@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Chap Connect - Video Directors</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="Style.css">
+</head>
+
+<body>
+    <nav class="nav">
+        <div class="logo">
+            <a href="index.html"><img src="logo.png" alt="Chap Connect Logo"></a>
+            <a href="index.html"><h1>Chap Connect</h1></a>
+        </div>
+        <div class="icon">
+            <div class="menu">
+                <ul>
+                    <li class="active"><a href="videodirector.html">Video Director</a></li>
+                    <li><a href="index.html?category=musicproducer">Music Producer</a></li>
+                    <li><a href="index.html?category=musicartist">Music Artist</a></li>
+                    <li><a href="index.html?category=musicband">Music Band</a></li>
+                    <li><a href="index.html?category=videovixen">Video Vixen</a></li>
+                    <li><a href="index.html?category=dancer">Dancer</a></li>
+                    <li><a href="index.html?category=actor">Actor</a></li>
+                    <li><a href="index.html?category=journalist">Journalist</a></li>
+                    <li><a href="index.html?category=eventmc">Event MC</a></li>
+                    <li><a href="index.html?category=musicmc">Music MC</a></li>
+                    <li><a href="index.html?category=guitarist">Guitarist</a></li>
+                    <li><a href="index.html?category=pianist">Pianist</a></li>
+                    <li><a href="index.html?category=musicdj">Music DJ</a></li>
+                    <li><a href="index.html?category=contentcreator">Content Creator</a></li>
+                    <li><a href="index.html?category=talented">Talented</a></li>
+                    <li><a href="index.html?category=manager">Manager</a></li>
+                    <li><a href="index.html?category=management">Management</a></li>
+                    <li><a href="index.html?category=comedian">Comedian</a></li>
+                    <li><a href="index.html?category=onlinetv">Online Tv</a></li>
+                </ul>
+            </div>
+            <div class="Search">
+                <input class="Srch" type="search" id="searchInput" placeholder="Search directors...">
+                <button class="btn" id="searchBtn">Search</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main" style="margin-top: 100px;">
+        <div class="willshow">
+            <h2>Video Directors</h2>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 5px;">Discover elite cinematographers and creators</p>
+        </div>
+        
+        <div class="talent-grid" id="talentGrid">
+            <!-- Dynamic Video Director Cards will load here -->
+        </div>
+    </main>
+
+    <!-- Talents Database -->
+    <script src="data.js"></script>
+
+    <!-- App Logic -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const grid = document.getElementById("talentGrid");
+            const searchInput = document.getElementById("searchInput");
+            const searchBtn = document.getElementById("searchBtn");
+
+            let searchQuery = "";
+
+            // Helper to render video director cards
+            const renderDirectors = () => {
+                grid.innerHTML = "";
+
+                // Filter talents to video directors only, then match search query
+                const filtered = talentsData.filter(talent => {
+                    const isDirector = talent.category === "videodirector";
+                    const matchesSearch = talent.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                          talent.description.toLowerCase().includes(searchQuery.toLowerCase());
+                    return isDirector && matchesSearch;
+                });
+
+                if (filtered.length === 0) {
+                    grid.innerHTML = `<div class="no-results">No video directors found matching your search.</div>`;
+                    return;
+                }
+
+                filtered.forEach(talent => {
+                    const card = document.createElement("div");
+                    card.className = "container";
+                    card.innerHTML = `
+                        <div class="image">
+                            <img src="${talent.image}" alt="${talent.name}">
+                        </div>
+                        <div class="details">
+                            <h2>${talent.name}</h2>
+                            <h5>${talent.categoryLabel}</h5>
+                            <p class="card-desc">${talent.description}</p>
+                            <a href="viewprofile.html?id=${talent.id}">
+                                <button class="vbtn">View Profile</button>
+                            </a>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            };
+
+            // Initial render
+            renderDirectors();
+
+            // Search event listeners
+            searchInput.addEventListener("input", (e) => {
+                searchQuery = e.target.value;
+                renderDirectors();
+            });
+
+            searchBtn.addEventListener("click", () => {
+                searchQuery = searchInput.value;
+                renderDirectors();
+            });
+        });
+    </script>
+</body>
+
+</html>

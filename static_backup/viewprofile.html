@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Chap Connect - View Profile</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="Style.css">
+</head>
+
+<body>
+    <nav class="nav">
+        <div class="logo">
+            <a href="index.html"><img src="logo.png" alt="Chap Connect Logo"></a>
+            <a href="index.html"><h1>Chap Connect</h1></a>
+        </div>
+        <div class="icon">
+            <div class="menu">
+                <ul>
+                    <li><a href="videodirector.html">Video Director</a></li>
+                    <li><a href="index.html?category=musicproducer">Music Producer</a></li>
+                    <li><a href="index.html?category=musicartist">Music Artist</a></li>
+                    <li><a href="index.html?category=musicband">Music Band</a></li>
+                    <li><a href="index.html?category=videovixen">Video Vixen</a></li>
+                    <li><a href="index.html?category=dancer">Dancer</a></li>
+                    <li><a href="index.html?category=actor">Actor</a></li>
+                    <li><a href="index.html?category=journalist">Journalist</a></li>
+                    <li><a href="index.html?category=eventmc">Event MC</a></li>
+                    <li><a href="index.html?category=musicmc">Music MC</a></li>
+                    <li><a href="index.html?category=guitarist">Guitarist</a></li>
+                    <li><a href="index.html?category=pianist">Pianist</a></li>
+                    <li><a href="index.html?category=musicdj">Music DJ</a></li>
+                    <li><a href="index.html?category=contentcreator">Content Creator</a></li>
+                    <li><a href="index.html?category=talented">Talented</a></li>
+                    <li><a href="index.html?category=manager">Manager</a></li>
+                    <li><a href="index.html?category=management">Management</a></li>
+                    <li><a href="index.html?category=comedian">Comedian</a></li>
+                    <li><a href="index.html?category=onlinetv">Online Tv</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="profile-hero">
+        <!-- Sidebar profile card -->
+        <div class="profile-sidebar">
+            <div class="pimage">
+                <img id="profileSidebarImg" src="" alt="Talent Profile Pic">
+            </div>
+            <h2 id="profileSidebarName">Loading...</h2>
+            <h5 id="profileSidebarCategory">Loading...</h5>
+            
+            <div class="profile-menu-vertical">
+                <a class="active" href="#" id="profileLink">Overview</a>
+                <a href="#" id="photosLink">Photos Gallery</a>
+                <a href="#" id="videosLink">Videos Showcase</a>
+                <a href="index.html" style="margin-top: 15px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #ef4444;">Back to Home</a>
+            </div>
+        </div>
+
+        <!-- Main Details -->
+        <div class="pdetails" id="profileDetailsSection">
+            <h2 id="profileName">Loading Profile...</h2>
+            <p id="profileDescription" style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 25px;"></p>
+            
+            <h3>Occupations</h3>
+            <h5 id="profileCategory">--</h5>
+
+            <h3>Country</h3>
+            <h5 id="profileCountry">--</h5>
+
+            <h3>Phone</h3>
+            <h5 id="profilePhone">--</h5>
+
+            <h3>Social Channels</h3>
+            <div class="social-links" id="profileSocialLinks">
+                <!-- Social links loaded dynamically -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Mini gallery showcase at the bottom -->
+    <section class="media-container" style="margin-top: 40px;">
+        <div class="section-header">
+            <h2>Recent Photos</h2>
+            <a href="#" class="back-link" id="seeAllPhotosLink">See All Photos &rarr;</a>
+        </div>
+        <div class="photos-grid" id="profileMiniPhotos">
+            <!-- First few photos loaded dynamically -->
+        </div>
+    </section>
+
+    <!-- Talents Database -->
+    <script src="data.js"></script>
+
+    <!-- Loader Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Get URL Parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            let talentId = urlParams.get("id");
+
+            // Default to 'directorngalawa' if no parameter is provided
+            if (!talentId) {
+                talentId = "directorngalawa";
+            }
+
+            // Find talent details
+            const talent = talentsData.find(t => t.id === talentId);
+
+            if (!talent) {
+                document.body.innerHTML = `
+                    <div style="text-align: center; padding: 100px 20px;">
+                        <h2 style="font-family: 'Outfit'; font-size: 2rem; color: #ef4444; margin-bottom: 10px;">Profile Not Found</h2>
+                        <p style="color: #9ca3af; margin-bottom: 20px;">The requested talent profile does not exist in our directory.</p>
+                        <a href="index.html" class="btn" style="display: inline-block;">Return to Directory</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Populate document titles
+            document.title = `Chap Connect - ${talent.name}`;
+
+            // Populate Sidebar
+            document.getElementById("profileSidebarImg").src = talent.image;
+            document.getElementById("profileSidebarImg").alt = talent.name;
+            document.getElementById("profileSidebarName").textContent = talent.name;
+            document.getElementById("profileSidebarCategory").textContent = talent.categoryLabel;
+
+            // Populate Main Section
+            document.getElementById("profileName").textContent = talent.name;
+            document.getElementById("profileDescription").textContent = talent.description || "No bio description provided.";
+            document.getElementById("profileCategory").textContent = talent.categoryLabel;
+            document.getElementById("profileCountry").textContent = talent.country;
+            document.getElementById("profilePhone").textContent = talent.phone;
+
+            // Update photo/video dynamic menu links with query params
+            document.getElementById("profileLink").href = `viewprofile.html?id=${talent.id}`;
+            document.getElementById("photosLink").href = `directorngalawaphotos.html?id=${talent.id}`;
+            document.getElementById("videosLink").href = `directorngalawavideos.html?id=${talent.id}`;
+            document.getElementById("seeAllPhotosLink").href = `directorngalawaphotos.html?id=${talent.id}`;
+
+            // Populate Social links
+            const socialContainer = document.getElementById("profileSocialLinks");
+            socialContainer.innerHTML = "";
+            if (talent.links) {
+                Object.entries(talent.links).forEach(([platform, url]) => {
+                    if (url && url !== "#") {
+                        const linkBtn = document.createElement("a");
+                        linkBtn.href = url;
+                        linkBtn.target = "_blank";
+                        linkBtn.className = "social-btn";
+                        linkBtn.textContent = platform.charAt(0).toUpperCase() + platform.slice(1);
+                        socialContainer.appendChild(linkBtn);
+                    }
+                });
+            }
+
+            // Populate Mini Gallery (first 4 photos)
+            const miniPhotosContainer = document.getElementById("profileMiniPhotos");
+            miniPhotosContainer.innerHTML = "";
+            const showPhotos = talent.photos.slice(0, 4);
+
+            if (showPhotos.length === 0) {
+                miniPhotosContainer.innerHTML = `<div class="no-results" style="grid-column: 1/-1;">No photos uploaded yet.</div>`;
+            } else {
+                showPhotos.forEach(pUrl => {
+                    const item = document.createElement("div");
+                    item.className = "photo-item";
+                    item.innerHTML = `<img src="${pUrl}" alt="${talent.name}">`;
+                    miniPhotosContainer.appendChild(item);
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

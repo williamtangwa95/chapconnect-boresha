@@ -1,0 +1,113 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+
+class HomeController extends Controller
+{
+    public function index(Request $request)
+    {
+        $search = $request->input('search');
+        $category = $request->input('category');
+
+        // Query only regular users (exclude admins)
+        $query = User::where('role', 'user');
+
+        if ($category && $category !== 'all') {
+            $query->where('category', $category);
+        }
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('category_label', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $talents = $query->latest()->get();
+
+        // Count talents per category
+        $categoryCounts = User::where('role', 'user')
+            ->groupBy('category')
+            ->selectRaw('category, count(*) as count')
+            ->pluck('count', 'category')
+            ->toArray();
+
+        // Count total talents
+        $totalTalents = User::where('role', 'user')->count();
+
+        // Sort categories by talent count descending (most popular first)
+        $allCategories = AuthController::categories();
+        uksort($allCategories, function($a, $b) use ($categoryCounts) {
+            $countA = $categoryCounts[$a] ?? 0;
+            $countB = $categoryCounts[$b] ?? 0;
+            return $countB <=> $countA; // descending
+        });
+
+        return view('home', [
+            'talents' => $talents,
+            'currentCategory' => $category ?? 'all',
+            'search' => $search,
+            'categories' => $allCategories,
+            'categoryCounts' => $categoryCounts,
+            'totalTalents' => $totalTalents
+        ]);
+    }
+
+    public function category($category)
+    {
+        $validCategories = AuthController::categories();
+        if (!array_key_exists($category, $validCategories)) {
+            abort(404);
+        }
+
+        $directors = User::where('role', 'user')
+            ->where('category', $category)
+            ->latest()
+            ->get();
+
+        return view('category', [
+            'talents' => $directors,
+            'category' => $category,
+            'categoryLabel' => $validCategories[$category]
+        ]);
+    }
+
+    public function profile($id)
+    {
+        $talent = User::where('role', 'user')->findOrFail($id);
+        
+        // Load first 4 photos for mini-gallery
+        $miniPhotos = $talent->media()->where('type', 'photo')->latest()->take(4)->get();
+
+        return view('profile', [
+            'talent' => $talent,
+            'miniPhotos' => $miniPhotos
+        ]);
+    }
+
+    public function photos($id)
+    {
+        $talent = User::where('role', 'user')->findOrFail($id);
+        $photos = $talent->media()->where('type', 'photo')->latest()->get();
+
+        return view('profile-photos', [
+            'talent' => $talent,
+            'photos' => $photos
+        ]);
+    }
+
+    public function videos($id)
+    {
+        $talent = User::where('role', 'user')->findOrFail($id);
+        $videos = $talent->media()->where('type', 'video')->latest()->get();
+
+        return view('profile-videos', [
+            'talent' => $talent,
+            'videos' => $videos
+        ]);
+    }
+}

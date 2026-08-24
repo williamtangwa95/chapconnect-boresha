@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Chap Connect - Photos</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="Style.css">
+</head>
+
+<body>
+    <nav class="nav">
+        <div class="logo">
+            <a href="index.html"><img src="logo.png" alt="Chap Connect Logo"></a>
+            <a href="index.html"><h1>Chap Connect</h1></a>
+        </div>
+        <div class="icon">
+            <div class="menu">
+                <ul>
+                    <li><a href="videodirector.html">Video Director</a></li>
+                    <li><a href="index.html?category=musicproducer">Music Producer</a></li>
+                    <li><a href="index.html?category=musicartist">Music Artist</a></li>
+                    <li><a href="index.html?category=musicband">Music Band</a></li>
+                    <li><a href="index.html?category=videovixen">Video Vixen</a></li>
+                    <li><a href="index.html?category=dancer">Dancer</a></li>
+                    <li><a href="index.html?category=actor">Actor</a></li>
+                    <li><a href="index.html?category=journalist">Journalist</a></li>
+                    <li><a href="index.html?category=eventmc">Event MC</a></li>
+                    <li><a href="index.html?category=musicmc">Music MC</a></li>
+                    <li><a href="index.html?category=guitarist">Guitarist</a></li>
+                    <li><a href="index.html?category=pianist">Pianist</a></li>
+                    <li><a href="index.html?category=musicdj">Music DJ</a></li>
+                    <li><a href="index.html?category=contentcreator">Content Creator</a></li>
+                    <li><a href="index.html?category=talented">Talented</a></li>
+                    <li><a href="index.html?category=manager">Manager</a></li>
+                    <li><a href="index.html?category=management">Management</a></li>
+                    <li><a href="index.html?category=comedian">Comedian</a></li>
+                    <li><a href="index.html?category=onlinetv">Online Tv</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="profile-hero">
+        <!-- Sidebar profile card -->
+        <div class="profile-sidebar">
+            <div class="pimage">
+                <img id="profileSidebarImg" src="" alt="Talent Profile Pic">
+            </div>
+            <h2 id="profileSidebarName">Loading...</h2>
+            <h5 id="profileSidebarCategory">Loading...</h5>
+            
+            <div class="profile-menu-vertical">
+                <a href="#" id="profileLink">Overview</a>
+                <a class="active" href="#" id="photosLink">Photos Gallery</a>
+                <a href="#" id="videosLink">Videos Showcase</a>
+                <a href="index.html" style="margin-top: 15px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #ef4444;">Back to Home</a>
+            </div>
+        </div>
+
+        <!-- Main Details Section: Photos Gallery -->
+        <div class="pdetails" style="padding: 30px;">
+            <h2 id="galleryTitle">Director Ngalawa's Photos</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">Browse visual work, captures, and snapshots.</p>
+            
+            <div class="photos-grid" id="photosGrid">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Talents Database -->
+    <script src="data.js"></script>
+
+    <!-- Loader Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Get URL Parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            let talentId = urlParams.get("id");
+
+            // Default to 'directorngalawa' if no parameter is provided
+            if (!talentId) {
+                talentId = "directorngalawa";
+            }
+
+            // Find talent details
+            const talent = talentsData.find(t => t.id === talentId);
+
+            if (!talent) {
+                document.body.innerHTML = `
+                    <div style="text-align: center; padding: 100px 20px;">
+                        <h2 style="font-family: 'Outfit'; font-size: 2rem; color: #ef4444; margin-bottom: 10px;">Photos Not Found</h2>
+                        <p style="color: #9ca3af; margin-bottom: 20px;">The requested profile details are unavailable.</p>
+                        <a href="index.html" class="btn" style="display: inline-block;">Return to Directory</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Populate document titles
+            document.title = `${talent.name} - Photos`;
+
+            // Populate Sidebar
+            document.getElementById("profileSidebarImg").src = talent.image;
+            document.getElementById("profileSidebarImg").alt = talent.name;
+            document.getElementById("profileSidebarName").textContent = talent.name;
+            document.getElementById("profileSidebarCategory").textContent = talent.categoryLabel;
+
+            // Populate Headers
+            document.getElementById("galleryTitle").textContent = `${talent.name}'s Photos`;
+
+            // Update photo/video dynamic menu links with query params
+            document.getElementById("profileLink").href = `viewprofile.html?id=${talent.id}`;
+            document.getElementById("photosLink").href = `directorngalawaphotos.html?id=${talent.id}`;
+            document.getElementById("videosLink").href = `directorngalawavideos.html?id=${talent.id}`;
+
+            // Populate Photos
+            const grid = document.getElementById("photosGrid");
+            grid.innerHTML = "";
+
+            if (talent.photos && talent.photos.length > 0) {
+                talent.photos.forEach(pUrl => {
+                    const item = document.createElement("div");
+                    item.className = "photo-item";
+                    item.innerHTML = `<img src="${pUrl}" alt="${talent.name} Photo">`;
+                    grid.appendChild(item);
+                });
+            } else {
+                grid.innerHTML = `<div class="no-results" style="grid-column: 1/-1;">No photos uploaded yet for this profile.</div>`;
+            }
+        });
+    </script>
+</body>
+
+</html>

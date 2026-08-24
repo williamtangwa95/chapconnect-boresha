@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Chap Connect - Videos</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="Style.css">
+</head>
+
+<body>
+    <nav class="nav">
+        <div class="logo">
+            <a href="index.html"><img src="logo.png" alt="Chap Connect Logo"></a>
+            <a href="index.html"><h1>Chap Connect</h1></a>
+        </div>
+        <div class="icon">
+            <div class="menu">
+                <ul>
+                    <li><a href="videodirector.html">Video Director</a></li>
+                    <li><a href="index.html?category=musicproducer">Music Producer</a></li>
+                    <li><a href="index.html?category=musicartist">Music Artist</a></li>
+                    <li><a href="index.html?category=musicband">Music Band</a></li>
+                    <li><a href="index.html?category=videovixen">Video Vixen</a></li>
+                    <li><a href="index.html?category=dancer">Dancer</a></li>
+                    <li><a href="index.html?category=actor">Actor</a></li>
+                    <li><a href="index.html?category=journalist">Journalist</a></li>
+                    <li><a href="index.html?category=eventmc">Event MC</a></li>
+                    <li><a href="index.html?category=musicmc">Music MC</a></li>
+                    <li><a href="index.html?category=guitarist">Guitarist</a></li>
+                    <li><a href="index.html?category=pianist">Pianist</a></li>
+                    <li><a href="index.html?category=musicdj">Music DJ</a></li>
+                    <li><a href="index.html?category=contentcreator">Content Creator</a></li>
+                    <li><a href="index.html?category=talented">Talented</a></li>
+                    <li><a href="index.html?category=manager">Manager</a></li>
+                    <li><a href="index.html?category=management">Management</a></li>
+                    <li><a href="index.html?category=comedian">Comedian</a></li>
+                    <li><a href="index.html?category=onlinetv">Online Tv</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="profile-hero">
+        <!-- Sidebar profile card -->
+        <div class="profile-sidebar">
+            <div class="pimage">
+                <img id="profileSidebarImg" src="" alt="Talent Profile Pic">
+            </div>
+            <h2 id="profileSidebarName">Loading...</h2>
+            <h5 id="profileSidebarCategory">Loading...</h5>
+            
+            <div class="profile-menu-vertical">
+                <a href="#" id="profileLink">Overview</a>
+                <a href="#" id="photosLink">Photos Gallery</a>
+                <a class="active" href="#" id="videosLink">Videos Showcase</a>
+                <a href="index.html" style="margin-top: 15px; background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #ef4444;">Back to Home</a>
+            </div>
+        </div>
+
+        <!-- Main Details Section: Videos Showcase -->
+        <div class="pdetails" style="padding: 30px;">
+            <h2 id="videosTitle">Director Ngalawa's Videos</h2>
+            <p style="color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem;">Watch featured clips, showreels, and video portfolio pieces.</p>
+            
+            <div class="videos-grid" id="videosGrid">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Talents Database -->
+    <script src="data.js"></script>
+
+    <!-- Loader Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Get URL Parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            let talentId = urlParams.get("id");
+
+            // Default to 'directorngalawa' if no parameter is provided
+            if (!talentId) {
+                talentId = "directorngalawa";
+            }
+
+            // Find talent details
+            const talent = talentsData.find(t => t.id === talentId);
+
+            if (!talent) {
+                document.body.innerHTML = `
+                    <div style="text-align: center; padding: 100px 20px;">
+                        <h2 style="font-family: 'Outfit'; font-size: 2rem; color: #ef4444; margin-bottom: 10px;">Videos Not Found</h2>
+                        <p style="color: #9ca3af; margin-bottom: 20px;">The requested profile details are unavailable.</p>
+                        <a href="index.html" class="btn" style="display: inline-block;">Return to Directory</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // Populate document titles
+            document.title = `${talent.name} - Videos`;
+
+            // Populate Sidebar
+            document.getElementById("profileSidebarImg").src = talent.image;
+            document.getElementById("profileSidebarImg").alt = talent.name;
+            document.getElementById("profileSidebarName").textContent = talent.name;
+            document.getElementById("profileSidebarCategory").textContent = talent.categoryLabel;
+
+            // Populate Headers
+            document.getElementById("videosTitle").textContent = `${talent.name}'s Videos`;
+
+            // Update photo/video menu links with query params
+            document.getElementById("profileLink").href = `viewprofile.html?id=${talent.id}`;
+            document.getElementById("photosLink").href = `directorngalawaphotos.html?id=${talent.id}`;
+            document.getElementById("videosLink").href = `directorngalawavideos.html?id=${talent.id}`;
+
+            // Populate Videos
+            const grid = document.getElementById("videosGrid");
+            grid.innerHTML = "";
+
+            if (talent.videos && talent.videos.length > 0) {
+                talent.videos.forEach((vUrl, index) => {
+                    const item = document.createElement("div");
+                    item.className = "video-item";
+                    item.innerHTML = `
+                        <div class="video-wrapper">
+                            <video controls preload="metadata">
+                                <source src="${vUrl}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                        <div style="padding: 15px;">
+                            <h4 style="font-size: 1rem; margin-bottom: 4px; color: var(--text-primary);">Video Asset #${index + 1}</h4>
+                            <p style="font-size: 0.8rem; color: var(--text-muted);">${talent.categoryLabel} showcase file</p>
+                        </div>
+                    `;
+                    grid.appendChild(item);
+                });
+            } else {
+                grid.innerHTML = `<div class="no-results" style="grid-column: 1/-1;">No videos uploaded yet for this profile.</div>`;
+            }
+        });
+    </script>
+</body>
+
+</html>
