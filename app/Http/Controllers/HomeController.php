@@ -12,8 +12,8 @@ class HomeController extends Controller
         $search = $request->input('search');
         $category = $request->input('category');
 
-        // Query only regular users (exclude admins)
-        $query = User::where('role', 'user');
+        // Query only regular users that have published their profiles
+        $query = User::where('role', 'user')->where('is_published', true);
 
         if ($category && $category !== 'all') {
             $query->where('category', $category);
@@ -29,15 +29,15 @@ class HomeController extends Controller
 
         $talents = $query->latest()->get();
 
-        // Count talents per category
-        $categoryCounts = User::where('role', 'user')
+        // Count published talents per category
+        $categoryCounts = User::where('role', 'user')->where('is_published', true)
             ->groupBy('category')
             ->selectRaw('category, count(*) as count')
             ->pluck('count', 'category')
             ->toArray();
 
-        // Count total talents
-        $totalTalents = User::where('role', 'user')->count();
+        // Count total published talents
+        $totalTalents = User::where('role', 'user')->where('is_published', true)->count();
 
         // Sort categories by talent count descending (most popular first)
         $allCategories = AuthController::categories();

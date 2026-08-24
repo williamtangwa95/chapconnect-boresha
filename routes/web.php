@@ -40,6 +40,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard/videos', [DashboardController::class, 'videos'])->name('dashboard.videos');
     Route::post('/dashboard/videos', [DashboardController::class, 'storeVideo'])->name('dashboard.videos.store');
     Route::delete('/dashboard/videos/{id}', [DashboardController::class, 'deleteVideo'])->name('dashboard.videos.delete');
+
+    // Publish / Unpublish profile
+    Route::post('/dashboard/publish', [DashboardController::class, 'publish'])->name('dashboard.publish');
+    Route::post('/dashboard/unpublish', [DashboardController::class, 'unpublish'])->name('dashboard.unpublish');
 });
 
 // Super Admin Panel Routes (Protected by auth and admin middleware)
@@ -53,4 +57,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/user/{id}/reset-password', [AdminController::class, 'resetPassword'])->name('admin.user.reset-password');
     Route::post('/admin/user/{id}/update', [AdminController::class, 'updateUser'])->name('admin.user.update');
     Route::delete('/admin/users/bulk-delete', [AdminController::class, 'bulkDelete'])->name('admin.users.bulk-delete');
+    Route::post('/admin/user/{id}/toggle-publish', [AdminController::class, 'togglePublish'])->name('admin.user.toggle-publish');
+    Route::post('/admin/users/bulk-publish', [AdminController::class, 'bulkPublish'])->name('admin.users.bulk-publish');
+    Route::post('/admin/users/bulk-unpublish', [AdminController::class, 'bulkUnpublish'])->name('admin.users.bulk-unpublish');
 });

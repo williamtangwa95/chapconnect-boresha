@@ -430,6 +430,7 @@ class DatabaseSeeder extends Seeder
                 'phone' => $t['phone'],
                 'country' => 'East Africa Tanzania',
                 'role' => 'user',
+                'is_published' => true,
                 'social_instagram' => 'https://instagram.com',
                 'social_facebook' => 'https://facebook.com',
                 'social_tiktok' => 'https://tiktok.com',

@@ -21,6 +21,7 @@ use Illuminate\Notifications\Notifiable;
     'country', 
     'profile_image', 
     'role', 
+    'is_published',
     'social_instagram', 
     'social_facebook', 
     'social_tiktok', 
@@ -50,6 +51,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_published' => 'boolean',
         ];
     }
 }

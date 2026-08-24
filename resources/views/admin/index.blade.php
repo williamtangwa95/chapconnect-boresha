@@ -195,6 +195,7 @@
                                 <th>Email Address</th>
                                 <th>Category</th>
                                 <th>Country</th>
+                                <th>Status</th>
                                 <th>Registered Date</th>
                                 <th>Actions</th>
                             </tr>
@@ -209,6 +210,13 @@
                                     <td style="color: #64748b;">{{ $u->email }}</td>
                                     <td><span style="color: #2563eb; font-weight: 500;">{{ $u->category_label }}</span></td>
                                     <td>{{ $u->country }}</td>
+                                    <td>
+                                        @if($u->is_published)
+                                            <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.25);"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block;"></span>Live</span>
+                                        @else
+                                            <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(100,100,100,0.1);color:#888;border:1px solid rgba(255,255,255,0.08);"><span style="width:6px;height:6px;border-radius:50%;background:#888;display:inline-block;"></span>Draft</span>
+                                        @endif
+                                    </td>
                                     <td>{{ $u->created_at->format('M d, Y') }}</td>
                                     <td>
                                         <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
@@ -227,6 +235,14 @@
                                                     style="padding: 6px 12px; margin-top: 0; font-size: 0.75rem; border: 1px solid #cbd5e1; color: #0284c7; border-radius: 6px; font-weight: 600; background: #fff; cursor: pointer;">
                                                 Edit
                                             </button>
+
+                                            <!-- Toggle Publish / Unpublish -->
+                                            <form action="{{ route('admin.user.toggle-publish', $u->id) }}" method="POST" style="margin:0;display:inline;">
+                                                @csrf
+                                                <button type="submit" style="padding: 6px 12px; margin-top: 0; font-size: 0.75rem; border: 1px solid {{ $u->is_published ? 'rgba(239,68,68,0.4)' : 'rgba(16,185,129,0.4)' }}; color: {{ $u->is_published ? '#ef4444' : '#10b981' }}; border-radius: 6px; font-weight: 600; background: {{ $u->is_published ? 'rgba(239,68,68,0.08)' : 'rgba(16,185,129,0.08)' }}; cursor: pointer;">
+                                                    {{ $u->is_published ? 'Unpublish' : 'Publish' }}
+                                                </button>
+                                            </form>
 
                                             <!-- Reset Password (POST Form) -->
                                             <button type="button" class="social-btn btn-reset-password" 
@@ -265,6 +281,8 @@
                     <div class="bulk-action-info"><span id="selected-count">0</span> talents selected</div>
                     <div class="bulk-action-buttons">
                         <button type="button" class="bulk-btn-cancel" id="bulk-cancel-btn">Cancel</button>
+                        <button type="button" id="bulk-publish-btn" style="padding: 9px 18px; background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.35); border-radius: 8px; font-weight: 700; font-size: 0.83rem; cursor: pointer; transition: all 0.2s;">🌐 Publish Selected</button>
+                        <button type="button" id="bulk-unpublish-btn" style="padding: 9px 18px; background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; font-weight: 700; font-size: 0.83rem; cursor: pointer; transition: all 0.2s;">🔒 Unpublish Selected</button>
                         <button type="submit" class="bulk-btn-delete" onclick="return confirm('WARNING: Are you sure you want to permanently delete all selected users and their media files?');">Delete Selected</button>
                     </div>
                 </div>
@@ -428,6 +446,17 @@
 <form id="reset-password-form" action="" method="POST" style="display: none;">
     @csrf
 </form>
+
+<!-- Bulk Publish / Unpublish forms (ids[] populated by JS) -->
+<form id="bulk-publish-form" action="{{ route('admin.users.bulk-publish') }}" method="POST" style="display: none;">
+    @csrf
+    <div id="bulk-publish-ids"></div>
+</form>
+
+<form id="bulk-unpublish-form" action="{{ route('admin.users.bulk-unpublish') }}" method="POST" style="display: none;">
+    @csrf
+    <div id="bulk-unpublish-ids"></div>
+</form>
 @endsection
 
 @section('scripts')
@@ -537,6 +566,49 @@
                     selectAllCheckbox.checked = false;
                 }
                 updateBulkPanelState();
+            });
+        }
+
+        // Helper: collect checked IDs and inject into a target form container, then submit
+        function bulkSubmitWithIds(formId, idsContainerId, confirmMsg) {
+            const checked = document.querySelectorAll(".talent-checkbox:checked");
+            if (checked.length === 0) return;
+            if (!confirm(confirmMsg)) return;
+
+            const form = document.getElementById(formId);
+            const container = document.getElementById(idsContainerId);
+            container.innerHTML = "";
+            checked.forEach(cb => {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = "ids[]";
+                input.value = cb.value;
+                container.appendChild(input);
+            });
+            form.submit();
+        }
+
+        // Bulk Publish click
+        const bulkPublishBtn = document.getElementById("bulk-publish-btn");
+        if (bulkPublishBtn) {
+            bulkPublishBtn.addEventListener("click", () => {
+                bulkSubmitWithIds(
+                    "bulk-publish-form",
+                    "bulk-publish-ids",
+                    "Publish all selected talent profiles? They will become visible on the homepage."
+                );
+            });
+        }
+
+        // Bulk Unpublish click
+        const bulkUnpublishBtn = document.getElementById("bulk-unpublish-btn");
+        if (bulkUnpublishBtn) {
+            bulkUnpublishBtn.addEventListener("click", () => {
+                bulkSubmitWithIds(
+                    "bulk-unpublish-form",
+                    "bulk-unpublish-ids",
+                    "Unpublish all selected talent profiles? They will be hidden from the homepage."
+                );
             });
         }
 

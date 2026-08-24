@@ -8,11 +8,36 @@ use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
+    /**
+     * Calculate profile completion percentage for a given user.
+     */
+    public static function completionScore($user): int
+    {
+        $checks = [
+            !empty($user->name),
+            !empty($user->description),
+            !empty($user->profile_image),
+            !empty($user->phone),
+            !empty($user->country),
+            $user->media()->where('type', 'photo')->exists(),
+            (
+                !empty($user->social_instagram) ||
+                !empty($user->social_facebook) ||
+                !empty($user->social_tiktok) ||
+                !empty($user->social_youtube)
+            ),
+        ];
+        $completed = count(array_filter($checks));
+        return (int) round(($completed / count($checks)) * 100);
+    }
+
     public function index()
     {
         $user = auth()->user();
+        $completion = self::completionScore($user);
         return view('dashboard.index', [
-            'user' => $user
+            'user'       => $user,
+            'completion' => $completion,
         ]);
     }
 
@@ -141,5 +166,35 @@ class DashboardController extends Controller
         $video->delete();
 
         return redirect()->route('dashboard.videos')->with('success', 'Video deleted successfully.');
+    }
+
+    /**
+     * Publish the authenticated user's profile.
+     * Requires at least 60% completion.
+     */
+    public function publish()
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $completion = self::completionScore($user);
+
+        if ($completion < 60) {
+            return redirect()->route('dashboard')
+                ->with('error', 'Your profile must be at least 60% complete before publishing. Current: ' . $completion . '%.');
+        }
+
+        $user->update(['is_published' => true]);
+        return redirect()->route('dashboard')->with('success', 'Your profile is now live and visible to the public!');
+    }
+
+    /**
+     * Unpublish (hide) the authenticated user's profile.
+     */
+    public function unpublish()
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $user->update(['is_published' => false]);
+        return redirect()->route('dashboard')->with('success', 'Your profile has been hidden from the public directory.');
     }
 }

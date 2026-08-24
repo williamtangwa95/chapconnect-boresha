@@ -224,4 +224,41 @@ class AdminController extends Controller
 
         return redirect()->back()->with('success', 'Category updated successfully!');
     }
+
+    /**
+     * Toggle a talent's published status (Admin override).
+     */
+    public function togglePublish($id)
+    {
+        $user = User::where('role', 'user')->findOrFail($id);
+        $user->update(['is_published' => !$user->is_published]);
+        $status = $user->is_published ? 'published' : 'unpublished';
+        return redirect()->back()->with('success', "Talent profile has been {$status}.");
+    }
+
+    /**
+     * Bulk publish selected talent profiles.
+     */
+    public function bulkPublish(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No talents selected.');
+        }
+        User::where('role', 'user')->whereIn('id', $ids)->update(['is_published' => true]);
+        return redirect()->back()->with('success', count($ids) . ' talent profile(s) published successfully.');
+    }
+
+    /**
+     * Bulk unpublish selected talent profiles.
+     */
+    public function bulkUnpublish(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No talents selected.');
+        }
+        User::where('role', 'user')->whereIn('id', $ids)->update(['is_published' => false]);
+        return redirect()->back()->with('success', count($ids) . ' talent profile(s) unpublished successfully.');
+    }
 }
