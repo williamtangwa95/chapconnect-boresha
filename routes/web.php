@@ -26,6 +26,12 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Forgot Password Routes
+Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetCode'])->name('password.email');
+Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+
 // User Dashboard Panel Routes (Authenticated)
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

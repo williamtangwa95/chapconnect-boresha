@@ -75,6 +75,7 @@
 
     @yield('content')
 
+    <script src="{{ asset('js/image-compressor.js') }}"></script>
     @yield('scripts')
 </body>
 

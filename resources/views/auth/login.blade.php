@@ -28,9 +28,12 @@
                 </div>
             </div>
             
-            <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" id="remember" name="remember" style="width: auto;">
-                <label for="remember" style="margin-bottom: 0; cursor: pointer;">Remember Me</label>
+            <div class="form-group" style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="remember" name="remember" style="width: auto;">
+                    <label for="remember" style="margin-bottom: 0; cursor: pointer;">Remember Me</label>
+                </div>
+                <a href="{{ route('password.request') }}" style="color: var(--accent); font-size: 0.85rem; font-weight: 500;">Forgot Password?</a>
             </div>
             
             <button type="submit" class="btn-submit" style="width: 100%; margin-top: 10px;">Sign In</button>

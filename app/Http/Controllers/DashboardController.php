@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Media;
+use App\Services\ImageCompressor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -51,7 +52,7 @@ class DashboardController extends Controller
             'phone' => 'nullable|string|max:30',
             'country' => 'required|string|max:100',
             'description' => 'nullable|string',
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:12288', // up to 12MB before compression
             'social_instagram' => 'nullable|url|max:255',
             'social_facebook' => 'nullable|url|max:255',
             'social_tiktok' => 'nullable|url|max:255',
@@ -66,10 +67,19 @@ class DashboardController extends Controller
         if ($request->hasFile('profile_image')) {
             // Delete old profile image if it exists and is not a default stock URL
             if ($user->profile_image && !str_starts_with($user->profile_image, 'http')) {
-                Storage::disk('public')->delete($user->profile_image);
+                $relativePath = str_replace('/storage/', '', $user->profile_image);
+                Storage::disk('public')->delete($relativePath);
             }
 
-            $path = $request->file('profile_image')->store('profiles', 'public');
+            // Compress profile image to web-optimized WebP (800x800 max, 82% quality)
+            $path = ImageCompressor::compressAndStore(
+                $request->file('profile_image'),
+                'profiles',
+                800,
+                800,
+                82,
+                'webp'
+            );
             $data['profile_image'] = '/storage/' . $path;
         }
 
@@ -91,18 +101,26 @@ class DashboardController extends Controller
     public function storePhoto(Request $request)
     {
         $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120', // up to 5MB
+            'photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:15360', // up to 15MB before compression
         ]);
 
         if ($request->hasFile('photo')) {
-            $path = $request->file('photo')->store('media/photos', 'public');
+            // Compress portfolio photo to web-optimized WebP (1920x1920 max, 82% quality)
+            $path = ImageCompressor::compressAndStore(
+                $request->file('photo'),
+                'media/photos',
+                1920,
+                1920,
+                82,
+                'webp'
+            );
             
             auth()->user()->media()->create([
                 'type' => 'photo',
                 'file_path' => '/storage/' . $path,
             ]);
 
-            return redirect()->route('dashboard.photos')->with('success', 'Photo uploaded successfully.');
+            return redirect()->route('dashboard.photos')->with('success', 'Photo compressed & uploaded successfully.');
         }
 
         return redirect()->back()->with('error', 'Failed to upload photo.');
@@ -135,8 +153,37 @@ class DashboardController extends Controller
 
     public function storeVideo(Request $request)
     {
+        // 1. If Video URL (YouTube, Vimeo, TikTok, Direct Link) is provided
+        if ($request->filled('video_url')) {
+            $request->validate([
+                'video_url' => 'required|url|max:500',
+            ], [
+                'video_url.url' => 'Please enter a valid video URL (e.g. https://www.youtube.com/watch?v=... or direct MP4 link).',
+            ]);
+
+            auth()->user()->media()->create([
+                'type' => 'video',
+                'file_path' => $request->video_url,
+            ]);
+
+            return redirect()->route('dashboard.videos')->with('success', 'Video link added successfully to your portfolio.');
+        }
+
+        // 2. Check if file upload was attempted but failed PHP ini limits before validation
+        if ($request->hasFile('video') && !$request->file('video')->isValid()) {
+            $errorCode = $request->file('video')->getError();
+            if ($errorCode === UPLOAD_ERR_INI_SIZE || $errorCode === UPLOAD_ERR_FORM_SIZE) {
+                return redirect()->back()->with('error', 'The video file exceeds the server upload limit. Please upload a smaller clip (under 50MB) or use a YouTube/video link.');
+            }
+        }
+
+        // 3. File upload validation
         $request->validate([
-            'video' => 'required|mimes:mp4,mov,avi,webm,ogg|max:20480', // up to 20MB
+            'video' => 'required_without:video_url|nullable|file|mimes:mp4,mov,avi,webm,ogg,mkv,3gp,flv,qt|max:51200', // up to 50MB
+        ], [
+            'video.required_without' => 'Please select a video file to upload or enter a video link.',
+            'video.mimes' => 'The video format must be: MP4, MOV, AVI, WEBM, OGG, MKV, or 3GP.',
+            'video.max' => 'The video file size cannot exceed 50MB.',
         ]);
 
         if ($request->hasFile('video')) {
@@ -147,10 +194,10 @@ class DashboardController extends Controller
                 'file_path' => '/storage/' . $path,
             ]);
 
-            return redirect()->route('dashboard.videos')->with('success', 'Video uploaded successfully.');
+            return redirect()->route('dashboard.videos')->with('success', 'Video file uploaded successfully.');
         }
 
-        return redirect()->back()->with('error', 'Failed to upload video.');
+        return redirect()->back()->with('error', 'Failed to process video upload. Please try again.');
     }
 
     public function deleteVideo($id)

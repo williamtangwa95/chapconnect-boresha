@@ -29,18 +29,14 @@
         <h2>{{ $talent->name }}'s Videos</h2>
         <p style="color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem;">Watch uploaded videos and showreel files.</p>
         
-        <div class="videos-grid">
+        <div class="videos-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
             @forelse($videos as $index => $video)
-                <div class="video-item">
-                    <div class="video-wrapper">
-                        <video controls preload="metadata">
-                            <source src="{{ $video->file_path }}" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
+                <div class="video-item" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden;">
+                    {!! \App\Helpers\VideoHelper::renderEmbed($video->file_path) !!}
+                    
                     <div style="padding: 15px;">
-                        <h4 style="font-size: 1rem; margin-bottom: 4px; color: var(--text-primary);">Video Asset #{{ $index + 1 }}</h4>
-                        <p style="font-size: 0.8rem; color: var(--text-muted);">Uploaded {{ $video->created_at->diffForHumans() }}</p>
+                        <h4 style="font-size: 1rem; margin-bottom: 4px; color: var(--text-primary);">Video Showcase #{{ $index + 1 }}</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">Added {{ $video->created_at->diffForHumans() }}</p>
                     </div>
                 </div>
             @empty

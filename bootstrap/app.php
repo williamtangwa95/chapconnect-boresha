@@ -20,4 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+        $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, Request $request) {
+            return redirect()->back()->with('error', 'The uploaded file exceeds the server limit (8MB). Please choose a smaller file or image.');
+        });
     })->create();
