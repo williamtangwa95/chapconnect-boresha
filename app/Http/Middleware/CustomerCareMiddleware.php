@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminMiddleware
+class CustomerCareMiddleware
 {
     /**
      * Handle an incoming request.
@@ -15,10 +15,10 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && in_array(auth()->user()->role, ['admin', 'customer_care'])) {
+        if (auth()->check() && in_array(auth()->user()->role, ['admin', 'customer_care', 'staff'])) {
             return $next($request);
         }
 
-        return redirect()->route('login')->with('error', 'You do not have permission to access the admin dashboard.');
+        return redirect()->route('login')->with('error', 'Access restricted to Customer Care & Administrative personnel.');
     }
 }

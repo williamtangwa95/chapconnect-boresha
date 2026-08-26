@@ -83,6 +83,10 @@ class AuthController extends Controller
                 return redirect()->route('admin.dashboard')->with('success', 'Admin login successful.');
             }
 
+            if (Auth::user()->role === 'customer_care') {
+                return redirect()->route('customer-care.dashboard')->with('success', 'Customer Care Portal login successful.');
+            }
+
             return redirect()->route('dashboard')->with('success', 'Login successful.');
         }
 

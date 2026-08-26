@@ -47,22 +47,41 @@ class DashboardController extends Controller
         /** @var \App\Models\User $user */
         $user = auth()->user();
 
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:30',
-            'country' => 'required|string|max:100',
-            'description' => 'nullable|string',
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:12288', // up to 12MB before compression
-            'social_instagram' => 'nullable|url|max:255',
-            'social_facebook' => 'nullable|url|max:255',
-            'social_tiktok' => 'nullable|url|max:255',
-            'social_youtube' => 'nullable|url|max:255',
-        ]);
+            'country' => 'nullable|string|max:100',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:12288',
+        ];
+
+        if ($user->role === 'user') {
+            $rules['country'] = 'required|string|max:100';
+            $rules['description'] = 'nullable|string';
+            $rules['social_instagram'] = 'nullable|url|max:255';
+            $rules['social_facebook'] = 'nullable|url|max:255';
+            $rules['social_tiktok'] = 'nullable|url|max:255';
+            $rules['social_youtube'] = 'nullable|url|max:255';
+        }
+
+        if ($request->filled('password')) {
+            $rules['password'] = 'required|string|min:6|confirmed';
+            if ($request->filled('current_password')) {
+                if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
+                    return redirect()->back()->withErrors(['current_password' => 'The current password provided is incorrect.']);
+                }
+            }
+        }
+
+        $request->validate($rules);
 
         $data = $request->only([
             'name', 'phone', 'country', 'description',
             'social_instagram', 'social_facebook', 'social_tiktok', 'social_youtube'
         ]);
+
+        if ($request->filled('password')) {
+            $data['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
+        }
 
         if ($request->hasFile('profile_image')) {
             // Delete old profile image if it exists and is not a default stock URL
@@ -85,12 +104,16 @@ class DashboardController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('dashboard')->with('success', 'Profile updated successfully.');
+        return redirect()->back()->with('success', 'Profile updated successfully.');
     }
 
     public function photos()
     {
         $user = auth()->user();
+        if ($user->role === 'admin') {
+            return redirect()->route('dashboard')->with('info', 'Staff accounts manage administrative controls directly from the Admin Panel.');
+        }
+
         $photos = $user->media()->where('type', 'photo')->latest()->get();
 
         return view('dashboard.photos', [
@@ -101,6 +124,8 @@ class DashboardController extends Controller
     public function storePhoto(Request $request)
     {
         $request->validate([
+            'title' => 'nullable|string|max:255',
+            'caption' => 'nullable|string|max:1000',
             'photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:15360', // up to 15MB before compression
         ]);
 
@@ -117,6 +142,8 @@ class DashboardController extends Controller
             
             auth()->user()->media()->create([
                 'type' => 'photo',
+                'title' => $request->title,
+                'content' => $request->caption,
                 'file_path' => '/storage/' . $path,
             ]);
 
@@ -153,6 +180,11 @@ class DashboardController extends Controller
 
     public function storeVideo(Request $request)
     {
+        $request->validate([
+            'title' => 'nullable|string|max:255',
+            'caption' => 'nullable|string|max:1000',
+        ]);
+
         // 1. If Video URL (YouTube, Vimeo, TikTok, Direct Link) is provided
         if ($request->filled('video_url')) {
             $request->validate([
@@ -163,6 +195,8 @@ class DashboardController extends Controller
 
             auth()->user()->media()->create([
                 'type' => 'video',
+                'title' => $request->title,
+                'content' => $request->caption,
                 'file_path' => $request->video_url,
             ]);
 
@@ -191,6 +225,8 @@ class DashboardController extends Controller
 
             auth()->user()->media()->create([
                 'type' => 'video',
+                'title' => $request->title,
+                'content' => $request->caption,
                 'file_path' => '/storage/' . $path,
             ]);
 
@@ -213,6 +249,61 @@ class DashboardController extends Controller
         $video->delete();
 
         return redirect()->route('dashboard.videos')->with('success', 'Video deleted successfully.');
+    }
+
+    public function news()
+    {
+        $user = auth()->user();
+        $newsItems = $user->media()->where('type', 'news')->latest()->get();
+
+        return view('dashboard.news', [
+            'newsItems' => $newsItems
+        ]);
+    }
+
+    public function storeNews(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+        ]);
+
+        $filePath = null;
+        if ($request->hasFile('image')) {
+            $path = ImageCompressor::compressAndStore(
+                $request->file('image'),
+                'media/news',
+                1200,
+                1200,
+                82,
+                'webp'
+            );
+            $filePath = '/storage/' . $path;
+        }
+
+        auth()->user()->media()->create([
+            'type' => 'news',
+            'title' => $request->title,
+            'content' => $request->content,
+            'file_path' => $filePath ?? '',
+        ]);
+
+        return redirect()->route('dashboard.news')->with('success', 'Latest news update published successfully.');
+    }
+
+    public function deleteNews($id)
+    {
+        $news = auth()->user()->media()->where('type', 'news')->findOrFail($id);
+
+        if ($news->file_path && !str_starts_with($news->file_path, 'http')) {
+            $relativePath = str_replace('/storage/', '', $news->file_path);
+            Storage::disk('public')->delete($relativePath);
+        }
+
+        $news->delete();
+
+        return redirect()->route('dashboard.news')->with('success', 'News item deleted successfully.');
     }
 
     /**

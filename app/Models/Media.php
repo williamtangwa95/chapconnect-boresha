@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 
-#[Fillable(['user_id', 'type', 'file_path'])]
+#[Fillable(['user_id', 'type', 'title', 'file_path', 'content'])]
 class Media extends Model
 {
     /**

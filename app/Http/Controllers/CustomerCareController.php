@@ -1,0 +1,252 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Notification;
+use App\Models\SupportTicket;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class CustomerCareController extends Controller
+{
+    /**
+     * Display Customer Care Support Issues Dashboard.
+     */
+    public function index(Request $request)
+    {
+        $statusFilter = $request->query('status');
+        $priorityFilter = $request->query('priority');
+        $searchQuery = $request->query('search');
+
+        $query = SupportTicket::with(['user', 'assignedStaff'])->latest();
+
+        if ($statusFilter && in_array($statusFilter, ['open', 'pending', 'in_progress', 'approved', 'resolved', 'cancelled', 'closed'])) {
+            $query->where('status', $statusFilter);
+        }
+
+        if ($priorityFilter && in_array($priorityFilter, ['low', 'medium', 'high', 'urgent'])) {
+            $query->where('priority', $priorityFilter);
+        }
+
+        if ($searchQuery) {
+            $query->where(function($q) use ($searchQuery) {
+                $q->where('ticket_number', 'like', "%{$searchQuery}%")
+                  ->orWhere('subject', 'like', "%{$searchQuery}%")
+                  ->orWhere('reporter_name', 'like', "%{$searchQuery}%")
+                  ->orWhere('reporter_email', 'like', "%{$searchQuery}%");
+            });
+        }
+
+        $tickets = $query->get();
+
+        // System Statistics
+        $totalTickets = SupportTicket::count();
+        $openTickets = SupportTicket::whereIn('status', ['open', 'pending'])->count();
+        $inProgressTickets = SupportTicket::whereIn('status', ['in_progress', 'approved'])->count();
+        $resolvedTickets = SupportTicket::whereIn('status', ['resolved', 'closed', 'cancelled'])->count();
+        $urgentTickets = SupportTicket::where('priority', 'urgent')->whereNotIn('status', ['closed', 'resolved', 'cancelled'])->count();
+
+        // Fetch staff list for assignment dropdown
+        $staffMembers = User::whereIn('role', ['admin', 'customer_care', 'staff'])->orderBy('name')->get();
+
+        return view('customer_care.index', compact(
+            'tickets',
+            'totalTickets',
+            'openTickets',
+            'inProgressTickets',
+            'resolvedTickets',
+            'urgentTickets',
+            'staffMembers',
+            'statusFilter',
+            'priorityFilter',
+            'searchQuery'
+        ));
+    }
+
+    /**
+     * Store a new support ticket / issue from Customer Care Portal.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'reporter_name' => 'required|string|max:255',
+            'reporter_email' => 'required|string|email|max:255',
+            'reporter_phone' => 'nullable|string|max:50',
+            'subject' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'priority' => 'required|string|in:low,medium,high,urgent',
+            'description' => 'required|string',
+            'assigned_to' => 'nullable|exists:users,id',
+        ]);
+
+        $ticket = SupportTicket::create([
+            'reporter_name' => $request->reporter_name,
+            'reporter_email' => $request->reporter_email,
+            'reporter_phone' => $request->reporter_phone,
+            'subject' => $request->subject,
+            'category' => $request->category,
+            'priority' => $request->priority,
+            'status' => 'open',
+            'description' => $request->description,
+            'assigned_to' => $request->assigned_to,
+            'user_id' => Auth::check() ? Auth::id() : null,
+        ]);
+
+        // Send notification to assigned staff member if set
+        if ($request->assigned_to) {
+            Notification::create([
+                'user_id' => $request->assigned_to,
+                'type' => 'ticket_assigned',
+                'title' => "Assigned Ticket #{$ticket->ticket_number}",
+                'message' => "You have been assigned to handle support issue: '{$ticket->subject}'",
+                'link' => route('admin.dashboard') . '#assigned-tickets',
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Support ticket '{$ticket->ticket_number}' created successfully.");
+    }
+
+    /**
+     * Submit support ticket / issue directly from User Dashboard.
+     */
+    public function userSubmit(Request $request)
+    {
+        $request->validate([
+            'subject' => 'required|string|max:255',
+            'category' => 'required|string|max:100',
+            'priority' => 'required|string|in:low,medium,high,urgent',
+            'description' => 'required|string',
+        ]);
+
+        $user = Auth::user();
+
+        $ticket = SupportTicket::create([
+            'user_id' => $user ? $user->id : null,
+            'reporter_name' => $user ? $user->name : ($request->reporter_name ?? 'Guest User'),
+            'reporter_email' => $user ? $user->email : ($request->reporter_email ?? 'guest@chapconnect.com'),
+            'reporter_phone' => $user ? $user->phone : $request->reporter_phone,
+            'subject' => $request->subject,
+            'category' => $request->category,
+            'priority' => $request->priority,
+            'status' => 'open',
+            'description' => $request->description,
+        ]);
+
+        // Notify All Customer Care & Admin Staff of New Public Ticket
+        $adminStaff = User::whereIn('role', ['admin', 'customer_care'])->get();
+        foreach ($adminStaff as $staff) {
+            Notification::create([
+                'user_id' => $staff->id,
+                'type' => 'new_ticket',
+                'title' => "New Ticket Logged: #{$ticket->ticket_number}",
+                'message' => "'{$ticket->reporter_name}' submitted issue: {$ticket->subject}",
+                'link' => route('customer-care.dashboard'),
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Your issue has been logged under ticket #{$ticket->ticket_number}. Our Customer Care team will review it shortly!");
+    }
+
+    /**
+     * Update an issue's status, priority, assignment, recommendations, or resolution notes.
+     */
+    public function update(Request $request, $id)
+    {
+        $ticket = SupportTicket::findOrFail($id);
+        $oldAssignedTo = $ticket->assigned_to;
+        $oldStatus = $ticket->status;
+
+        $request->validate([
+            'status' => 'required|string|in:open,pending,in_progress,approved,resolved,cancelled,closed',
+            'priority' => 'required|string|in:low,medium,high,urgent',
+            'assigned_to' => 'nullable|exists:users,id',
+            'resolution_notes' => 'nullable|string',
+            'recommendations' => 'nullable|string',
+        ]);
+
+        $ticket->update([
+            'status' => $request->status,
+            'priority' => $request->priority,
+            'assigned_to' => $request->assigned_to,
+            'resolution_notes' => $request->resolution_notes,
+            'recommendations' => $request->recommendations,
+        ]);
+
+        // Notify assigned staff if newly assigned
+        if ($request->assigned_to && $request->assigned_to != $oldAssignedTo) {
+            Notification::create([
+                'user_id' => $request->assigned_to,
+                'type' => 'ticket_assigned',
+                'title' => "Assigned Ticket #{$ticket->ticket_number}",
+                'message' => "You have been assigned to handle support issue: '{$ticket->subject}'",
+                'link' => route('admin.dashboard') . '#assigned-tickets',
+            ]);
+        }
+
+        // Notify reporter user if registered and status changed
+        if ($ticket->user_id && $oldStatus !== $request->status) {
+            $formattedStatus = ucfirst(str_replace('_', ' ', $request->status));
+            Notification::create([
+                'user_id' => $ticket->user_id,
+                'type' => 'ticket_status',
+                'title' => "Ticket #{$ticket->ticket_number} Status Updated",
+                'message' => "Your ticket status has been changed to '{$formattedStatus}'.",
+                'link' => route('dashboard'),
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Support ticket '{$ticket->ticket_number}' updated successfully.");
+    }
+
+    /**
+     * Staff specific action on assigned ticket (Approving, Canceling, Pending, Recommending).
+     */
+    public function staffAction(Request $request, $id)
+    {
+        $ticket = SupportTicket::findOrFail($id);
+
+        // Ensure user is assigned staff or admin
+        if ($ticket->assigned_to !== Auth::id() && !in_array(Auth::user()->role, ['admin', 'customer_care'])) {
+            return redirect()->back()->with('error', 'You are not authorized to take action on this ticket.');
+        }
+
+        $request->validate([
+            'status' => 'required|string|in:pending,approved,in_progress,resolved,cancelled,closed',
+            'recommendations' => 'nullable|string',
+            'resolution_notes' => 'nullable|string',
+        ]);
+
+        $ticket->update([
+            'status' => $request->status,
+            'recommendations' => $request->recommendations,
+            'resolution_notes' => $request->resolution_notes ?? $ticket->resolution_notes,
+        ]);
+
+        // Notify reporter user if registered
+        if ($ticket->user_id) {
+            $formattedStatus = ucfirst(str_replace('_', ' ', $request->status));
+            Notification::create([
+                'user_id' => $ticket->user_id,
+                'type' => 'ticket_status',
+                'title' => "Ticket #{$ticket->ticket_number} Update ({$formattedStatus})",
+                'message' => "Assigned staff updated ticket #{$ticket->ticket_number} to '{$formattedStatus}'.",
+                'link' => route('dashboard'),
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Action saved for assigned ticket #{$ticket->ticket_number}.");
+    }
+
+    /**
+     * Delete a support ticket.
+     */
+    public function destroy($id)
+    {
+        $ticket = SupportTicket::findOrFail($id);
+        $num = $ticket->ticket_number;
+        $ticket->delete();
+
+        return redirect()->back()->with('success', "Support ticket '{$num}' deleted.");
+    }
+}

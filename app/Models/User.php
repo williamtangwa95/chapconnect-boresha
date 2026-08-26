@@ -42,6 +42,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get support tickets reported by this user.
+     */
+    public function supportTickets()
+    {
+        return $this->hasMany(SupportTicket::class, 'user_id');
+    }
+
+    /**
+     * Get support tickets assigned to this staff user.
+     */
+    public function assignedTickets()
+    {
+        return $this->hasMany(SupportTicket::class, 'assigned_to');
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

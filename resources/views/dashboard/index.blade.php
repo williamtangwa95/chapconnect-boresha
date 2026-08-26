@@ -1,184 +1,462 @@
 @extends('layouts.app')
 
-@section('title', 'Chap Connect - Dashboard Settings')
+@section('title', $user->role === 'admin' ? 'ChapConnect - Staff Account Settings' : 'ChapConnect - Dashboard Settings')
 
 @section('content')
-<main class="profile-hero">
-    <!-- Sidebar profile card -->
-    <div class="profile-sidebar">
-        <div class="pimage">
-            @if($user->profile_image)
-                <img src="{{ $user->profile_image }}" alt="{{ $user->name }}">
-            @else
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop" alt="{{ $user->name }}">
-            @endif
-        </div>
-        <h2>{{ $user->name }}</h2>
-        <h5>{{ $user->category_label }}</h5>
-        
-        <!-- Publish Status Badge -->
-        @if($user->is_published)
-            <div style="margin: 8px 0; padding: 5px 12px; border-radius: 20px; background: rgba(16,185,129,0.15); color: #10b981; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
-                <span style="width:7px;height:7px;background:#10b981;border-radius:50%;display:inline-block;"></span> LIVE &amp; PUBLIC
+<main class="main" style="max-width: 100%; width: 100%; margin: 15px 0; padding: 0 40px;">
+    <div class="dashboard-container">
+
+        @if($user->role === 'admin')
+        <!-- Staff Member Welcome Header -->
+        <div class="dashboard-header" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; padding: 25px 30px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+            <div class="dashboard-welcome" style="display: flex; align-items: center; gap: 20px;">
+                <div class="dashboard-avatar" style="width: 70px; height: 70px; border-radius: 50%; overflow: hidden; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); display: flex; align-items: center; justify-content: center; font-size: 28px; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.4); flex-shrink: 0;">
+                    @if($user->profile_image)
+                    <img src="{{ asset($user->profile_image) }}" alt="{{ $user->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    @else
+                    <i class="bi bi-shield-lock-fill"></i>
+                    @endif
+                </div>
+                <div class="dashboard-welcome-text">
+                    <h2 style="color: #ffffff; margin: 0 0 4px 0; font-size: 1.5rem; font-weight: 800;">Welcome, {{ $user->name }}</h2>
+                    <p style="color: #94a3b8; margin: 0; font-size: 0.92rem;">Staff Account Settings (Role: Super Administrator). Update your profile details and security credentials.</p>
+                </div>
             </div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <button type="button" onclick="$('#user-support-modal').fadeIn(200);" class="nav-btn" style="border-radius: 20px; font-weight: 700; padding: 10px 18px; background: rgba(99,102,241,0.12); color: #6366f1; border: 1px solid rgba(99,102,241,0.3); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
+                    <i class="bi bi-headset"></i> Need Help / Support
+                </button>
+                @if(in_array($user->role, ['admin', 'customer_care']))
+                <a href="{{ route('admin.dashboard') }}" class="nav-btn nav-btn-login" style="border-radius: 20px; font-weight: 700; padding: 10px 22px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-speedometer2"></i> Admin Panel
+                </a>
+                @endif
+            </div>
+        </div>
+
+        <!-- Staff Profile Form -->
+        <div class="dashboard-panel" style="background: #ffffff; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+            <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.2rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-person-gear" style="color: var(--primary);"></i> Staff Account Profile & Security Credentials
+            </h3>
+
+            <form action="{{ route('dashboard.update') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label for="name" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Full Name</label>
+                        <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $user->name) }}" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Account Email Address</label>
+                        <input type="email" id="email" class="form-control" value="{{ $user->email }}" disabled style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label for="phone" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Phone Number (WhatsApp)</label>
+                        <input type="text" id="phone" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="country" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Country Location</label>
+                        <input type="text" id="country" name="country" class="form-control" value="{{ old('country', $user->country ?? 'Tanzania') }}" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label for="profile_image" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Update Profile Avatar Photo</label>
+                    <input type="file" id="profile_image" name="profile_image" class="form-control" accept="image/*" style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 10px;" onchange="previewProfileImage(event)">
+
+                    <div id="image-preview-container" style="margin-top: 12px; display: none; align-items: center; gap: 15px; background: #f8fafc; padding: 12px 16px; border-radius: 12px; border: 1px dashed var(--primary);">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.15); flex-shrink: 0; border: 2px solid var(--primary);">
+                            <img id="image-preview-element" src="#" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div>
+                            <span style="font-size: 13px; font-weight: 700; color: var(--primary); display: block;">✨ New Image Selected!</span>
+                            <span id="image-file-info" style="font-size: 12px; color: var(--text-muted);">Previewing selected file</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 1rem; font-weight: 700; color: #0f172a; margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-key-fill" style="color: #d97706;"></i> Update Security Password Credentials (Optional)
+                </h4>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                    <div class="form-group">
+                        <label for="current_password" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Current Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="current_password" name="current_password" class="form-control" placeholder="Enter current password" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 42px 10px 14px;">
+                            <button type="button" class="toggle-password-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; font-size: 1.1rem; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">New Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Leave blank to keep current password" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 42px 10px 14px;">
+                            <button type="button" class="toggle-password-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; font-size: 1.1rem; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password_confirmation" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Confirm New Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="Re-type new password" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 42px 10px 14px;">
+                            <button type="button" class="toggle-password-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; font-size: 1.1rem; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end;">
+                    <button type="submit" style="padding: 12px 28px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.35); cursor: pointer;">
+                        Save Staff Account Updates
+                    </button>
+                </div>
+            </form>
+        </div>
+
         @else
-            <div style="margin: 8px 0; padding: 5px 12px; border-radius: 20px; background: rgba(239,68,68,0.12); color: #ef4444; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
-                <span style="width:7px;height:7px;background:#ef4444;border-radius:50%;display:inline-block;"></span> HIDDEN (Draft)
+        <!-- Regular Talent Dashboard -->
+        <!-- Welcome Header -->
+        <div class="dashboard-header">
+            <div class="dashboard-welcome">
+                <div class="dashboard-avatar">
+                    @if($user->profile_image)
+                    <img src="{{ asset($user->profile_image) }}" alt="{{ $user->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    @else
+                    <i class="bi bi-person-fill"></i>
+                    @endif
+                </div>
+                <div class="dashboard-welcome-text">
+                    <h2>Welcome, {{ $user->name }}</h2>
+                    <p>Glad to have you back! Manage your portfolio, profile details, and public visibility.</p>
+                </div>
             </div>
-        @endif
 
-        <div class="profile-menu-vertical">
-            <a class="active" href="{{ route('dashboard') }}">Overview Settings</a>
-            <a href="{{ route('dashboard.photos') }}">Manage Photos</a>
-            <a href="{{ route('dashboard.videos') }}">Manage Videos</a>
-            <a href="{{ route('profile', $user->id) }}" target="_blank" style="background: rgba(99, 102, 241, 0.1); color: var(--accent); border-color: rgba(99, 102, 241, 0.2);">Preview Public Profile</a>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                @if($user->is_published)
+                <span style="padding: 6px 14px; border-radius: 20px; background: rgba(16,185,129,0.15); color: #10b981; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+                    <span style="width:8px;height:8px;background:#10b981;border-radius:50%;"></span> LIVE &amp; PUBLIC
+                </span>
+                @else
+                <span style="padding: 6px 14px; border-radius: 20px; background: rgba(239,68,68,0.15); color: #ef4444; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+                    <span style="width:8px;height:8px;background:#ef4444;border-radius:50%;"></span> HIDDEN (Draft)
+                </span>
+                @endif
+                <a href="{{ route('profile', $user->id) }}" target="_blank" class="vbtn" style="width: auto; padding: 8px 16px; background: var(--primary); color: white; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-box-arrow-up-right"></i> Preview Profile
+                </a>
+            </div>
         </div>
-    </div>
 
-    <!-- Main Details Form -->
-    <div class="pdetails" style="padding: 30px;">
-
-        <!-- Flash Messages -->
-        @if(session('success'))
-            <div style="background: rgba(16,185,129,0.12); border: 1px solid rgba(16,185,129,0.3); color: #10b981; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size: 0.9rem;">
-                ✅ {{ session('success') }}
+        <!-- Stats Widgets Grid -->
+        <div class="dashboard-stats" style="margin-top: 25px;">
+            <div class="stat-card">
+                <div class="stat-icon secondary">
+                    <i class="bi bi-heart-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">24</div>
+                    <div class="stat-label">Likes</div>
+                </div>
             </div>
-        @endif
-        @if(session('error'))
-            <div style="background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; font-size: 0.9rem;">
-                ⚠️ {{ session('error') }}
+            <div class="stat-card">
+                <div class="stat-icon secondary">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">128</div>
+                    <div class="stat-label">Followers</div>
+                </div>
             </div>
-        @endif
+            <div class="stat-card">
+                <div class="stat-icon secondary">
+                    <i class="bi bi-chat-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">Comments</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon primary">
+                    <i class="bi bi-camera-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ $user->media()->count() }}</div>
+                    <div class="stat-label">Portfolio Items</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon success">
+                    <i class="bi bi-patch-check-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ $completion }}%</div>
+                    <div class="stat-label">Profile Completion</div>
+                </div>
+            </div>
+        </div>
 
-        <!-- Profile Completion & Publish Panel -->
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 14px; padding: 22px 24px; margin-bottom: 30px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px;">Profile Completion</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; color: @if($completion >= 60) #10b981 @else var(--accent) @endif;">{{ $completion }}%</div>
+        <!-- Main Dashboard Grid -->
+        <div class="dashboard-grid" style="margin-top: 25px;">
+            <!-- Quick Actions Panel -->
+            <div class="dashboard-panel">
+                <h3><i class="bi bi-sliders2-vertical" style="color: var(--primary);"></i> Quick Actions</h3>
+                <div class="action-grid">
+                    <a href="{{ route('home') }}" class="action-card">
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Browse Talent Feed</span>
+                    </a>
+                    <a href="{{ route('dashboard.photos') }}" class="action-card">
+                        <i class="bi bi-camera-fill"></i>
+                        <span>Manage Photos</span>
+                    </a>
+                    <a href="{{ route('dashboard.videos') }}" class="action-card">
+                        <i class="bi bi-camera-video-fill"></i>
+                        <span>Manage Videos</span>
+                    </a>
+                    <a href="{{ route('dashboard.news') }}" class="action-card">
+                        <i class="bi bi-newspaper"></i>
+                        <span>Manage News</span>
+                    </a>
+                    <a href="{{ route('profile', $user->id) }}" target="_blank" class="action-card">
+                        <i class="bi bi-person-badge-fill"></i>
+                        <span>Public Profile</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Profile Completion & Publish Control Panel -->
+            <div class="dashboard-panel">
+                <h3><i class="bi bi-shield-lock-fill" style="color: #10b981;"></i> Publishing Control</h3>
+
+                <div style="margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">Profile Score</span>
+                        <span style="font-size: 16px; font-weight: 800; color: {{ $completion >= 60 ? '#10b981' : 'var(--primary)' }};">{{ $completion }}%</span>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.06); border-radius: 999px; height: 8px; overflow: hidden;">
+                        <div style="height: 100%; width: {{ $completion }}%; border-radius: 999px; background: {{ $completion >= 60 ? 'linear-gradient(90deg, #10b981, #059669)' : 'var(--primary)' }}; transition: width 0.5s ease;"></div>
+                    </div>
                 </div>
 
                 @if($user->is_published)
-                    <form action="{{ route('dashboard.unpublish') }}" method="POST">
-                        @csrf
-                        <button type="submit" style="padding: 10px 22px; background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; transition: all 0.2s;">
-                            🔒 Unpublish Profile
-                        </button>
-                    </form>
+                <form action="{{ route('dashboard.unpublish') }}" method="POST">
+                    @csrf
+                    <button type="submit" style="width: 100%; padding: 10px; background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s;">
+                        🔒 Unpublish Profile (Draft)
+                    </button>
+                </form>
                 @else
-                    <form action="{{ route('dashboard.publish') }}" method="POST">
-                        @csrf
-                        <button type="submit" 
-                            @if($completion < 60) disabled title="Complete at least 60% of your profile to publish" @endif
-                            style="padding: 10px 22px; background: @if($completion >= 60) linear-gradient(135deg, #10b981, #059669) @else rgba(100,100,100,0.2) @endif; color: @if($completion >= 60) #fff @else #888 @endif; border: none; border-radius: 8px; font-weight: 700; font-size: 0.88rem; cursor: @if($completion >= 60) pointer @else not-allowed @endif; transition: all 0.2s;">
-                            🌐 Publish Profile
-                        </button>
-                    </form>
+                <form action="{{ route('dashboard.publish') }}" method="POST">
+                    @csrf
+                    <button type="submit"
+                        @if($completion < 60) disabled title="Complete at least 60% of your profile to publish" @endif
+                        style="width: 100%; padding: 10px; background: {{ $completion >= 60 ? 'var(--primary)' : 'rgba(100,100,100,0.2)' }}; color: {{ $completion >= 60 ? '#fff' : '#888' }}; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: {{ $completion >= 60 ? 'pointer' : 'not-allowed' }}; transition: all 0.2s;">
+                        🌐 Publish Profile Live
+                    </button>
+                </form>
+                @endif
+
+                @if($completion < 60)
+                <p style="font-size: 12px; color: #888; margin-top: 10px; text-align: center;">Complete at least 60% of your profile to enable live publishing.</p>
                 @endif
             </div>
-
-            <!-- Progress Bar -->
-            <div style="background: rgba(255,255,255,0.06); border-radius: 999px; height: 8px; overflow: hidden;">
-                <div style="height: 100%; width: {{ $completion }}%; border-radius: 999px; background: @if($completion >= 60) linear-gradient(90deg, #10b981, #059669) @else linear-gradient(90deg, var(--accent), var(--accent-pink)) @endif; transition: width 0.5s ease;"></div>
-            </div>
-
-            <!-- Checklist hints -->
-            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;">
-                @php
-                    $checks = [
-                        'Name set'              => !empty($user->name),
-                        'Bio written'           => !empty($user->description),
-                        'Profile photo'         => !empty($user->profile_image),
-                        'Phone added'           => !empty($user->phone),
-                        'Country added'         => !empty($user->country),
-                        'Photo uploaded'        => $user->media()->where('type','photo')->exists(),
-                        'Social link added'     => !empty($user->social_instagram) || !empty($user->social_facebook) || !empty($user->social_tiktok) || !empty($user->social_youtube),
-                    ];
-                @endphp
-                @foreach($checks as $label => $done)
-                    <span style="font-size: 0.72rem; font-weight: 600; padding: 3px 10px; border-radius: 20px;
-                        background: {{ $done ? 'rgba(16,185,129,0.12)' : 'rgba(255,255,255,0.05)' }};
-                        color: {{ $done ? '#10b981' : '#888' }};
-                        border: 1px solid {{ $done ? 'rgba(16,185,129,0.25)' : 'rgba(255,255,255,0.08)' }};">
-                        {{ $done ? '✓' : '○' }} {{ $label }}
-                    </span>
-                @endforeach
-            </div>
-
-            @if($completion < 60)
-                <p style="font-size: 0.78rem; color: #888; margin-top: 10px; margin-bottom: 0;">Complete at least <strong style="color: var(--accent);">4 out of 7</strong> profile sections to unlock publishing.</p>
-            @endif
         </div>
 
-        <h2>Profile Control Panel</h2>
-        <p style="color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem;">Update your biography description, profile photo, and public details.</p>
-        
-        <form action="{{ route('dashboard.update') }}" method="POST" enctype="multipart/form-data">
-            @csrf
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div class="form-group">
-                    <label for="name">Stage Name / Full Name</label>
-                    <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="category_read">Registered Category</label>
-                    <input type="text" id="category_read" class="form-control" value="{{ $user->category_label }}" disabled style="opacity: 0.7;">
-                </div>
-            </div>
+        <!-- Settings Form Panel -->
+        <div class="dashboard-panel" style="margin-top: 25px;">
+            <h3><i class="bi bi-gear-fill" style="color: var(--primary);"></i> Edit Profile Information</h3>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div class="form-group">
-                    <label for="phone">Phone Number</label>
-                    <input type="text" id="phone" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}">
-                </div>
-                
-                <div class="form-group">
-                    <label for="country">Country Location</label>
-                    <input type="text" id="country" name="country" class="form-control" value="{{ old('country', $user->country) }}" required>
-                </div>
-            </div>
+            <form action="{{ route('dashboard.update') }}" method="POST" enctype="multipart/form-data">
+                @csrf
 
-            <div class="form-group">
-                <label for="profile_image">Change Profile Photo</label>
-                <input type="file" id="profile_image" name="profile_image" class="form-control" accept="image/*" style="padding: 8px;">
-                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">Recommended: Square image, maximum 2MB size.</p>
-            </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
+                    <div class="form-group">
+                        <label for="name">Stage Name / Full Name</label>
+                        <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
+                    </div>
 
-            <div class="form-group">
-                <label for="description">Short Bio Description</label>
-                <textarea id="description" name="description" class="form-control" placeholder="Tell the world about yourself and your works...">{{ old('description', $user->description) }}</textarea>
-            </div>
+                    <div class="form-group">
+                        <label for="category_read">Registered Category</label>
+                        <input type="text" id="category_read" class="form-control" value="{{ $user->category_label }}" disabled style="opacity: 0.7;">
+                    </div>
+                </div>
 
-            <h3 style="font-size: 0.9rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-bottom: 20px; margin-top: 30px;">Social Media Links</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="text" id="phone" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}">
+                    </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div class="form-group">
-                    <label for="social_instagram">Instagram Link</label>
-                    <input type="url" id="social_instagram" name="social_instagram" class="form-control" value="{{ old('social_instagram', $user->social_instagram) }}" placeholder="https://instagram.com/username">
+                    <div class="form-group">
+                        <label for="country">Country Location</label>
+                        <input type="text" id="country" name="country" class="form-control" value="{{ old('country', $user->country) }}" required>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="social_facebook">Facebook Link</label>
-                    <input type="url" id="social_facebook" name="social_facebook" class="form-control" value="{{ old('social_facebook', $user->social_facebook) }}" placeholder="https://facebook.com/page">
-                </div>
-            </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div class="form-group">
-                    <label for="social_tiktok">TikTok Link</label>
-                    <input type="url" id="social_tiktok" name="social_tiktok" class="form-control" value="{{ old('social_tiktok', $user->social_tiktok) }}" placeholder="https://tiktok.com/@username">
+                    <label for="profile_image">Change Profile Photo</label>
+                    <input type="file" id="profile_image" name="profile_image" class="form-control" accept="image/*" style="padding: 8px;" onchange="previewProfileImage(event)">
+
+                    <!-- Live Image Preview Box -->
+                    <div id="image-preview-container" style="margin-top: 12px; display: none; align-items: center; gap: 15px; background: #f8fafc; padding: 12px 16px; border-radius: 12px; border: 1px dashed var(--primary);">
+                        <div style="width: 70px; height: 70px; border-radius: 50%; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.15); flex-shrink: 0; border: 2px solid var(--primary);">
+                            <img id="image-preview-element" src="#" alt="New Profile Preview" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div>
+                            <span style="font-size: 13px; font-weight: 700; color: var(--primary); display: block;">✨ New Image Selected!</span>
+                            <span id="image-file-info" style="font-size: 12px; color: var(--text-muted);">Previewing selected file</span>
+                        </div>
+                    </div>
                 </div>
-                
+
                 <div class="form-group">
-                    <label for="social_youtube">YouTube Link</label>
-                    <input type="url" id="social_youtube" name="social_youtube" class="form-control" value="{{ old('social_youtube', $user->social_youtube) }}" placeholder="https://youtube.com/channel">
+                    <label for="description">Short Bio Description</label>
+                    <textarea id="description" name="description" class="form-control" rows="4" placeholder="Tell the world about yourself and your creative works...">{{ old('description', $user->description) }}</textarea>
                 </div>
-            </div>
-            
-            <button type="submit" class="btn-submit" style="margin-top: 10px;">Save Settings</button>
-        </form>
+
+                <h4 style="font-size: 15px; color: var(--primary); margin-top: 25px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Social Media Links</h4>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
+                    <div class="form-group">
+                        <label for="social_instagram">Instagram Link</label>
+                        <input type="url" id="social_instagram" name="social_instagram" class="form-control" value="{{ old('social_instagram', $user->social_instagram) }}" placeholder="https://instagram.com/username">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="social_facebook">Facebook Link</label>
+                        <input type="url" id="social_facebook" name="social_facebook" class="form-control" value="{{ old('social_facebook', $user->social_facebook) }}" placeholder="https://facebook.com/page">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="social_tiktok">TikTok Link</label>
+                        <input type="url" id="social_tiktok" name="social_tiktok" class="form-control" value="{{ old('social_tiktok', $user->social_tiktok) }}" placeholder="https://tiktok.com/@username">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="social_youtube">YouTube Link</label>
+                        <input type="url" id="social_youtube" name="social_youtube" class="form-control" value="{{ old('social_youtube', $user->social_youtube) }}" placeholder="https://youtube.com/channel">
+                    </div>
+                </div>
+
+                <button type="submit" class="nav-btn nav-btn-register" style="margin-top: 15px; width: auto; padding: 10px 24px; cursor: pointer; border: none;">Save Changes</button>
+            </form>
+        </div>
+        @endif
     </div>
 </main>
+
+<script>
+    function previewProfileImage(event) {
+        const file = event.target.files[0];
+        const previewContainer = document.getElementById('image-preview-container');
+        const previewElement = document.getElementById('image-preview-element');
+        const fileInfo = document.getElementById('image-file-info');
+
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewElement.src = e.target.result;
+                previewContainer.style.display = 'flex';
+                if (fileInfo) {
+                    fileInfo.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+                }
+
+                // Also live-update the header avatar if present
+                const headerAvatarImg = document.querySelector('.dashboard-avatar img');
+                if (headerAvatarImg) {
+                    headerAvatarImg.src = e.target.result;
+                }
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewContainer.style.display = 'none';
+            previewElement.src = '#';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.toggle-password-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const input = this.parentElement.querySelector('input');
+                const icon = this.querySelector('i');
+                if (input) {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('bi-eye-slash');
+                        icon.classList.add('bi-eye');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('bi-eye');
+                        icon.classList.add('bi-eye-slash');
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+<!-- Support Modal for Talent / User -->
+<div id="user-support-modal" class="admin-modal">
+    <div class="admin-modal-content" style="border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-width: 520px; width: 90%; margin: auto;">
+        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-headset" style="color: var(--primary);"></i> Submit Support Ticket to Customer Care
+            </h3>
+            <button type="button" class="admin-modal-close" onclick="$('#user-support-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <form action="{{ route('dashboard.support.submit') }}" method="POST">
+            @csrf
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Issue Category</label>
+                <select name="category" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <option value="Account Access & Credentials">Account Access & Credentials</option>
+                    <option value="Profile Verification">Profile Verification</option>
+                    <option value="Media Uploads (Photos/Videos)">Media Uploads (Photos/Videos)</option>
+                    <option value="Billing & Subscription">Billing & Subscription</option>
+                    <option value="Report Abuse / Content Guidelines">Report Abuse / Content Guidelines</option>
+                    <option value="General Inquiry" selected>General Inquiry</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Subject Title</label>
+                <input type="text" name="subject" class="form-control" placeholder="Brief summary of what you need help with..." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Priority Level</label>
+                <select name="priority" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <option value="low">Low Priority</option>
+                    <option value="medium" selected>Medium Priority</option>
+                    <option value="high">High Priority</option>
+                    <option value="urgent">Urgent Priority</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Detailed Explanation</label>
+                <textarea name="description" rows="4" class="form-control" placeholder="Explain your issue or question in detail..." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <button type="button" onclick="$('#user-support-modal').fadeOut(200);" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; font-weight: 600; cursor: pointer;">Cancel</button>
+                <button type="submit" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.35); cursor: pointer;">Submit Support Ticket</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection

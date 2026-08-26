@@ -47,14 +47,40 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/dashboard/videos', [DashboardController::class, 'storeVideo'])->name('dashboard.videos.store');
     Route::delete('/dashboard/videos/{id}', [DashboardController::class, 'deleteVideo'])->name('dashboard.videos.delete');
 
+    // News updates management
+    Route::get('/dashboard/news', [DashboardController::class, 'news'])->name('dashboard.news');
+    Route::post('/dashboard/news', [DashboardController::class, 'storeNews'])->name('dashboard.news.store');
+    Route::delete('/dashboard/news/{id}', [DashboardController::class, 'deleteNews'])->name('dashboard.news.delete');
+
     // Publish / Unpublish profile
     Route::post('/dashboard/publish', [DashboardController::class, 'publish'])->name('dashboard.publish');
     Route::post('/dashboard/unpublish', [DashboardController::class, 'unpublish'])->name('dashboard.unpublish');
+
+    // Submit support issue / ticket
+    Route::post('/dashboard/support/submit', [\App\Http\Controllers\CustomerCareController::class, 'userSubmit'])->name('dashboard.support.submit');
+
+    // Notifications API
+    Route::get('/notifications/unread', [\App\Http\Controllers\NotificationController::class, 'getUnread'])->name('notifications.unread');
+    Route::post('/notifications/{id}/mark-read', [\App\Http\Controllers\NotificationController::class, 'markRead'])->name('notifications.mark-read');
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+
+    // Assigned staff ticket action route
+    Route::post('/admin/tickets/{id}/staff-action', [\App\Http\Controllers\CustomerCareController::class, 'staffAction'])->name('admin.tickets.staff-action');
+});
+
+// Customer Care Dashboard & Support Ticket Management (Protected by auth and customer_care middleware)
+Route::middleware(['auth', 'customer_care'])->group(function () {
+    Route::get('/customer-care', [\App\Http\Controllers\CustomerCareController::class, 'index'])->name('customer-care.dashboard');
+    Route::post('/customer-care/tickets', [\App\Http\Controllers\CustomerCareController::class, 'store'])->name('customer-care.tickets.store');
+    Route::post('/customer-care/tickets/{id}/update', [\App\Http\Controllers\CustomerCareController::class, 'update'])->name('customer-care.tickets.update');
+    Route::delete('/customer-care/tickets/{id}', [\App\Http\Controllers\CustomerCareController::class, 'destroy'])->name('customer-care.tickets.delete');
 });
 
 // Super Admin Panel Routes (Protected by auth and admin middleware)
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::post('/admin/user/store', [AdminController::class, 'storeUser'])->name('admin.user.store');
+    Route::post('/admin/staff/store', [AdminController::class, 'storeStaff'])->name('admin.staff.store');
     Route::delete('/admin/user/{id}', [AdminController::class, 'deleteUser'])->name('admin.user.delete');
     Route::delete('/admin/media/{id}', [AdminController::class, 'deleteMedia'])->name('admin.media.delete');
     Route::post('/admin/categories', [AdminController::class, 'storeCategory'])->name('admin.categories.store');
@@ -66,4 +92,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/user/{id}/toggle-publish', [AdminController::class, 'togglePublish'])->name('admin.user.toggle-publish');
     Route::post('/admin/users/bulk-publish', [AdminController::class, 'bulkPublish'])->name('admin.users.bulk-publish');
     Route::post('/admin/users/bulk-unpublish', [AdminController::class, 'bulkUnpublish'])->name('admin.users.bulk-unpublish');
+    Route::post('/admin/settings/notification-sound', [AdminController::class, 'uploadNotificationSound'])->name('admin.settings.notification-sound');
+    Route::post('/admin/settings/update', [AdminController::class, 'updateSystemSettings'])->name('admin.settings.update');
+    Route::post('/admin/settings/clear-cache', [AdminController::class, 'clearCache'])->name('admin.settings.clear-cache');
 });
