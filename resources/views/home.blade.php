@@ -64,15 +64,17 @@
                         <div class="like-container">
                             <div class="like">
                                 <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})">Like 🤍</button>
-                                <span class="like-count" id="likeCount_{{ $talent->id }}">0</span>
+                                <span class="like-count" id="likeCount_{{ $talent->id }}">{{ $talent->likes_received_count ?? 0 }}</span>
                             </div>
                             <div class="comment">
-                                <a href="{{ route('profile', $talent->id) }}#info-tab" style="text-decoration:none;"><button class="comment-btn">Comments 💬</button></a>
-                                <span class="comment-count">0</span>
+                                <a href="{{ route('profile', $talent->id) }}#info-tab" style="text-decoration:none;">
+                                    <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}">Comments 💬</button>
+                                </a>
+                                <span class="comment-count {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentCount_{{ $talent->id }}">{{ $talent->comments_received_count ?? 0 }}</span>
                             </div>
                             <div class="follow">
                                 <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})">Followers</button>
-                                <span class="followers-count" id="followersCount_{{ $talent->id }}">0</span>
+                                <span class="followers-count" id="followersCount_{{ $talent->id }}">{{ $talent->followers_received_count ?? 0 }}</span>
                             </div>
                         </div>
 
@@ -110,40 +112,108 @@
             var url = $(this).val();
             if (url) window.location.href = url;
         });
+
+        // Fetch initial user interaction statuses for visible talent cards
+        const talentIds = [];
+        $('.like-btn').each(function() {
+            const id = this.id.replace('likeBtn_', '');
+            if (id) talentIds.push(id);
+        });
+
+        if (talentIds.length > 0) {
+            $.get('{{ route("talent.interactions.status") }}', { talent_ids: talentIds.join(',') }, function(res) {
+                if (res.success && res.statuses) {
+                    $.each(res.statuses, function(id, data) {
+                        const likeBtn = document.getElementById('likeBtn_' + id);
+                        const likeCount = document.getElementById('likeCount_' + id);
+                        const followBtn = document.getElementById('followBtn_' + id);
+                        const followCount = document.getElementById('followersCount_' + id);
+                        const commentCount = document.getElementById('commentCount_' + id);
+                        const commentBtn = document.getElementById('commentBtn_' + id);
+
+                        if (likeCount) likeCount.textContent = data.likes_count;
+                        if (followCount) followCount.textContent = data.followers_count;
+                        if (commentCount) {
+                            commentCount.textContent = data.comments_count;
+                            if (data.comments_count > 0) {
+                                if (commentBtn) commentBtn.classList.add('has-comments');
+                                commentCount.classList.add('has-comments');
+                            } else {
+                                if (commentBtn) commentBtn.classList.remove('has-comments');
+                                commentCount.classList.remove('has-comments');
+                            }
+                        }
+
+                        if (likeBtn && data.is_liked) {
+                            likeBtn.classList.add('liked');
+                            likeBtn.textContent = 'Liked ❤️';
+                        }
+                        if (followBtn && data.is_following) {
+                            followBtn.classList.add('following');
+                            followBtn.textContent = 'Following';
+                        }
+                    });
+                }
+            });
+        }
     });
 
     function toggleCardLike(id) {
         const btn = document.getElementById('likeBtn_' + id);
         const count = document.getElementById('likeCount_' + id);
         if (!btn || !count) return;
-        let num = parseInt(count.textContent) || 0;
-        if (btn.classList.contains('liked')) {
-            btn.classList.remove('liked');
-            btn.textContent = 'Like 🤍';
-            num = Math.max(0, num - 1);
-        } else {
-            btn.classList.add('liked');
-            btn.textContent = 'Liked ❤️';
-            num += 1;
-        }
-        count.textContent = num;
+
+        btn.disabled = true;
+        $.ajax({
+            url: '/talent/' + id + '/like',
+            type: 'POST',
+            data: { _token: '{{ csrf_token() }}' },
+            success: function(res) {
+                btn.disabled = false;
+                if (res.success) {
+                    if (res.liked) {
+                        btn.classList.add('liked');
+                        btn.textContent = 'Liked ❤️';
+                    } else {
+                        btn.classList.remove('liked');
+                        btn.textContent = 'Like 🤍';
+                    }
+                    count.textContent = res.count;
+                }
+            },
+            error: function() {
+                btn.disabled = false;
+            }
+        });
     }
 
     function toggleCardFollow(id) {
         const btn = document.getElementById('followBtn_' + id);
         const count = document.getElementById('followersCount_' + id);
         if (!btn || !count) return;
-        let num = parseInt(count.textContent) || 0;
-        if (btn.classList.contains('following')) {
-            btn.classList.remove('following');
-            btn.textContent = 'Followers';
-            num = Math.max(0, num - 1);
-        } else {
-            btn.classList.add('following');
-            btn.textContent = 'Following';
-            num += 1;
-        }
-        count.textContent = num;
+
+        btn.disabled = true;
+        $.ajax({
+            url: '/talent/' + id + '/follow',
+            type: 'POST',
+            data: { _token: '{{ csrf_token() }}' },
+            success: function(res) {
+                btn.disabled = false;
+                if (res.success) {
+                    if (res.following) {
+                        btn.classList.add('following');
+                        btn.textContent = 'Following';
+                    } else {
+                        btn.classList.remove('following');
+                        btn.textContent = 'Followers';
+                    }
+                    count.textContent = res.count;
+                }
+            },
+            error: function() {
+                btn.disabled = false;
+            }
+        });
     }
 </script>
 @endsection

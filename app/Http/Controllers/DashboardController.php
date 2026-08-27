@@ -34,8 +34,11 @@ class DashboardController extends Controller
 
     public function index()
     {
+        /** @var \App\Models\User $user */
         $user = auth()->user();
+        $user->loadCount(['likesReceived', 'followersReceived', 'commentsReceived']);
         $completion = self::completionScore($user);
+
         return view('dashboard.index', [
             'user'       => $user,
             'completion' => $completion,

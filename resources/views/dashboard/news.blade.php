@@ -3,30 +3,10 @@
 @section('title', 'ChapConnect - Manage News & Updates')
 
 @section('content')
-<main class="profile-hero" style="max-width: 1200px; margin: 30px auto; padding: 0 20px; box-sizing: border-box;">
-    <!-- Sidebar profile card -->
-    <div class="profile-sidebar" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
-        <div class="pimage" style="width: 90px; height: 90px; margin: 0 auto 15px auto; border-radius: 50%; overflow: hidden; border: 3px solid var(--primary); box-shadow: 0 4px 15px rgba(99,102,241,0.25);">
-            @if(auth()->user()->profile_image)
-                <img src="{{ asset(auth()->user()->profile_image) }}" alt="{{ auth()->user()->name }}" style="width: 100%; height: 100%; object-fit: cover;">
-            @else
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop" alt="{{ auth()->user()->name }}" style="width: 100%; height: 100%; object-fit: cover;">
-            @endif
-        </div>
-        <h2 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; text-align: center; margin-bottom: 2px;">{{ auth()->user()->name }}</h2>
-        <h5 style="font-size: 0.82rem; color: #64748b; text-align: center; margin-bottom: 20px; font-weight: 600;">{{ auth()->user()->category_label }}</h5>
-        
-        <div class="profile-menu-vertical">
-            <a href="{{ route('dashboard') }}"><i class="bi bi-sliders"></i> Overview Settings</a>
-            <a href="{{ route('dashboard.photos') }}"><i class="bi bi-images"></i> Manage Photos</a>
-            <a href="{{ route('dashboard.videos') }}"><i class="bi bi-film"></i> Manage Videos</a>
-            <a class="active" href="{{ route('dashboard.news') }}"><i class="bi bi-newspaper"></i> Manage News</a>
-            <a href="{{ route('profile', auth()->user()->id) }}" target="_blank" style="background: rgba(99, 102, 241, 0.1); color: var(--primary); border: 1px solid rgba(99, 102, 241, 0.25);"><i class="bi bi-box-arrow-up-right"></i> Preview Public Profile</a>
-        </div>
-    </div>
-
-    <!-- Main Content Area: News & Updates Manager -->
-    <div class="pdetails" style="background: #ffffff; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+<main class="main admin-main-container" style="max-width: 100%; width: 100%; margin: 15px 0; padding: 0 30px;">
+    <div class="dashboard-container">
+        <!-- Main Content Area: News & Updates Manager -->
+        <div class="pdetails" style="background: #ffffff; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
         <!-- Page Header -->
         <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; padding: 24px 28px; border-radius: 14px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div>

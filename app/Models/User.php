@@ -58,6 +58,30 @@ class User extends Authenticatable
     }
 
     /**
+     * Get likes received by this talent user.
+     */
+    public function likesReceived()
+    {
+        return $this->hasMany(Like::class, 'talent_id');
+    }
+
+    /**
+     * Get followers of this talent user.
+     */
+    public function followersReceived()
+    {
+        return $this->hasMany(Follower::class, 'talent_id');
+    }
+
+    /**
+     * Get comments received by this talent user.
+     */
+    public function commentsReceived()
+    {
+        return $this->hasMany(Comment::class, 'talent_id');
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

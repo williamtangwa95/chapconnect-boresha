@@ -13,7 +13,9 @@ class HomeController extends Controller
         $category = $request->input('category');
 
         // Query only regular users that have published their profiles
-        $query = User::where('role', 'user')->where('is_published', true);
+        $query = User::where('role', 'user')
+            ->where('is_published', true)
+            ->withCount(['likesReceived', 'followersReceived', 'commentsReceived']);
 
         if ($category && $category !== 'all') {
             $query->where('category', $category);
@@ -78,14 +80,19 @@ class HomeController extends Controller
 
     public function profile($id)
     {
-        $talent = User::where('role', 'user')->findOrFail($id);
+        $talent = User::where('role', 'user')
+            ->withCount(['likesReceived', 'followersReceived', 'commentsReceived'])
+            ->findOrFail($id);
         
         // Load first 4 photos for mini-gallery
         $miniPhotos = $talent->media()->where('type', 'photo')->latest()->take(4)->get();
+        // Load comments for talent
+        $comments = $talent->commentsReceived()->latest()->get();
 
         return view('profile', [
             'talent' => $talent,
-            'miniPhotos' => $miniPhotos
+            'miniPhotos' => $miniPhotos,
+            'comments' => $comments
         ]);
     }
 

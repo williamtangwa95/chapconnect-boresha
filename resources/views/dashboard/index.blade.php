@@ -3,7 +3,7 @@
 @section('title', $user->role === 'admin' ? 'ChapConnect - Staff Account Settings' : 'ChapConnect - Dashboard Settings')
 
 @section('content')
-<main class="main" style="max-width: 100%; width: 100%; margin: 15px 0; padding: 0 40px;">
+<main class="main admin-main-container" style="max-width: 100%; width: 100%; margin: 15px 0; padding: 0 30px;">
     <div class="dashboard-container">
 
         @if($user->role === 'admin')
@@ -167,7 +167,7 @@
                     <i class="bi bi-heart-fill"></i>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-value">24</div>
+                    <div class="stat-value">{{ $user->likes_received_count ?? 0 }}</div>
                     <div class="stat-label">Likes</div>
                 </div>
             </div>
@@ -176,7 +176,7 @@
                     <i class="bi bi-people-fill"></i>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-value">128</div>
+                    <div class="stat-value">{{ $user->followers_received_count ?? 0 }}</div>
                     <div class="stat-label">Followers</div>
                 </div>
             </div>
@@ -185,7 +185,7 @@
                     <i class="bi bi-chat-fill"></i>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-value">8</div>
+                    <div class="stat-value">{{ $user->comments_received_count ?? 0 }}</div>
                     <div class="stat-label">Comments</div>
                 </div>
             </div>

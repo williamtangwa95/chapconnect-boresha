@@ -12,12 +12,20 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+use App\Http\Controllers\InteractionController;
+
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/category/{category}', [HomeController::class, 'category'])->name('category');
 Route::get('/profile/{id}', [HomeController::class, 'profile'])->name('profile');
 Route::get('/profile/{id}/photos', [HomeController::class, 'photos'])->name('profile.photos');
 Route::get('/profile/{id}/videos', [HomeController::class, 'videos'])->name('profile.videos');
+
+// Public Talent Interaction Routes (Likes, Followers, Comments)
+Route::post('/talent/{id}/like', [InteractionController::class, 'toggleLike'])->name('talent.like');
+Route::post('/talent/{id}/follow', [InteractionController::class, 'toggleFollow'])->name('talent.follow');
+Route::post('/talent/{id}/comment', [InteractionController::class, 'storeComment'])->name('talent.comment');
+Route::get('/interactions/status', [InteractionController::class, 'getStatuses'])->name('talent.interactions.status');
 
 // Authentication Routes
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');

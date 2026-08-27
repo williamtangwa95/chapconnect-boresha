@@ -882,6 +882,15 @@ transition: background 0.3s;
     color: #10b981;
 }
 
+.comment-btn.has-comments,
+.comment-btn.commented {
+    color: #6366f1;
+}
+
+.comment-count.has-comments {
+    color: #6366f1;
+}
+
 .like-count,
 .comment-count,
 .followers-count {

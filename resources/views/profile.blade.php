@@ -22,7 +22,24 @@
                 @endif
             </div>
             <h2>{{ $talent->name }}</h2>
-            <p style="color: var(--text-muted); font-size: 14px; font-weight: 500; margin-bottom: 15px;">{{ $talent->category_label }}</p>
+            <p style="color: var(--text-muted); font-size: 14px; font-weight: 500; margin-bottom: 12px;">{{ $talent->category_label }}</p>
+
+            <div class="like-container" style="justify-content: center; margin-bottom: 18px; gap: 8px;">
+                <div class="like">
+                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})">Like 🤍</button>
+                    <span class="like-count" id="likeCount_{{ $talent->id }}">{{ $talent->likes_received_count ?? 0 }}</span>
+                </div>
+                <div class="comment">
+                    <a href="#info-tab" style="text-decoration:none;" onclick="$('.menu a[href=\'#info-tab\']').click();">
+                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}">Comments 💬</button>
+                    </a>
+                    <span class="comment-count {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentCount_{{ $talent->id }}">{{ $talent->comments_received_count ?? 0 }}</span>
+                </div>
+                <div class="follow">
+                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})">Followers</button>
+                    <span class="followers-count" id="followersCount_{{ $talent->id }}">{{ $talent->followers_received_count ?? 0 }}</span>
+                </div>
+            </div>
 
             <div class="menu">
                 <ul>
@@ -74,6 +91,46 @@
                         @if(!$talent->social_instagram && !$talent->social_facebook && !$talent->social_tiktok && !$talent->social_youtube)
                             <span style="color: var(--text-muted); font-size: 14px;">No social channels linked yet.</span>
                         @endif
+                    </div>
+
+                    <!-- Fan Comments & Reviews Section -->
+                    <h3 style="margin-top: 30px; display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-chat-dots-fill" style="color: var(--primary);"></i> User Comments ({{ $comments->count() }})
+                    </h3>
+
+                    <!-- Comment Submission Form -->
+                    <form action="{{ route('talent.comment', $talent->id) }}" method="POST" style="margin-top: 15px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #cbd5e1;">
+                        @csrf
+                        @guest
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">Your Name</label>
+                            <input type="text" name="author_name" class="form-control" placeholder="Enter your name..." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; width: 100%;">
+                        </div>
+                        @endguest
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <label style="font-size: 13px; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">Leave a Comment or Review</label>
+                            <textarea name="comment" rows="3" class="form-control" placeholder="Write a public comment for {{ $talent->name }}..." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; width: 100%;"></textarea>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end;">
+                            <button type="submit" style="padding: 9px 20px; border-radius: 8px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(99,102,241,0.3);">Post Comment</button>
+                        </div>
+                    </form>
+
+                    <!-- Comments List Stream -->
+                    <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+                        @forelse($comments as $cmt)
+                            <div style="background: #ffffff; padding: 14px 18px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <strong style="color: #0f172a; font-size: 0.9rem;">{{ $cmt->author_name }}</strong>
+                                    <span style="font-size: 0.75rem; color: #94a3b8;"><i class="bi bi-clock"></i> {{ $cmt->created_at->diffForHumans() }}</span>
+                                </div>
+                                <p style="margin: 0; color: #475569; font-size: 0.88rem; line-height: 1.5; white-space: pre-line;">{{ $cmt->comment }}</p>
+                            </div>
+                        @empty
+                            <div style="text-align: center; padding: 25px; color: #94a3b8; font-size: 0.88rem; background: #f8fafc; border-radius: 10px; border: 1px dashed #cbd5e1;">
+                                No comments posted yet for {{ $talent->name }}. Be the first to leave a comment!
+                            </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -168,6 +225,82 @@
         if (typeof initProfileTabs === "function") {
             initProfileTabs();
         }
+
+        // Fetch initial status for this talent
+        $.get('{{ route("talent.interactions.status") }}', { talent_ids: '{{ $talent->id }}' }, function(res) {
+            if (res.success && res.statuses && res.statuses['{{ $talent->id }}']) {
+                const data = res.statuses['{{ $talent->id }}'];
+                const likeBtn = document.getElementById('likeBtn_{{ $talent->id }}');
+                const followBtn = document.getElementById('followBtn_{{ $talent->id }}');
+
+                if (likeBtn && data.is_liked) {
+                    likeBtn.classList.add('liked');
+                    likeBtn.textContent = 'Liked ❤️';
+                }
+                if (followBtn && data.is_following) {
+                    followBtn.classList.add('following');
+                    followBtn.textContent = 'Following';
+                }
+            }
+        });
     });
+
+    function toggleCardLike(id) {
+        const btn = document.getElementById('likeBtn_' + id);
+        const count = document.getElementById('likeCount_' + id);
+        if (!btn || !count) return;
+
+        btn.disabled = true;
+        $.ajax({
+            url: '/talent/' + id + '/like',
+            type: 'POST',
+            data: { _token: '{{ csrf_token() }}' },
+            success: function(res) {
+                btn.disabled = false;
+                if (res.success) {
+                    if (res.liked) {
+                        btn.classList.add('liked');
+                        btn.textContent = 'Liked ❤️';
+                    } else {
+                        btn.classList.remove('liked');
+                        btn.textContent = 'Like 🤍';
+                    }
+                    count.textContent = res.count;
+                }
+            },
+            error: function() {
+                btn.disabled = false;
+            }
+        });
+    }
+
+    function toggleCardFollow(id) {
+        const btn = document.getElementById('followBtn_' + id);
+        const count = document.getElementById('followersCount_' + id);
+        if (!btn || !count) return;
+
+        btn.disabled = true;
+        $.ajax({
+            url: '/talent/' + id + '/follow',
+            type: 'POST',
+            data: { _token: '{{ csrf_token() }}' },
+            success: function(res) {
+                btn.disabled = false;
+                if (res.success) {
+                    if (res.following) {
+                        btn.classList.add('following');
+                        btn.textContent = 'Following';
+                    } else {
+                        btn.classList.remove('following');
+                        btn.textContent = 'Followers';
+                    }
+                    count.textContent = res.count;
+                }
+            },
+            error: function() {
+                btn.disabled = false;
+            }
+        });
+    }
 </script>
 @endsection

@@ -5,6 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'ChapConnect - Connecting Talents')</title>
+    <!-- Favicon / Title Icon -->
+    <link rel="icon" type="image/png" href="{{ asset('logo.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('logo.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('logo.png') }}">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Select2 CSS -->
@@ -16,7 +20,7 @@
     @yield('styles')
 </head>
 
-<body class="{{ (Request::is('admin*') || Request::is('customer-care*')) ? 'admin-body' : '' }}">
+<body class="{{ (Request::is('admin*') || Request::is('customer-care*') || Request::is('dashboard*')) ? 'admin-body' : '' }}">
     <nav class="nav">
         <div class="logo">
             <a href="{{ route('home') }}"><img src="{{ asset('logo.png') }}" alt="ChapConnect Logo" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'"></a>
@@ -63,7 +67,10 @@
                 @endif
                 @else
                 <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> Home</a>
-                <a href="{{ route('dashboard') }}" class="nav-mobile-link"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> Dashboard Panel</a>
+                <a href="{{ route('dashboard') }}" class="nav-mobile-link"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> Dashboard Overview</a>
+                <a href="{{ route('dashboard.photos') }}" class="nav-mobile-link"><i class="bi bi-camera-fill" style="color: var(--primary);"></i> Manage Photos</a>
+                <a href="{{ route('dashboard.videos') }}" class="nav-mobile-link"><i class="bi bi-camera-video-fill" style="color: var(--primary);"></i> Manage Videos</a>
+                <a href="{{ route('dashboard.news') }}" class="nav-mobile-link"><i class="bi bi-newspaper" style="color: var(--primary);"></i> Manage News</a>
                 @endif
                 <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-mobile-link"><i class="bi bi-box-arrow-right" style="color: #ef4444;"></i> Logout</a>
                 @else
@@ -75,17 +82,14 @@
             </div>
             <div class="nav-auth">
                 @auth
-                @if(in_array(auth()->user()->role, ['admin', 'customer_care']))
                 <!-- Sidebar Toggle Button for Mobile -->
-                <!-- <button type="button" onclick="$('#adminSidebar').toggleClass('mobile-open');" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; border-radius: 20px; font-weight: 700; padding: 6px 14px; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-                    <i class="bi bi-layout-sidebar"></i> Navigation Menu
-                </button> -->
+                <button type="button" onclick="$('#adminSidebar').toggleClass('mobile-open');" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; border-radius: 20px; font-weight: 700; padding: 6px 14px; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-right: 6px;">
+                    <i class="bi bi-layout-sidebar"></i> Menu
+                </button>
                 <span style="font-weight: 700; font-size: 0.84rem; color: #fff; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;">
                     <i class="bi bi-person-circle" style="color: #38bdf8;"></i> {{ auth()->user()->name }}
                 </span>
-                @else
-                <a href="{{ route('dashboard') }}" class="nav-btn nav-btn-login"><i class="bi bi-speedometer2"></i> Dashboard</a>
-                @endif
+
                 <!-- In-App Notification Bell -->
                 <div class="notification-wrapper" style="position: relative; display: inline-block;">
                     <button type="button" id="notifBellBtn" onclick="$('#notifDropdown').fadeToggle(150);" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; border-radius: 50%; width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; position: relative; font-size: 1.1rem; transition: all 0.2s ease;">
@@ -173,27 +177,34 @@
     </div>
 
     @auth
-    @if(Request::is('admin*') || Request::is('customer-care*'))
+    @if(Request::is('admin*') || Request::is('customer-care*') || Request::is('dashboard*'))
     <div class="admin-layout-container">
         <!-- Sidebar Navigation -->
         <aside class="admin-sidebar" id="adminSidebar">
             <div class="admin-sidebar-header">
                 <div class="sidebar-user-avatar">
-                    <i class="bi bi-shield-lock-fill"></i>
+                    @if(auth()->user()->profile_image)
+                    <img src="{{ asset(auth()->user()->profile_image) }}" alt="{{ auth()->user()->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+                    @else
+                    <i class="bi bi-person-circle"></i>
+                    @endif
                 </div>
                 <div class="sidebar-user-info">
                     <span class="sidebar-user-name">{{ auth()->user()->name }}</span>
-                    <span class="sidebar-user-role">{{ auth()->user()->role === 'admin' ? 'Super Administrator' : 'Customer Care' }}</span>
+                    <span class="sidebar-user-role">
+                        @if(auth()->user()->role === 'admin')
+                        Super Administrator
+                        @elseif(auth()->user()->role === 'customer_care')
+                        Customer Care
+                        @else
+                        {{ auth()->user()->category_label ?? 'Talent Account' }}
+                        @endif
+                    </span>
                 </div>
             </div>
 
             <div class="admin-sidebar-nav">
                 @if(auth()->user()->role === 'customer_care')
-                <!-- <div class="sidebar-group-label">MAIN CONTROL</div> -->
-                <!-- <a href="{{ route('customer-care.dashboard') }}" class="sidebar-link {{ Request::is('customer-care*') ? 'active' : '' }}">
-                    <i class="bi bi-speedometer2"></i> <span>View Dashboard</span>
-                </a> -->
-
                 <div class="sidebar-group-label">OPERATIONS & SUPPORT</div>
                 <a href="{{ route('customer-care.dashboard') }}" class="sidebar-link {{ Request::is('customer-care*') ? 'active' : '' }}">
                     <i class="bi bi-headset"></i> <span>Customer Care</span>
@@ -209,7 +220,7 @@
                     <i class="bi bi-grid-fill"></i> <span>Public Directory</span>
                     <i class="bi bi-box-arrow-up-right" style="font-size: 0.75rem; margin-left: auto; color: #94a3b8;"></i>
                 </a>
-                @else
+                @elseif(auth()->user()->role === 'admin')
                 <div class="sidebar-group-label">MAIN CONTROL</div>
                 <a href="{{ Request::is('admin*') ? '#dashboard' : route('admin.dashboard') . '#dashboard' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="dashboard">
                     <i class="bi bi-speedometer2"></i> <span>Dashboard Overview</span>
@@ -225,7 +236,7 @@
                 </a>
 
                 <div class="sidebar-group-label">OPERATIONS & SUPPORT</div>
-                <a href="{{ Request::is('admin*') ? '#customer-care' : route('customer-care.dashboard') }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : 'active' }}" data-tab="customer-care">
+                <a href="{{ Request::is('admin*') ? '#customer-care' : route('customer-care.dashboard') }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="customer-care">
                     <i class="bi bi-headset"></i> <span>Customer Care Portal</span>
                 </a>
 
@@ -241,6 +252,37 @@
                 <a href="{{ route('home') }}" target="_blank" class="sidebar-link">
                     <i class="bi bi-grid-fill"></i> <span>Public Directory</span>
                     <i class="bi bi-box-arrow-up-right" style="font-size: 0.75rem; margin-left: auto; color: #94a3b8;"></i>
+                </a>
+                @else
+                <!-- ROLE USER SIDEBAR NAVIGATION -->
+                <div class="sidebar-group-label">MAIN CONTROL</div>
+                <a href="{{ route('dashboard') }}" class="sidebar-link {{ Request::routeIs('dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-speedometer2"></i> <span>Dashboard Overview</span>
+                </a>
+
+                <div class="sidebar-group-label">PORTFOLIO CONTENT</div>
+                <a href="{{ route('dashboard.photos') }}" class="sidebar-link {{ Request::routeIs('dashboard.photos') ? 'active' : '' }}">
+                    <i class="bi bi-camera-fill"></i> <span>Manage Photos</span>
+                </a>
+                <a href="{{ route('dashboard.videos') }}" class="sidebar-link {{ Request::routeIs('dashboard.videos') ? 'active' : '' }}">
+                    <i class="bi bi-camera-video-fill"></i> <span>Manage Videos</span>
+                </a>
+                <a href="{{ route('dashboard.news') }}" class="sidebar-link {{ Request::routeIs('dashboard.news') ? 'active' : '' }}">
+                    <i class="bi bi-newspaper"></i> <span>Manage News</span>
+                </a>
+
+                <div class="sidebar-group-label">DIRECTORY & PUBLIC</div>
+                <a href="{{ route('profile', auth()->user()->id) }}" target="_blank" class="sidebar-link">
+                    <i class="bi bi-person-badge-fill"></i> <span>Public Profile</span>
+                    <i class="bi bi-box-arrow-up-right" style="font-size: 0.75rem; margin-left: auto; color: #94a3b8;"></i>
+                </a>
+                <a href="{{ route('home') }}" class="sidebar-link">
+                    <i class="bi bi-grid-fill"></i> <span>Public Directory</span>
+                </a>
+
+                <div class="sidebar-group-label">SUPPORT</div>
+                <a href="#" onclick="event.preventDefault(); $('#user-support-modal').fadeIn(200);" class="sidebar-link">
+                    <i class="bi bi-headset"></i> <span>Need Help / Support</span>
                 </a>
                 @endif
             </div>
