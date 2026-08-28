@@ -126,6 +126,7 @@ body {
     letter-spacing: 0.3px;
 }
 
+.nav-btn-home,
 .nav-btn-login {
     background: rgba(255, 255, 255, 0.95);
     color: #0f172a !important;
@@ -134,6 +135,11 @@ body {
     backdrop-filter: blur(8px);
 }
 
+.nav-btn-home i {
+    color: #6366f1;
+}
+
+.nav-btn-home:hover,
 .nav-btn-login:hover {
     background: #ffffff;
     transform: translateY(-2px);
@@ -152,6 +158,20 @@ body {
     background: linear-gradient(135deg, #1e293b 0%, #312e81 100%);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(15, 23, 42, 0.45);
+    color: #ffffff !important;
+}
+
+.nav-btn-install {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+
+.nav-btn-install:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.45);
     color: #ffffff !important;
 }
 
@@ -923,8 +943,8 @@ transition: background 0.3s;
 /* Profile Page Details & Side-by-Side Layout */
 .profile-wrapper {
     display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 30px;
+    grid-template-columns: 310px 1fr;
+    gap: 16px;
     width: 100%;
 }
 

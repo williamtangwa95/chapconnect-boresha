@@ -27,16 +27,22 @@ class ImageCompressor
         int $quality = 82,
         string $format = 'webp'
     ): string {
+        @ini_set('memory_limit', '512M');
         $realPath = $file->getRealPath();
-        $mime = $file->getMimeType();
+
+        if (!$realPath || !file_exists($realPath)) {
+            return $file->store($folder, 'public');
+        }
+
+        $mime = strtolower($file->getMimeType() ?? '');
 
         // Create GD image resource based on file type
         $sourceImage = match ($mime) {
-            'image/jpeg', 'image/jpg' => @imagecreatefromjpeg($realPath),
-            'image/png' => @imagecreatefrompng($realPath),
-            'image/webp' => @imagecreatefromwebp($realPath),
-            'image/gif' => @imagecreatefromgif($realPath),
-            'image/bmp', 'image/x-ms-bmp' => @imagecreatefrombmp($realPath),
+            'image/jpeg', 'image/jpg', 'image/pjpeg' => function_exists('imagecreatefromjpeg') ? @imagecreatefromjpeg($realPath) : null,
+            'image/png', 'image/x-png' => function_exists('imagecreatefrompng') ? @imagecreatefrompng($realPath) : null,
+            'image/webp' => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($realPath) : null,
+            'image/gif' => function_exists('imagecreatefromgif') ? @imagecreatefromgif($realPath) : null,
+            'image/bmp', 'image/x-ms-bmp' => function_exists('imagecreatefrombmp') ? @imagecreatefrombmp($realPath) : null,
             default => null,
         };
 

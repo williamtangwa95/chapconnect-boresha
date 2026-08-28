@@ -16,11 +16,66 @@
     <!-- DataTables Online CDN CSS + Responsive Extension -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/jquery.dataTables.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css" />
+    <!-- PWA Web App Manifest & Mobile App Meta Tags -->
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ChapConnect">
+
     <link rel="stylesheet" type="text/css" href="{{ asset('css/Style.css') }}">
     @yield('styles')
 </head>
 
 <body class="{{ (Request::is('admin*') || Request::is('customer-care*') || Request::is('dashboard*')) ? 'admin-body' : '' }}">
+
+    <!-- First-Time Visitor Typewriter Splash Loader Overlay -->
+    @php
+        $welcomeText = \App\Models\SystemSetting::get('welcome_text', 'Karibu sana ChapConnect...');
+        $welcomeSpeed = (int) \App\Models\SystemSetting::get('welcome_typing_speed', 55);
+        $welcomeDelay = (int) \App\Models\SystemSetting::get('welcome_delay', 300);
+        $welcomeSound = \App\Models\SystemSetting::get('welcome_sound', '/sounds/welcome_default.wav');
+    @endphp
+    <div id="firstTimeLoaderOverlay" onmouseover="if(typeof playWelcomeSound==='function')playWelcomeSound(false)" onclick="if(typeof playWelcomeSound==='function')playWelcomeSound(true)" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); z-index: 999999; flex-direction: column; justify-content: center; align-items: center; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; opacity: 1; transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;">
+        <!-- Glowing Brand Logo Icon -->
+        <div style="position: relative; margin-bottom: 24px;">
+            <div style="position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #38bdf8); filter: blur(20px); opacity: 0.6; animation: loaderPulse 2s infinite ease-in-out;"></div>
+            <img src="{{ asset('logo.png') }}" alt="ChapConnect" style="position: relative; width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(255,255,255,0.8); box-shadow: 0 10px 30px rgba(0,0,0,0.5);" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'">
+        </div>
+
+        <!-- Typewriter Animated Text -->
+        <div style="font-size: 1.6rem; font-weight: 800; letter-spacing: 0.5px; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); min-height: 40px; display: flex; align-items: center; justify-content: center; padding: 0 20px; text-align: center;">
+            <span id="typewriterText" style="background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></span>
+            <span id="typewriterCursor" style="display: inline-block; width: 3px; height: 26px; background: #6366f1; margin-left: 4px; animation: blinkCursor 0.7s infinite;"></span>
+        </div>
+
+        <!-- Animated Loading Progress Line -->
+        <div style="width: 220px; height: 4px; background: rgba(255,255,255,0.12); border-radius: 10px; margin-top: 25px; overflow: hidden; position: relative;">
+            <div id="loaderProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #6366f1, #38bdf8); border-radius: 10px; transition: width 0.1s linear;"></div>
+        </div>
+
+        <!-- Audio Welcome Interactive Pill Button -->
+        <button type="button" id="welcomeAudioTriggerBtn" onclick="playWelcomeSound(true)" style="margin-top: 20px; background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%); border: none; color: #ffffff; padding: 10px 22px; border-radius: 25px; font-size: 0.9rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 6px 20px rgba(99,102,241,0.5); animation: pulseBtn 1.8s infinite ease-in-out;">
+            <i class="bi bi-volume-up-fill" style="font-size: 1.1rem; color: #ffffff;"></i> <span id="welcomeAudioBtnText">Tap Anywhere to Enable Audio 🔊</span>
+        </button>
+        <audio id="welcomeAudioElement" src="{{ asset($welcomeSound) }}" preload="auto" playsinline style="display: none;"></audio>
+    </div>
+
+    <style>
+    @keyframes blinkCursor {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+    }
+    @keyframes loaderPulse {
+        0%, 100% { transform: scale(1); opacity: 0.5; }
+        50% { transform: scale(1.15); opacity: 0.85; }
+    }
+    @keyframes pulseBtn {
+        0%, 100% { transform: scale(1); box-shadow: 0 6px 20px rgba(99,102,241,0.5); }
+        50% { transform: scale(1.06); box-shadow: 0 10px 25px rgba(56,189,248,0.7); }
+    }
+    </style>
     <nav class="nav">
         <div class="logo">
             <a href="{{ route('home') }}"><img src="{{ asset('logo.png') }}" alt="ChapConnect Logo" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'"></a>
@@ -74,6 +129,8 @@
                 @endif
                 <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-mobile-link"><i class="bi bi-box-arrow-right" style="color: #ef4444;"></i> Logout</a>
                 @else
+                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door-fill" style="color: var(--primary);"></i> Home</a>
+                <a href="#" onclick="event.preventDefault(); handlePwaInstallClick();" class="nav-mobile-link" style="background: rgba(16,185,129,0.08); color: #059669 !important; font-weight: 700;"><i class="bi bi-download" style="color: #10b981;"></i> Install ChapConnect App</a>
                 <a href="{{ route('login') }}" class="nav-mobile-link"><i class="bi bi-box-arrow-in-right" style="color: var(--primary);"></i> Login</a>
                 <a href="{{ route('register') }}" class="nav-mobile-link"><i class="bi bi-person-plus" style="color: var(--primary);"></i> Register</a>
                 @endauth
@@ -119,6 +176,7 @@
                     @csrf
                 </form>
                 @else
+                <a href="{{ route('home') }}" class="nav-btn nav-btn-home"><i class="bi bi-house-door-fill" style="color: #6366f1;"></i> Home</a>
                 <a href="{{ route('login') }}" class="nav-btn nav-btn-login"><i class="bi bi-box-arrow-in-right"></i> Login</a>
                 <a href="{{ route('register') }}" class="nav-btn nav-btn-register"><i class="bi bi-person-plus-fill"></i> Register</a>
                 @endauth
@@ -405,6 +463,214 @@
         });
     </script>
     @endauth
+
+    <!-- First-Time Typewriter Splash Loader Script -->
+    <script>
+    (function() {
+        var isTest = window.location.search.indexOf('test_loader=1') !== -1;
+        var hasVisited = sessionStorage.getItem('chap_first_visit_done');
+
+        if (!hasVisited || isTest) {
+            document.addEventListener("DOMContentLoaded", function() {
+                var loaderOverlay = document.getElementById('firstTimeLoaderOverlay');
+                var typewriterEl = document.getElementById('typewriterText');
+                var progressBar = document.getElementById('loaderProgressBar');
+                if (!loaderOverlay || !typewriterEl) return;
+
+                // Lock scrolling & show loader overlay
+                loaderOverlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+
+                var textToType = @json($welcomeText);
+                var charIndex = 0;
+                var typingSpeed = {{ $welcomeSpeed }};
+                var welcomeDelay = {{ $welcomeDelay }};
+                var welcomeSoundUrl = @json($welcomeSound);
+
+                var audioEl = document.getElementById('welcomeAudioElement');
+                var welcomeAudio = audioEl || (welcomeSoundUrl ? new Audio(welcomeSoundUrl) : null);
+                var audioPlayed = false;
+
+                window.playWelcomeSound = function(userAction) {
+                    if (audioPlayed && !userAction) return;
+
+                    var audioEl = document.getElementById('welcomeAudioElement');
+                    var audioInstance = audioEl || (welcomeSoundUrl ? new Audio(welcomeSoundUrl) : null);
+
+                    if (audioInstance) {
+                        try {
+                            audioInstance.currentTime = 0;
+                            audioInstance.volume = 1.0;
+                            var p = audioInstance.play();
+                            if (p !== undefined) {
+                                p.then(function() {
+                                    audioPlayed = true;
+                                    var btnText = document.getElementById('welcomeAudioBtnText');
+                                    if (btnText) btnText.textContent = "Welcome Audio Playing ♪";
+                                }).catch(function(e) {
+                                    speakFemaleVoiceFallback();
+                                });
+                            }
+                        } catch(e) {
+                            speakFemaleVoiceFallback();
+                        }
+                    } else {
+                        speakFemaleVoiceFallback();
+                    }
+                };
+
+                function speakFemaleVoiceFallback() {
+                    if ('speechSynthesis' in window) {
+                        try {
+                            window.speechSynthesis.cancel();
+                            var utterance = new SpeechSynthesisUtterance(textToType);
+                            utterance.rate = 0.95;
+                            utterance.pitch = 1.2;
+                            var voices = window.speechSynthesis.getVoices();
+                            var femaleVoice = voices.find(function(v) {
+                                return v.name.toLowerCase().includes('female') || 
+                                       v.name.toLowerCase().includes('zira') || 
+                                       v.name.toLowerCase().includes('samantha') || 
+                                       v.name.toLowerCase().includes('google us english');
+                            });
+                            if (femaleVoice) utterance.voice = femaleVoice;
+                            window.speechSynthesis.speak(utterance);
+                            audioPlayed = true;
+                        } catch(err) {}
+                    }
+                }
+
+                function triggerHoverSound() {
+                    if (!audioPlayed) {
+                        playWelcomeSound(false);
+                    }
+                }
+
+                ['mousemove', 'pointermove', 'mouseover', 'pointerover', 'mouseenter', 'touchstart', 'pointerdown', 'click'].forEach(function(evt) {
+                    window.addEventListener(evt, triggerHoverSound, { passive: true });
+                    document.addEventListener(evt, triggerHoverSound, { passive: true });
+                    if (loaderOverlay) {
+                        loaderOverlay.addEventListener(evt, triggerHoverSound, { passive: true });
+                    }
+                });
+
+                function typeNextChar() {
+                    if (charIndex < textToType.length) {
+                        typewriterEl.textContent += textToType.charAt(charIndex);
+                        charIndex++;
+                        var progressPercent = Math.min(100, Math.round((charIndex / textToType.length) * 88));
+                        if (progressBar) progressBar.style.width = progressPercent + '%';
+                        setTimeout(typeNextChar, typingSpeed);
+                    } else {
+                        if (progressBar) progressBar.style.width = '100%';
+                        setTimeout(dismissIntroLoader, 700);
+                    }
+                }
+
+                function dismissIntroLoader() {
+                    loaderOverlay.style.opacity = '0';
+                    document.body.style.overflow = '';
+                    sessionStorage.setItem('chap_first_visit_done', 'true');
+                    if (welcomeAudio) {
+                        welcomeAudio.pause();
+                        welcomeAudio.currentTime = 0;
+                    }
+                    setTimeout(function() {
+                        loaderOverlay.style.display = 'none';
+                    }, 600);
+                }
+
+                // Kickoff welcome sound and typing after admin delay timeout
+                setTimeout(function() {
+                    playWelcomeSound();
+                    typeNextChar();
+                }, welcomeDelay);
+            });
+        }
+    })();
+    </script>
+
+    @if(Request::is('/'))
+    <!-- Floating Bottom-Right Corner Install App Link Banner (Home Page Only) -->
+    <div id="pwaInstallBanner" style="display: flex; position: fixed; bottom: 25px; right: 25px; z-index: 999999; background: #0f172a; border: 1px solid rgba(16,185,129,0.5); border-radius: 30px; padding: 10px 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); color: #ffffff; align-items: center; gap: 10px; backdrop-filter: blur(10px);">
+        <img src="{{ asset('logo.png') }}" alt="ChapConnect App" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'">
+        <a href="#" onclick="event.preventDefault(); handlePwaInstallClick();" style="color: #ffffff; text-decoration: none; font-weight: 700; font-size: 0.86rem; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="bi bi-download" style="color: #10b981; font-size: 1rem;"></i> Install ChapConnect App
+        </a>
+        <button type="button" onclick="dismissPwaBanner()" style="background: none; border: none; color: #94a3b8; font-size: 1.1rem; cursor: pointer; padding: 0; margin-left: 4px; display: inline-flex; align-items: center;" title="Dismiss">&times;</button>
+    </div>
+    @endif
+
+    <!-- PWA Step-by-Step Install Guide Modal -->
+    <div id="pwaGuideModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.85); backdrop-filter: blur(8px); z-index: 999999; justify-content: center; align-items: center; padding: 20px;" onclick="closePwaGuideModal()">
+        <div style="background: #ffffff; border-radius: 20px; max-width: 440px; width: 100%; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid #e2e8f0; position: relative;" onclick="event.stopPropagation();">
+            <button type="button" onclick="closePwaGuideModal()" style="position: absolute; top: 16px; right: 16px; background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2rem; color: #64748b; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">&times;</button>
+            
+            <div style="text-align: center; margin-bottom: 18px;">
+                <img src="{{ asset('logo.png') }}" alt="ChapConnect" style="width: 64px; height: 64px; border-radius: 16px; object-fit: cover; box-shadow: 0 6px 18px rgba(99,102,241,0.25); margin-bottom: 10px;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'">
+                <h3 style="margin: 0 0 4px 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">Install ChapConnect App</h3>
+                <p style="margin: 0 0 14px 0; color: #64748b; font-size: 0.84rem;">Add ChapConnect directly to your Android or iOS home screen.</p>
+            </div>
+
+            <div style="background: #f8fafc; border-radius: 14px; padding: 16px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+                <div style="font-weight: 700; font-size: 0.86rem; color: #0f172a; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-phone-fill" style="color: #6366f1; font-size: 1.1rem;"></i> 1-Tap Mobile Installation:
+                </div>
+                <ul style="margin: 0; padding-left: 20px; font-size: 0.84rem; color: #475569; line-height: 1.6;">
+                    <li><strong>Android (Chrome / Edge):</strong> Tap browser menu (<i class="bi bi-three-dots-vertical"></i>) &rarr; Select <strong>"Install App"</strong> or <strong>"Add to Home Screen"</strong>.</li>
+                    <li><strong>iPhone (Safari):</strong> Tap Share icon (<i class="bi bi-box-arrow-up"></i>) &rarr; Select <strong>"Add to Home Screen"</strong>.</li>
+                </ul>
+            </div>
+
+            <button type="button" onclick="closePwaGuideModal()" style="width: 100%; padding: 11px; border-radius: 12px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; border: none; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 14px rgba(99,102,241,0.4);">
+                Got It!
+            </button>
+        </div>
+    </div>
+
+    <!-- PWA Service Worker Registration & Install Script -->
+    <script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                console.log('PWA ServiceWorker registered successfully:', reg.scope);
+            }).catch(function(err) {
+                console.log('PWA ServiceWorker registration failed:', err);
+            });
+        });
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+    });
+
+    function handlePwaInstallClick() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+                console.log('User outcome:', choiceResult.outcome);
+                deferredPrompt = null;
+            });
+        } else {
+            var modal = document.getElementById('pwaGuideModal');
+            if (modal) modal.style.display = 'flex';
+        }
+    }
+
+    function dismissPwaBanner() {
+        const banner = document.getElementById('pwaInstallBanner');
+        if (banner) {
+            banner.style.display = 'none';
+        }
+    }
+
+    function closePwaGuideModal() {
+        const modal = document.getElementById('pwaGuideModal');
+        if (modal) modal.style.display = 'none';
+    }
+    </script>
 
     @yield('scripts')
 </body>

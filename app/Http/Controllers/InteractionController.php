@@ -12,31 +12,53 @@ use Illuminate\Support\Facades\Auth;
 class InteractionController extends Controller
 {
     /**
-     * Toggle like status for a talent profile.
+     * Helper to get or generate device fingerprint token
+     */
+    private function getDeviceFingerprint(Request $request): string
+    {
+        $fingerprint = $request->cookie('device_token');
+        if (!$fingerprint) {
+            $fingerprint = md5($request->ip() . ($request->header('User-Agent') ?? '') . 'chap_device');
+            cookie()->queue('device_token', $fingerprint, 525600); // 1 year
+        }
+        return $fingerprint;
+    }
+
+    /**
+     * Toggle like / dislike status for a talent profile.
      */
     public function toggleLike(Request $request, $talentId)
     {
         $talent = User::findOrFail($talentId);
         $userId = Auth::id();
         $ip = $request->ip();
+        $deviceFingerprint = $this->getDeviceFingerprint($request);
 
         $query = Like::where('talent_id', $talentId);
         if ($userId) {
             $query->where('user_id', $userId);
         } else {
-            $query->where('ip_address', $ip)->whereNull('user_id');
+            $query->where(function($q) use ($ip, $deviceFingerprint) {
+                $q->where('ip_address', $ip);
+                if ($deviceFingerprint) {
+                    $q->orWhere('device_fingerprint', $deviceFingerprint);
+                }
+            })->whereNull('user_id');
         }
 
         $existing = $query->first();
 
         if ($existing) {
+            // Dislike / Unlike action
             $existing->delete();
             $liked = false;
         } else {
+            // Like action
             Like::create([
                 'user_id' => $userId,
                 'talent_id' => $talentId,
                 'ip_address' => $ip,
+                'device_fingerprint' => $deviceFingerprint,
             ]);
             $liked = true;
         }
@@ -51,31 +73,40 @@ class InteractionController extends Controller
     }
 
     /**
-     * Toggle follow status for a talent profile.
+     * Toggle follow / unfollow status for a talent profile.
      */
     public function toggleFollow(Request $request, $talentId)
     {
         $talent = User::findOrFail($talentId);
         $userId = Auth::id();
         $ip = $request->ip();
+        $deviceFingerprint = $this->getDeviceFingerprint($request);
 
         $query = Follower::where('talent_id', $talentId);
         if ($userId) {
             $query->where('user_id', $userId);
         } else {
-            $query->where('ip_address', $ip)->whereNull('user_id');
+            $query->where(function($q) use ($ip, $deviceFingerprint) {
+                $q->where('ip_address', $ip);
+                if ($deviceFingerprint) {
+                    $q->orWhere('device_fingerprint', $deviceFingerprint);
+                }
+            })->whereNull('user_id');
         }
 
         $existing = $query->first();
 
         if ($existing) {
+            // Unfollow action
             $existing->delete();
             $following = false;
         } else {
+            // Follow action
             Follower::create([
                 'user_id' => $userId,
                 'talent_id' => $talentId,
                 'ip_address' => $ip,
+                'device_fingerprint' => $deviceFingerprint,
             ]);
             $following = true;
         }
@@ -95,6 +126,9 @@ class InteractionController extends Controller
     public function storeComment(Request $request, $talentId)
     {
         $talent = User::findOrFail($talentId);
+        $userId = Auth::id();
+        $ip = $request->ip();
+        $deviceFingerprint = $this->getDeviceFingerprint($request);
 
         $request->validate([
             'comment' => 'required|string|max:1000',
@@ -107,10 +141,12 @@ class InteractionController extends Controller
         }
 
         Comment::create([
-            'user_id' => Auth::id(),
+            'user_id' => $userId,
             'talent_id' => $talentId,
             'author_name' => $authorName,
             'comment' => $request->input('comment'),
+            'ip_address' => $ip,
+            'device_fingerprint' => $deviceFingerprint,
         ]);
 
         if ($request->wantsJson()) {
@@ -126,6 +162,47 @@ class InteractionController extends Controller
     }
 
     /**
+     * Delete a comment (Uncomment action)
+     */
+    public function deleteComment(Request $request, $commentId)
+    {
+        $comment = Comment::findOrFail($commentId);
+        $userId = Auth::id();
+        $ip = $request->ip();
+        $deviceFingerprint = $this->getDeviceFingerprint($request);
+
+        // Check if current user or guest device is the author or admin
+        $isAuthor = false;
+        if ($userId && ($comment->user_id == $userId || Auth::user()->role === 'admin')) {
+            $isAuthor = true;
+        } elseif (!$comment->user_id && ($comment->ip_address == $ip || ($deviceFingerprint && $comment->device_fingerprint == $deviceFingerprint))) {
+            $isAuthor = true;
+        }
+
+        if (!$isAuthor) {
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized to delete this comment.'], 403);
+            }
+            return redirect()->back()->with('error', 'Unauthorized to delete this comment.');
+        }
+
+        $talentId = $comment->talent_id;
+        $comment->delete();
+
+        $commentsCount = Comment::where('talent_id', $talentId)->count();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Comment deleted successfully.',
+                'count' => $commentsCount,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Comment deleted successfully!');
+    }
+
+    /**
      * Get real-time status and counts for interaction buttons on public talent cards.
      */
     public function getStatuses(Request $request)
@@ -137,6 +214,7 @@ class InteractionController extends Controller
 
         $userId = Auth::id();
         $ip = $request->ip();
+        $deviceFingerprint = $this->getDeviceFingerprint($request);
 
         $statuses = [];
 
@@ -152,7 +230,12 @@ class InteractionController extends Controller
             if ($userId) {
                 $likeQuery->where('user_id', $userId);
             } else {
-                $likeQuery->where('ip_address', $ip)->whereNull('user_id');
+                $likeQuery->where(function($q) use ($ip, $deviceFingerprint) {
+                    $q->where('ip_address', $ip);
+                    if ($deviceFingerprint) {
+                        $q->orWhere('device_fingerprint', $deviceFingerprint);
+                    }
+                })->whereNull('user_id');
             }
             $isLiked = $likeQuery->exists();
 
@@ -160,7 +243,12 @@ class InteractionController extends Controller
             if ($userId) {
                 $followQuery->where('user_id', $userId);
             } else {
-                $followQuery->where('ip_address', $ip)->whereNull('user_id');
+                $followQuery->where(function($q) use ($ip, $deviceFingerprint) {
+                    $q->where('ip_address', $ip);
+                    if ($deviceFingerprint) {
+                        $q->orWhere('device_fingerprint', $deviceFingerprint);
+                    }
+                })->whereNull('user_id');
             }
             $isFollowing = $followQuery->exists();
 

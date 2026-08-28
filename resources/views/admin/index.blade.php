@@ -867,7 +867,47 @@
                             <strong style="color: #0f172a;">Media Upload Policies:</strong><br>
                             • Photos auto-compressed to WebP format.<br>
                             • Videos supported up to 50MB per file.<br>
-                            • Maximum 10 photos & 5 videos per talent.
+                            • Maximum 10 photos &amp; 5 videos per talent.
+                        </div>
+                    </div>
+
+                    <!-- Card 4: First-Time Splash Loader & Typewriter Settings -->
+                    <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+                        <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-fonts" style="color: #ec4899;"></i> First-Time Splash Loader &amp; Typewriter
+                        </h3>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Welcome Text to Type</label>
+                            <input type="text" name="welcome_text" value="{{ $systemSettings['welcome_text'] ?? 'Karibu sana ChapConnect...' }}" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+                            <div class="form-group">
+                                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Typing Speed (ms / letter)</label>
+                                <input type="number" name="welcome_typing_speed" value="{{ $systemSettings['welcome_typing_speed'] ?? '55' }}" min="10" max="500" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
+                            </div>
+                            <div class="form-group">
+                                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Start Delay Timeout (ms)</label>
+                                <input type="number" name="welcome_delay" value="{{ $systemSettings['welcome_delay'] ?? '300' }}" min="0" max="3000" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Background Welcome Audio Sound (.mp3, .wav, .ogg)</label>
+                            <input type="file" name="welcome_sound_file" accept="audio/*" class="form-control" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.88rem;">
+                            
+                            <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                                @if(!empty($systemSettings['welcome_sound']))
+                                <div style="font-size: 0.82rem; color: #10b981; display: flex; align-items: center; gap: 6px;">
+                                    <i class="bi bi-music-note-beamed"></i> Active Sound: <strong>{{ basename($systemSettings['welcome_sound']) }}</strong>
+                                </div>
+                                @endif
+
+                                <button type="button" onclick="event.preventDefault(); document.getElementById('resetWelcomeSoundForm').submit();" style="background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; border-radius: 8px; padding: 6px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                                    <i class="bi bi-arrow-counterclockwise" style="color: #6366f1;"></i> Reset to Default Female Sound
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -878,6 +918,11 @@
                         <i class="bi bi-save-fill" style="margin-right: 6px;"></i> Save All System Settings
                     </button>
                 </div>
+            </form>
+
+            <!-- Reset Welcome Sound Form (Outside Main Settings Form to prevent HTML form nesting) -->
+            <form id="resetWelcomeSoundForm" action="{{ route('admin.settings.reset-welcome-sound') }}" method="POST" style="display: none;">
+                @csrf
             </form>
         </div>
 

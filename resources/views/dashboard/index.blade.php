@@ -190,6 +190,15 @@
                 </div>
             </div>
             <div class="stat-card">
+                <div class="stat-icon" style="background: rgba(14,165,233,0.12); color: #0284c7;">
+                    <i class="bi bi-eye-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ number_format($user->views_count ?? 0) }}</div>
+                    <div class="stat-label">Profile Views</div>
+                </div>
+            </div>
+            <div class="stat-card">
                 <div class="stat-icon primary">
                     <i class="bi bi-camera-fill"></i>
                 </div>

@@ -20,11 +20,13 @@ Route::get('/category/{category}', [HomeController::class, 'category'])->name('c
 Route::get('/profile/{id}', [HomeController::class, 'profile'])->name('profile');
 Route::get('/profile/{id}/photos', [HomeController::class, 'photos'])->name('profile.photos');
 Route::get('/profile/{id}/videos', [HomeController::class, 'videos'])->name('profile.videos');
+Route::get('/download/app', [HomeController::class, 'downloadApp'])->name('app.download');
 
 // Public Talent Interaction Routes (Likes, Followers, Comments)
 Route::post('/talent/{id}/like', [InteractionController::class, 'toggleLike'])->name('talent.like');
 Route::post('/talent/{id}/follow', [InteractionController::class, 'toggleFollow'])->name('talent.follow');
 Route::post('/talent/{id}/comment', [InteractionController::class, 'storeComment'])->name('talent.comment');
+Route::delete('/comment/{id}', [InteractionController::class, 'deleteComment'])->name('talent.comment.delete');
 Route::get('/interactions/status', [InteractionController::class, 'getStatuses'])->name('talent.interactions.status');
 
 // Authentication Routes
@@ -48,16 +50,19 @@ Route::middleware(['auth'])->group(function () {
     // Photos uploads management
     Route::get('/dashboard/photos', [DashboardController::class, 'photos'])->name('dashboard.photos');
     Route::post('/dashboard/photos', [DashboardController::class, 'storePhoto'])->name('dashboard.photos.store');
+    Route::post('/dashboard/photos/{id}/update', [DashboardController::class, 'updatePhoto'])->name('dashboard.photos.update');
     Route::delete('/dashboard/photos/{id}', [DashboardController::class, 'deletePhoto'])->name('dashboard.photos.delete');
     
     // Videos uploads management
     Route::get('/dashboard/videos', [DashboardController::class, 'videos'])->name('dashboard.videos');
     Route::post('/dashboard/videos', [DashboardController::class, 'storeVideo'])->name('dashboard.videos.store');
+    Route::post('/dashboard/videos/{id}/update', [DashboardController::class, 'updateVideo'])->name('dashboard.videos.update');
     Route::delete('/dashboard/videos/{id}', [DashboardController::class, 'deleteVideo'])->name('dashboard.videos.delete');
 
     // News updates management
     Route::get('/dashboard/news', [DashboardController::class, 'news'])->name('dashboard.news');
     Route::post('/dashboard/news', [DashboardController::class, 'storeNews'])->name('dashboard.news.store');
+    Route::post('/dashboard/news/{id}/update', [DashboardController::class, 'updateNews'])->name('dashboard.news.update');
     Route::delete('/dashboard/news/{id}', [DashboardController::class, 'deleteNews'])->name('dashboard.news.delete');
 
     // Publish / Unpublish profile
@@ -102,5 +107,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/users/bulk-unpublish', [AdminController::class, 'bulkUnpublish'])->name('admin.users.bulk-unpublish');
     Route::post('/admin/settings/notification-sound', [AdminController::class, 'uploadNotificationSound'])->name('admin.settings.notification-sound');
     Route::post('/admin/settings/update', [AdminController::class, 'updateSystemSettings'])->name('admin.settings.update');
+    Route::post('/admin/settings/reset-welcome-sound', [AdminController::class, 'resetWelcomeSound'])->name('admin.settings.reset-welcome-sound');
     Route::post('/admin/settings/clear-cache', [AdminController::class, 'clearCache'])->name('admin.settings.clear-cache');
 });

@@ -126,13 +126,44 @@ class DashboardController extends Controller
 
     public function storePhoto(Request $request)
     {
+        @ini_set('memory_limit', '512M');
+
+        // Catch POST body overflow (post_max_size exceeded)
+        if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['photo' => 'The uploaded photo file is too large and exceeded the server payload limit. Please select an image under 15MB.']);
+        }
+
+        // Check if PHP upload limits were hit before Laravel validation
+        if ($request->file('photo')) {
+            $photoFile = $request->file('photo');
+            if (!$photoFile->isValid()) {
+                $errorCode = $photoFile->getError();
+                if ($errorCode === UPLOAD_ERR_INI_SIZE || $errorCode === UPLOAD_ERR_FORM_SIZE) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['photo' => 'The photo file exceeds the server upload limit. Please select an image under 15MB.']);
+                }
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['photo' => 'Photo upload failed (' . $photoFile->getErrorMessage() . '). Please select another image.']);
+            }
+        }
+
         $request->validate([
-            'title' => 'nullable|string|max:255',
+            'title'   => 'nullable|string|max:255',
             'caption' => 'nullable|string|max:1000',
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:15360', // up to 15MB before compression
+            'photo'   => 'required|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:15360',
+        ], [
+            'photo.required' => 'Please select an image file to upload.',
+            'photo.image'    => 'The file must be a valid image (JPEG, PNG, JPG, GIF, WEBP, or HEIC).',
+            'photo.mimes'    => 'The photo must be a file of type: jpeg, png, jpg, gif, webp, heic, heif, bmp.',
+            'photo.max'      => 'The photo file size cannot exceed 15MB.',
+            'photo.uploaded' => 'The photo failed to upload. The image file may exceed server upload limits or was interrupted.',
         ]);
 
-        if ($request->hasFile('photo')) {
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
             // Compress portfolio photo to web-optimized WebP (1920x1920 max, 82% quality)
             $path = ImageCompressor::compressAndStore(
                 $request->file('photo'),
@@ -144,16 +175,79 @@ class DashboardController extends Controller
             );
             
             auth()->user()->media()->create([
-                'type' => 'photo',
-                'title' => $request->title,
-                'content' => $request->caption,
+                'type'      => 'photo',
+                'title'     => $request->title,
+                'content'   => $request->caption,
                 'file_path' => '/storage/' . $path,
             ]);
 
             return redirect()->route('dashboard.photos')->with('success', 'Photo compressed & uploaded successfully.');
         }
 
-        return redirect()->back()->with('error', 'Failed to upload photo.');
+        return redirect()->back()->withInput()->withErrors(['photo' => 'Failed to upload photo. Please select a valid image file.']);
+    }
+
+    public function updatePhoto(Request $request, $id)
+    {
+        @ini_set('memory_limit', '512M');
+        $photo = auth()->user()->media()->where('type', 'photo')->findOrFail($id);
+
+        if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['photo' => 'The uploaded photo file is too large and exceeded server payload limits. Please select an image under 15MB.']);
+        }
+
+        if ($request->file('photo')) {
+            $photoFile = $request->file('photo');
+            if (!$photoFile->isValid()) {
+                $errorCode = $photoFile->getError();
+                if ($errorCode === UPLOAD_ERR_INI_SIZE || $errorCode === UPLOAD_ERR_FORM_SIZE) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['photo' => 'The photo file exceeds the server upload limit. Please select an image under 15MB.']);
+                }
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['photo' => 'Photo upload failed (' . $photoFile->getErrorMessage() . '). Please select another image file.']);
+            }
+        }
+
+        $request->validate([
+            'title'   => 'nullable|string|max:255',
+            'caption' => 'nullable|string|max:1000',
+            'photo'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:15360',
+        ], [
+            'photo.image' => 'The file must be a valid image format.',
+            'photo.mimes' => 'The photo must be a file of type: jpeg, png, jpg, gif, webp, heic, heif, bmp.',
+            'photo.max'   => 'The photo file size cannot exceed 15MB.',
+        ]);
+
+        $data = [
+            'title'   => $request->title,
+            'content' => $request->caption,
+        ];
+
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            if ($photo->file_path && !str_starts_with($photo->file_path, 'http')) {
+                $relativePath = str_replace('/storage/', '', $photo->file_path);
+                Storage::disk('public')->delete($relativePath);
+            }
+
+            $path = ImageCompressor::compressAndStore(
+                $request->file('photo'),
+                'media/photos',
+                1920,
+                1920,
+                82,
+                'webp'
+            );
+            $data['file_path'] = '/storage/' . $path;
+        }
+
+        $photo->update($data);
+
+        return redirect()->route('dashboard.photos')->with('success', 'Photo details updated successfully.');
     }
 
     public function deletePhoto($id)
@@ -183,8 +277,18 @@ class DashboardController extends Controller
 
     public function storeVideo(Request $request)
     {
+        @ini_set('memory_limit', '512M');
+        @ini_set('max_execution_time', '300');
+
+        // Catch POST body overflow (post_max_size exceeded)
+        if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['video' => 'The video file is too large and exceeded server payload limits. Please upload a clip under 50MB or embed a YouTube link.']);
+        }
+
         $request->validate([
-            'title' => 'nullable|string|max:255',
+            'title'   => 'nullable|string|max:255',
             'caption' => 'nullable|string|max:1000',
         ]);
 
@@ -193,24 +297,33 @@ class DashboardController extends Controller
             $request->validate([
                 'video_url' => 'required|url|max:500',
             ], [
-                'video_url.url' => 'Please enter a valid video URL (e.g. https://www.youtube.com/watch?v=... or direct MP4 link).',
+                'video_url.required' => 'Please enter a video URL link.',
+                'video_url.url'      => 'Please enter a valid video URL (e.g. https://www.youtube.com/watch?v=... or direct MP4 link).',
             ]);
 
             auth()->user()->media()->create([
-                'type' => 'video',
-                'title' => $request->title,
-                'content' => $request->caption,
+                'type'      => 'video',
+                'title'     => $request->title,
+                'content'   => $request->caption,
                 'file_path' => $request->video_url,
             ]);
 
             return redirect()->route('dashboard.videos')->with('success', 'Video link added successfully to your portfolio.');
         }
 
-        // 2. Check if file upload was attempted but failed PHP ini limits before validation
-        if ($request->hasFile('video') && !$request->file('video')->isValid()) {
-            $errorCode = $request->file('video')->getError();
-            if ($errorCode === UPLOAD_ERR_INI_SIZE || $errorCode === UPLOAD_ERR_FORM_SIZE) {
-                return redirect()->back()->with('error', 'The video file exceeds the server upload limit. Please upload a smaller clip (under 50MB) or use a YouTube/video link.');
+        // 2. Check if video file upload was attempted but failed PHP ini limits before validation
+        if ($request->file('video')) {
+            $videoFile = $request->file('video');
+            if (!$videoFile->isValid()) {
+                $errorCode = $videoFile->getError();
+                if ($errorCode === UPLOAD_ERR_INI_SIZE || $errorCode === UPLOAD_ERR_FORM_SIZE) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['video' => 'The video file exceeds the server upload limit. Please upload a smaller clip (under 50MB) or use a YouTube/video link.']);
+                }
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['video' => 'Video upload failed: ' . $videoFile->getErrorMessage() . '. Please try another file or use a video link.']);
             }
         }
 
@@ -219,24 +332,100 @@ class DashboardController extends Controller
             'video' => 'required_without:video_url|nullable|file|mimes:mp4,mov,avi,webm,ogg,mkv,3gp,flv,qt|max:51200', // up to 50MB
         ], [
             'video.required_without' => 'Please select a video file to upload or enter a video link.',
-            'video.mimes' => 'The video format must be: MP4, MOV, AVI, WEBM, OGG, MKV, or 3GP.',
-            'video.max' => 'The video file size cannot exceed 50MB.',
+            'video.file'             => 'The selected video file is invalid.',
+            'video.mimes'            => 'The video format must be: MP4, MOV, AVI, WEBM, OGG, MKV, or 3GP.',
+            'video.max'              => 'The video file size cannot exceed 50MB.',
+            'video.uploaded'         => 'The video file failed to upload. Please ensure the clip is under 50MB or use a YouTube / Vimeo link.',
         ]);
 
-        if ($request->hasFile('video')) {
+        if ($request->hasFile('video') && $request->file('video')->isValid()) {
             $path = $request->file('video')->store('media/videos', 'public');
 
             auth()->user()->media()->create([
-                'type' => 'video',
-                'title' => $request->title,
-                'content' => $request->caption,
+                'type'      => 'video',
+                'title'     => $request->title,
+                'content'   => $request->caption,
                 'file_path' => '/storage/' . $path,
             ]);
 
             return redirect()->route('dashboard.videos')->with('success', 'Video file uploaded successfully.');
         }
 
-        return redirect()->back()->with('error', 'Failed to process video upload. Please try again.');
+        return redirect()->back()->withInput()->withErrors(['video' => 'Failed to process video upload. Please select a valid video file or enter a video link.']);
+    }
+
+    public function updateVideo(Request $request, $id)
+    {
+        @ini_set('memory_limit', '512M');
+        @ini_set('max_execution_time', '300');
+        $video = auth()->user()->media()->where('type', 'video')->findOrFail($id);
+
+        if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['video' => 'The uploaded video file is too large and exceeded server payload limits. Please upload a clip under 50MB.']);
+        }
+
+        $request->validate([
+            'title'   => 'nullable|string|max:255',
+            'caption' => 'nullable|string|max:1000',
+        ]);
+
+        $data = [
+            'title'   => $request->title,
+            'content' => $request->caption,
+        ];
+
+        if ($request->filled('video_url')) {
+            $request->validate([
+                'video_url' => 'required|url|max:500',
+            ], [
+                'video_url.url' => 'Please enter a valid video URL (e.g. https://www.youtube.com/watch?v=... or direct MP4 link).',
+            ]);
+
+            if ($video->file_path && !str_starts_with($video->file_path, 'http')) {
+                $relativePath = str_replace('/storage/', '', $video->file_path);
+                Storage::disk('public')->delete($relativePath);
+            }
+
+            $data['file_path'] = $request->video_url;
+        }
+
+        if ($request->file('video')) {
+            $videoFile = $request->file('video');
+            if (!$videoFile->isValid()) {
+                $errorCode = $videoFile->getError();
+                if ($errorCode === UPLOAD_ERR_INI_SIZE || $errorCode === UPLOAD_ERR_FORM_SIZE) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['video' => 'The video file exceeds the server upload limit. Please select a clip under 50MB.']);
+                }
+                return redirect()->back()
+                    ->withInput()
+                    ->withErrors(['video' => 'Video upload failed: ' . $videoFile->getErrorMessage()]);
+            }
+
+            $request->validate([
+                'video' => 'nullable|file|mimes:mp4,mov,avi,webm,ogg,mkv,3gp,flv,qt|max:51200',
+            ], [
+                'video.mimes' => 'The video format must be: MP4, MOV, AVI, WEBM, OGG, MKV, or 3GP.',
+                'video.max'   => 'The video file size cannot exceed 50MB.',
+            ]);
+
+            if ($videoFile->isValid()) {
+                if ($video->file_path && !str_starts_with($video->file_path, 'http')) {
+                    $relativePath = str_replace('/storage/', '', $video->file_path);
+                    Storage::disk('public')->delete($relativePath);
+                }
+
+                $path = $videoFile->store('media/videos', 'public');
+                $data['file_path'] = '/storage/' . $path;
+            }
+        }
+
+        $video->update($data);
+
+        return redirect()->route('dashboard.videos')->with('success', 'Video details updated successfully.');
     }
 
     public function deleteVideo($id)
@@ -293,6 +482,55 @@ class DashboardController extends Controller
         ]);
 
         return redirect()->route('dashboard.news')->with('success', 'Latest news update published successfully.');
+    }
+
+    public function updateNews(Request $request, $id)
+    {
+        @ini_set('memory_limit', '512M');
+        $news = auth()->user()->media()->where('type', 'news')->findOrFail($id);
+
+        if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['image' => 'The uploaded banner image is too large and exceeded server payload limits.']);
+        }
+
+        $request->validate([
+            'title'   => 'required|string|max:255',
+            'content' => 'required|string',
+            'image'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+        ], [
+            'title.required'   => 'Please provide a title for the news article.',
+            'content.required' => 'Please enter the content details for the news article.',
+            'image.image'      => 'The cover file must be a valid image.',
+            'image.max'        => 'The image file size cannot exceed 10MB.',
+        ]);
+
+        $data = [
+            'title'   => $request->title,
+            'content' => $request->content,
+        ];
+
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+            if ($news->file_path && !str_starts_with($news->file_path, 'http')) {
+                $relativePath = str_replace('/storage/', '', $news->file_path);
+                Storage::disk('public')->delete($relativePath);
+            }
+
+            $path = ImageCompressor::compressAndStore(
+                $request->file('image'),
+                'media/news',
+                1200,
+                1200,
+                82,
+                'webp'
+            );
+            $data['file_path'] = '/storage/' . $path;
+        }
+
+        $news->update($data);
+
+        return redirect()->route('dashboard.news')->with('success', 'News article updated successfully.');
     }
 
     public function deleteNews($id)

@@ -88,13 +88,18 @@
                             </span>
                         </div>
 
-                        <form action="{{ route('dashboard.news.delete', $news->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this news article?');" style="margin: 0;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" style="padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; background: #ef4444; color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(239,68,68,0.4);">
-                                <i class="bi bi-trash"></i> Delete
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <button type="button" onclick="openEditNewsModal({{ $news->id }}, '{{ addslashes($news->title ?? '') }}', '{{ addslashes($news->content ?? '') }}', '{{ $news->file_path ? asset($news->file_path) : '' }}')" style="padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; background: #6366f1; color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(99,102,241,0.4);">
+                                <i class="bi bi-pencil-square"></i> Edit
                             </button>
-                        </form>
+                            <form action="{{ route('dashboard.news.delete', $news->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this news article?');" style="margin: 0;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" style="padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; background: #ef4444; color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(239,68,68,0.4);">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
                     </div>
 
                     <p style="color: #334155; font-size: 0.92rem; line-height: 1.65; margin: 0; white-space: pre-line;">{{ $news->content }}</p>
@@ -108,10 +113,69 @@
         </div>
     </div>
 </main>
+
+<!-- Edit News Modal -->
+<div id="editNewsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.65); backdrop-filter: blur(5px); z-index: 99999; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 600px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-pencil-square" style="color: #6366f1;"></i> Edit Article Details
+            </h3>
+            <button type="button" onclick="$('#editNewsModal').fadeOut(200);" style="background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer;">&times;</button>
+        </div>
+
+        <form id="editNewsForm" action="" method="POST" enctype="multipart/form-data">
+            @csrf
+
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
+                <!-- Article Title -->
+                <div class="form-group">
+                    <label for="edit_news_title" style="display: block; font-weight: 700; font-size: 0.84rem; color: #334155; margin-bottom: 6px;">News Headline / Article Title *</label>
+                    <input type="text" id="edit_news_title" name="title" class="form-control" required style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%;">
+                </div>
+
+                <!-- Article Content -->
+                <div class="form-group">
+                    <label for="edit_news_content" style="display: block; font-weight: 700; font-size: 0.84rem; color: #334155; margin-bottom: 6px;">Article Details / Description *</label>
+                    <textarea id="edit_news_content" name="content" class="form-control" rows="5" required style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%; line-height: 1.6;"></textarea>
+                </div>
+
+                <!-- Banner Image Preview & Replace -->
+                <div class="form-group">
+                    <label for="edit_news_image" style="display: block; font-weight: 700; font-size: 0.84rem; color: #334155; margin-bottom: 6px;">Replace Cover Image (Optional)</label>
+                    <div id="editNewsCurrentImgContainer" style="display: none; margin-bottom: 10px;">
+                        <div style="font-weight: 600; font-size: 0.76rem; color: #64748b; margin-bottom: 4px;">Current Banner:</div>
+                        <img id="editNewsCurrentImg" src="" alt="Current Banner" style="max-width: 100%; max-height: 140px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: cover;">
+                    </div>
+                    <input type="file" id="edit_news_image" name="image" class="form-control" accept="image/*" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 8px 12px; font-size: 0.88rem; width: 100%;">
+                    <p style="font-size: 0.76rem; color: #64748b; margin-top: 4px;">Leave empty to keep existing banner. Max 10MB.</p>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="$('#editNewsModal').fadeOut(200);" style="padding: 10px 20px; border-radius: 10px; font-weight: 700; background: #f1f5f9; color: #475569; border: none; cursor: pointer;">Cancel</button>
+                <button type="submit" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(99,102,241,0.35);">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
 <script>
+    function openEditNewsModal(id, title, content, imgUrl) {
+        $('#editNewsForm').attr('action', '/dashboard/news/' + id + '/update');
+        $('#edit_news_title').val(title);
+        $('#edit_news_content').val(content);
+        if (imgUrl) {
+            $('#editNewsCurrentImg').attr('src', imgUrl);
+            $('#editNewsCurrentImgContainer').show();
+        } else {
+            $('#editNewsCurrentImgContainer').hide();
+        }
+        $('#editNewsModal').css('display', 'flex').hide().fadeIn(200);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         const newsImageInput = document.getElementById('image');
         const newsPreviewContainer = document.getElementById('newsImagePreviewContainer');
@@ -135,4 +199,3 @@
         }
     });
 </script>
-@endsection

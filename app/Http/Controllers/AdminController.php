@@ -50,6 +50,10 @@ class AdminController extends Controller
             'auto_publish_talents' => \App\Models\SystemSetting::get('auto_publish_talents', '1'),
             'notification_sound_enabled' => \App\Models\SystemSetting::get('notification_sound_enabled', '1'),
             'notification_sound' => \App\Models\SystemSetting::get('notification_sound', 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'),
+            'welcome_text' => \App\Models\SystemSetting::get('welcome_text', 'Karibu sana ChapConnect...'),
+            'welcome_typing_speed' => \App\Models\SystemSetting::get('welcome_typing_speed', '55'),
+            'welcome_delay' => \App\Models\SystemSetting::get('welcome_delay', '300'),
+            'welcome_sound' => \App\Models\SystemSetting::get('welcome_sound', '/sounds/welcome_default.wav'),
         ];
         $notificationSound = $systemSettings['notification_sound'];
 
@@ -392,6 +396,10 @@ class AdminController extends Controller
             'site_title' => 'required|string|max:255',
             'whatsapp_number' => 'required|string|max:50',
             'support_email' => 'required|email|max:255',
+            'welcome_text' => 'nullable|string|max:255',
+            'welcome_typing_speed' => 'nullable|integer|min:10|max:1000',
+            'welcome_delay' => 'nullable|integer|min:0|max:5000',
+            'welcome_sound_file' => 'nullable|file|mimes:mp3,wav,ogg,audio/mpeg,audio/wav,audio/ogg|max:5120',
         ]);
 
         \App\Models\SystemSetting::set('site_title', $request->site_title);
@@ -400,7 +408,17 @@ class AdminController extends Controller
         \App\Models\SystemSetting::set('auto_publish_talents', $request->has('auto_publish_talents') ? '1' : '0');
         \App\Models\SystemSetting::set('notification_sound_enabled', $request->has('notification_sound_enabled') ? '1' : '0');
 
-        // Check if sound file uploaded here
+        if ($request->filled('welcome_text')) {
+            \App\Models\SystemSetting::set('welcome_text', $request->welcome_text);
+        }
+        if ($request->filled('welcome_typing_speed')) {
+            \App\Models\SystemSetting::set('welcome_typing_speed', $request->welcome_typing_speed);
+        }
+        if ($request->filled('welcome_delay')) {
+            \App\Models\SystemSetting::set('welcome_delay', $request->welcome_delay);
+        }
+
+        // Check if sound file uploaded for notification sound
         if ($request->hasFile('notification_sound')) {
             $file = $request->file('notification_sound');
             $filename = 'notification_sound_' . time() . '.' . $file->getClientOriginalExtension();
@@ -409,7 +427,26 @@ class AdminController extends Controller
             \App\Models\SystemSetting::set('notification_sound', '/storage/' . $path);
         }
 
+        // Check if sound file uploaded for welcome audio
+        if ($request->hasFile('welcome_sound_file')) {
+            $file = $request->file('welcome_sound_file');
+            $filename = 'welcome_sound_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('sounds', $filename, 'public');
+
+            \App\Models\SystemSetting::set('welcome_sound', '/storage/' . $path);
+        }
+
         return redirect()->back()->with('success', 'System settings saved and updated successfully.');
+    }
+
+    /**
+     * Reset welcome audio sound to default female voice sound.
+     */
+    public function resetWelcomeSound()
+    {
+        \App\Models\SystemSetting::set('welcome_sound', '/sounds/welcome_default.wav');
+
+        return redirect()->back()->with('success', 'Welcome audio sound reset to default female voice sound successfully.');
     }
 
     /**

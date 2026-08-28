@@ -22,6 +22,7 @@ use Illuminate\Notifications\Notifiable;
     'profile_image', 
     'role', 
     'is_published',
+    'views_count',
     'social_instagram', 
     'social_facebook', 
     'social_tiktok', 
@@ -79,6 +80,14 @@ class User extends Authenticatable
     public function commentsReceived()
     {
         return $this->hasMany(Comment::class, 'talent_id');
+    }
+
+    /**
+     * Get profile views for this talent user.
+     */
+    public function profileViews()
+    {
+        return $this->hasMany(ProfileView::class, 'talent_id');
     }
 
     /**

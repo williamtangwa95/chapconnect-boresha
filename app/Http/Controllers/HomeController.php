@@ -78,12 +78,47 @@ class HomeController extends Controller
         ]);
     }
 
-    public function profile($id)
+    public function profile(Request $request, $id)
     {
         $talent = User::where('role', 'user')
             ->withCount(['likesReceived', 'followersReceived', 'commentsReceived'])
             ->findOrFail($id);
         
+        // Track Unique Profile View & Points
+        $userId = auth()->id();
+        $ip = $request->ip();
+
+        // Manage Device Fingerprint Cookie
+        $deviceFingerprint = $request->cookie('device_token');
+        if (!$deviceFingerprint) {
+            $deviceFingerprint = md5($ip . ($request->header('User-Agent') ?? '') . uniqid('dev_', true));
+            cookie()->queue('device_token', $deviceFingerprint, 525600); // 1 year
+        }
+
+        // Check if this visitor has already viewed this profile
+        $viewQuery = \App\Models\ProfileView::where('talent_id', $id);
+        if ($userId) {
+            $viewQuery->where('user_id', $userId);
+        } else {
+            $viewQuery->where(function($q) use ($ip, $deviceFingerprint) {
+                $q->where('ip_address', $ip);
+                if ($deviceFingerprint) {
+                    $q->orWhere('device_fingerprint', $deviceFingerprint);
+                }
+            });
+        }
+
+        if (!$viewQuery->exists()) {
+            \App\Models\ProfileView::create([
+                'talent_id' => $id,
+                'user_id' => $userId,
+                'ip_address' => $ip,
+                'device_fingerprint' => $deviceFingerprint,
+            ]);
+            $talent->increment('views_count');
+            $talent->refresh();
+        }
+
         // Load first 4 photos for mini-gallery
         $miniPhotos = $talent->media()->where('type', 'photo')->latest()->take(4)->get();
         // Load comments for talent
@@ -94,6 +129,17 @@ class HomeController extends Controller
             'miniPhotos' => $miniPhotos,
             'comments' => $comments
         ]);
+    }
+
+    public function downloadApp()
+    {
+        $apkPath = public_path('downloads/ChapConnect.apk');
+        if (file_exists($apkPath) && filesize($apkPath) > 100000) {
+            return response()->download($apkPath, 'ChapConnect.apk', [
+                'Content-Type' => 'application/vnd.android.package-archive',
+            ]);
+        }
+        return redirect()->route('home')->with('error', 'Native Android APK build is not uploaded yet. Please use "Add to Home Screen" to install the App instantly.');
     }
 
     public function photos($id)

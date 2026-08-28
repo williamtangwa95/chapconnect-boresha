@@ -13,6 +13,7 @@ class Like extends Model
         'user_id',
         'talent_id',
         'ip_address',
+        'device_fingerprint',
     ];
 
     public function user()
