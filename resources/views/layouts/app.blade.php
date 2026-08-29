@@ -32,10 +32,10 @@
 
     <!-- First-Time Visitor Typewriter Splash Loader Overlay -->
     @php
-        $welcomeText = \App\Models\SystemSetting::get('welcome_text', 'Karibu sana ChapConnect...');
-        $welcomeSpeed = (int) \App\Models\SystemSetting::get('welcome_typing_speed', 55);
-        $welcomeDelay = (int) \App\Models\SystemSetting::get('welcome_delay', 300);
-        $welcomeSound = \App\Models\SystemSetting::get('welcome_sound', '/sounds/welcome_default.wav');
+    $welcomeText = \App\Models\SystemSetting::get('welcome_text', 'Karibu sana ChapConnect...');
+    $welcomeSpeed = (int) \App\Models\SystemSetting::get('welcome_typing_speed', 55);
+    $welcomeDelay = (int) \App\Models\SystemSetting::get('welcome_delay', 300);
+    $welcomeSound = \App\Models\SystemSetting::get('welcome_sound', '/sounds/welcome_default.wav');
     @endphp
     <div id="firstTimeLoaderOverlay" onmouseover="if(typeof playWelcomeSound==='function')playWelcomeSound(false)" onclick="if(typeof playWelcomeSound==='function')playWelcomeSound(true)" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); z-index: 999999; flex-direction: column; justify-content: center; align-items: center; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; opacity: 1; transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;">
         <!-- Glowing Brand Logo Icon -->
@@ -63,30 +63,56 @@
     </div>
 
     <style>
-    @keyframes blinkCursor {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0; }
-    }
-    @keyframes loaderPulse {
-        0%, 100% { transform: scale(1); opacity: 0.5; }
-        50% { transform: scale(1.15); opacity: 0.85; }
-    }
-    @keyframes pulseBtn {
-        0%, 100% { transform: scale(1); box-shadow: 0 6px 20px rgba(99,102,241,0.5); }
-        50% { transform: scale(1.06); box-shadow: 0 10px 25px rgba(56,189,248,0.7); }
-    }
+        @keyframes blinkCursor {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes loaderPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.15);
+                opacity: 0.85;
+            }
+        }
+
+        @keyframes pulseBtn {
+
+            0%,
+            100% {
+                transform: scale(1);
+                box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+            }
+
+            50% {
+                transform: scale(1.06);
+                box-shadow: 0 10px 25px rgba(56, 189, 248, 0.7);
+            }
+        }
     </style>
     <nav class="nav">
         <div class="logo">
-            <a href="{{ route('home') }}"><img src="{{ asset('logo.png') }}" alt="ChapConnect Logo" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'"></a>
+            <a href="{{ route('home') }}"><img src="{{ asset(\App\Models\SystemSetting::get('site_logo', 'logo.png')) }}" alt="{{ \App\Models\SystemSetting::get('site_title', 'ChapConnect') }} Logo" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'"></a>
             <div class="tname">
                 <a href="{{ route('home') }}" style="text-decoration: none;">
-                    <h1>ChapConnect</h1>
+                    <h1>{{ \App\Models\SystemSetting::get('site_title', 'ChapConnect') }}</h1>
                 </a>
                 <div style="display: flex; gap: 4px; margin-top: 3px;">
-                    <a href="https://wa.me/255710383352" target="_blank"
-                        style="font-weight: 600; color: #ffffff; text-decoration: none; padding: 2px 7px; background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); border-radius: 12px; font-size: 10px; letter-spacing: 0.2px; box-shadow: 0 2px 6px rgba(37, 211, 102, 0.3); border: 1px solid rgba(255, 255, 255, 0.3); transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 3px;"><i
-                            class="bi bi-whatsapp" style="font-size: 11px; color: #ffffff;"></i> 0710383352</a>
+                    <a href="#" onclick="openGlobalSupportModal(); return false;" style="font-weight: 600; color: #ffffff; text-decoration: none; padding: 2px 7px; background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); border-radius: 12px; font-size: 10px; letter-spacing: 0.2px; box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3); border: 1px solid rgba(255, 255, 255, 0.3); transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 3px;"><i
+                            class="bi bi-headset" style="font-size: 11px; color: #ffffff;"></i>Help desk & Support</a>
                 </div>
             </div>
         </div>
@@ -103,12 +129,20 @@
                 <a href="#dashboard" class="tab-link nav-mobile-link" data-tab="dashboard"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> Dashboard Overview</a>
                 <a href="#talents" class="tab-link nav-mobile-link" data-tab="talents"><i class="bi bi-people-fill" style="color: var(--primary);"></i> Registered Talents</a>
                 <a href="#categories" class="tab-link nav-mobile-link" data-tab="categories"><i class="bi bi-tags-fill" style="color: var(--accent);"></i> Manage Categories</a>
+                <a href="#packages" class="tab-link nav-mobile-link" data-tab="packages"><i class="bi bi-box-seam-fill" style="color: #f59e0b;"></i> Membership Packages</a>
+                <a href="#invoices" class="tab-link nav-mobile-link" data-tab="invoices"><i class="bi bi-receipt-cutoff" style="color: #ef4444;"></i> Invoices & Billing</a>
                 <a href="#settings" class="tab-link nav-mobile-link" data-tab="settings"><i class="bi bi-person-gear" style="color: #0284c7;"></i> User Profile</a>
                 <a href="#staff" class="tab-link nav-mobile-link" data-tab="staff"><i class="bi bi-person-plus-fill" style="color: #6366f1;"></i> Registered Staff</a>
-                <a href="{{ route('customer-care.dashboard') }}" class="nav-mobile-link"><i class="bi bi-headset" style="color: #6366f1;"></i> Support Portal</a>
+                <a href="#analytics" class="tab-link nav-mobile-link" data-tab="analytics"><i class="bi bi-graph-up-arrow" style="color: #10b981;"></i> Visitor Analytics</a>
+                <a href="#activity-logs" class="tab-link nav-mobile-link" data-tab="activity-logs"><i class="bi bi-journal-text" style="color: #6366f1;"></i> User Activity Logs</a>
+                <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link"><i class="bi bi-life-preserver" style="color: #6366f1;"></i> Support Issues & Tickets Roster</a>
+                <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link"><i class="bi bi-shield-slash-fill" style="color: #dc2626;"></i> Blocked Accounts & Login Control</a>
+                <a href="{{ route('customer-care.dashboard') }}#requests" class="nav-mobile-link"><i class="bi bi-person-check-fill" style="color: #6366f1;"></i> Guest Contact Requests</a>
                 <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> Public Directory</a>
                 @elseif(Request::is('customer-care*'))
-                <a href="{{ route('customer-care.dashboard') }}" class="nav-mobile-link"><i class="bi bi-headset" style="color: #6366f1;"></i> Support Issues Roster</a>
+                <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link cc-tab-link" data-cctab="tickets"><i class="bi bi-life-preserver" style="color: #6366f1;"></i> Support Issues & Tickets Roster</a>
+                <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link cc-tab-link" data-cctab="blocked"><i class="bi bi-shield-slash-fill" style="color: #dc2626;"></i> Blocked Accounts & Login Control</a>
+                <a href="{{ route('customer-care.dashboard') }}#requests" class="nav-mobile-link cc-tab-link" data-cctab="requests"><i class="bi bi-person-check-fill" style="color: #6366f1;"></i> Guest Contact Requests</a>
                 @if(auth()->user()->role === 'admin')
                 <a href="{{ route('admin.dashboard') }}" class="nav-mobile-link"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> Super Admin Panel</a>
                 @endif
@@ -126,6 +160,7 @@
                 <a href="{{ route('dashboard.photos') }}" class="nav-mobile-link"><i class="bi bi-camera-fill" style="color: var(--primary);"></i> Manage Photos</a>
                 <a href="{{ route('dashboard.videos') }}" class="nav-mobile-link"><i class="bi bi-camera-video-fill" style="color: var(--primary);"></i> Manage Videos</a>
                 <a href="{{ route('dashboard.news') }}" class="nav-mobile-link"><i class="bi bi-newspaper" style="color: var(--primary);"></i> Manage News</a>
+                <a href="{{ route('dashboard.comments') }}" class="nav-mobile-link"><i class="bi bi-chat-left-text-fill" style="color: var(--primary);"></i> Manage Comments</a>
                 @endif
                 <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-mobile-link"><i class="bi bi-box-arrow-right" style="color: #ef4444;"></i> Logout</a>
                 @else
@@ -264,12 +299,18 @@
             <div class="admin-sidebar-nav">
                 @if(auth()->user()->role === 'customer_care')
                 <div class="sidebar-group-label">OPERATIONS & SUPPORT</div>
-                <a href="{{ route('customer-care.dashboard') }}" class="sidebar-link {{ Request::is('customer-care*') ? 'active' : '' }}">
-                    <i class="bi bi-headset"></i> <span>Customer Care</span>
+                <a href="{{ route('customer-care.dashboard') }}#tickets" class="sidebar-link cc-tab-link {{ Request::is('customer-care*') ? 'active' : '' }}" data-cctab="tickets">
+                    <i class="bi bi-life-preserver"></i> <span>Support Issues & Tickets Roster</span>
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#blocked" class="sidebar-link cc-tab-link" data-cctab="blocked">
+                    <i class="bi bi-shield-slash-fill" style="color:#dc2626;"></i> <span>Blocked Accounts & Login Control</span>
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#requests" class="sidebar-link cc-tab-link" data-cctab="requests">
+                    <i class="bi bi-person-check-fill" style="color:#6366f1;"></i> <span>Guest Contact Requests</span>
                 </a>
 
                 <div class="sidebar-group-label">SETTINGS & PROFILES</div>
-                <a href="{{ Request::is('admin*') ? '#settings' : route('admin.dashboard') . '#settings' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="settings">
+                <a href="{{ route('dashboard') }}" class="sidebar-link {{ Request::routeIs('dashboard') ? 'active' : '' }}">
                     <i class="bi bi-person-gear"></i> <span>My Account Profile</span>
                 </a>
 
@@ -289,13 +330,31 @@
                 <a href="{{ Request::is('admin*') ? '#categories' : route('admin.dashboard') . '#categories' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="categories">
                     <i class="bi bi-tags-fill"></i> <span>Manage Categories</span>
                 </a>
+                <a href="{{ Request::is('admin*') ? '#packages' : route('admin.dashboard') . '#packages' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="packages">
+                    <i class="bi bi-box-seam-fill"></i> <span>Membership Packages</span>
+                </a>
+                <a href="{{ Request::is('admin*') ? '#invoices' : route('admin.dashboard') . '#invoices' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="invoices">
+                    <i class="bi bi-receipt-cutoff"></i> <span>Invoices & Billing</span>
+                </a>
                 <a href="{{ Request::is('admin*') ? '#staff' : route('admin.dashboard') . '#staff' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="staff">
                     <i class="bi bi-person-plus-fill"></i> <span>Registered Staff</span>
                 </a>
+                <a href="{{ Request::is('admin*') ? '#analytics' : route('admin.dashboard') . '#analytics' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="analytics">
+                    <i class="bi bi-graph-up-arrow"></i> <span>Visitor Analytics</span>
+                </a>
+                <a href="{{ Request::is('admin*') ? '#activity-logs' : route('admin.dashboard') . '#activity-logs' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="activity-logs">
+                    <i class="bi bi-journal-text"></i> <span>User Activity Logs</span>
+                </a>
 
                 <div class="sidebar-group-label">OPERATIONS & SUPPORT</div>
-                <a href="{{ Request::is('admin*') ? '#customer-care' : route('customer-care.dashboard') }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="customer-care">
-                    <i class="bi bi-headset"></i> <span>Customer Care Portal</span>
+                <a href="{{ route('customer-care.dashboard') }}#tickets" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="tickets">
+                    <i class="bi bi-life-preserver"></i> <span>Support Issues & Tickets Roster</span>
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#blocked" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="blocked">
+                    <i class="bi bi-shield-slash-fill" style="color:#dc2626;"></i> <span>Blocked Accounts & Login Control</span>
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#requests" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="requests">
+                    <i class="bi bi-person-check-fill" style="color:#6366f1;"></i> <span>Guest Contact Requests</span>
                 </a>
 
                 <div class="sidebar-group-label">SETTINGS & PROFILES</div>
@@ -314,8 +373,11 @@
                 @else
                 <!-- ROLE USER SIDEBAR NAVIGATION -->
                 <div class="sidebar-group-label">MAIN CONTROL</div>
-                <a href="{{ route('dashboard') }}" class="sidebar-link {{ Request::routeIs('dashboard') ? 'active' : '' }}">
+                <a href="{{ route('dashboard') }}" class="sidebar-link {{ Request::routeIs('dashboard') && !Request::has('tab') ? 'active' : '' }}">
                     <i class="bi bi-speedometer2"></i> <span>Dashboard Overview</span>
+                </a>
+                <a href="{{ route('dashboard') }}?tab=billing" class="sidebar-link {{ Request::routeIs('dashboard') && Request::input('tab') === 'billing' ? 'active' : '' }}">
+                    <i class="bi bi-receipt"></i> <span>My Package & Bills</span>
                 </a>
 
                 <div class="sidebar-group-label">PORTFOLIO CONTENT</div>
@@ -327,6 +389,9 @@
                 </a>
                 <a href="{{ route('dashboard.news') }}" class="sidebar-link {{ Request::routeIs('dashboard.news') ? 'active' : '' }}">
                     <i class="bi bi-newspaper"></i> <span>Manage News</span>
+                </a>
+                <a href="{{ route('dashboard.comments') }}" class="sidebar-link {{ Request::routeIs('dashboard.comments') ? 'active' : '' }}">
+                    <i class="bi bi-chat-left-text-fill"></i> <span>Manage Comments</span>
                 </a>
 
                 <div class="sidebar-group-label">DIRECTORY & PUBLIC</div>
@@ -387,8 +452,12 @@
     <audio id="chapconnect-notification-audio" src="{{ \App\Models\SystemSetting::get('notification_sound', 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3') }}" preload="auto"></audio>
 
     @auth
+    @php
+    $soundEnabled = \App\Models\SystemSetting::get('notification_sound_enabled', '1') === '1';
+    @endphp
     <script>
         let lastUnreadCount = 0;
+        let isInitialFetch = true;
 
         function fetchNotifications() {
             $.ajax({
@@ -402,17 +471,20 @@
 
                     if (count > 0) {
                         $badge.text(count).show();
-                        if (count > lastUnreadCount && lastUnreadCount !== 0) {
+                        if (count > lastUnreadCount && !isInitialFetch) {
+                            @if($soundEnabled)
                             const audio = document.getElementById('chapconnect-notification-audio');
                             if (audio) {
                                 audio.play().catch(e => console.log('Audio playback policy', e));
                             }
+                            @endif
                         }
                     } else {
                         $badge.hide();
                     }
 
                     lastUnreadCount = count;
+                    isInitialFetch = false;
 
                     if (data.notifications && data.notifications.length > 0) {
                         let html = '';
@@ -466,128 +538,142 @@
 
     <!-- First-Time Typewriter Splash Loader Script -->
     <script>
-    (function() {
-        var isTest = window.location.search.indexOf('test_loader=1') !== -1;
-        var hasVisited = sessionStorage.getItem('chap_first_visit_done');
+        (function() {
+            var isTest = window.location.search.indexOf('test_loader=1') !== -1;
+            var hasVisited = sessionStorage.getItem('chap_first_visit_done');
 
-        if (!hasVisited || isTest) {
-            document.addEventListener("DOMContentLoaded", function() {
-                var loaderOverlay = document.getElementById('firstTimeLoaderOverlay');
-                var typewriterEl = document.getElementById('typewriterText');
-                var progressBar = document.getElementById('loaderProgressBar');
-                if (!loaderOverlay || !typewriterEl) return;
+            if (!hasVisited || isTest) {
+                document.addEventListener("DOMContentLoaded", function() {
+                    var loaderOverlay = document.getElementById('firstTimeLoaderOverlay');
+                    var typewriterEl = document.getElementById('typewriterText');
+                    var progressBar = document.getElementById('loaderProgressBar');
+                    if (!loaderOverlay || !typewriterEl) return;
 
-                // Lock scrolling & show loader overlay
-                loaderOverlay.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
+                    // Lock scrolling & show loader overlay
+                    loaderOverlay.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
 
-                var textToType = @json($welcomeText);
-                var charIndex = 0;
-                var typingSpeed = {{ $welcomeSpeed }};
-                var welcomeDelay = {{ $welcomeDelay }};
-                var welcomeSoundUrl = @json($welcomeSound);
-
-                var audioEl = document.getElementById('welcomeAudioElement');
-                var welcomeAudio = audioEl || (welcomeSoundUrl ? new Audio(welcomeSoundUrl) : null);
-                var audioPlayed = false;
-
-                window.playWelcomeSound = function(userAction) {
-                    if (audioPlayed && !userAction) return;
+                    var textToType = @json($welcomeText);
+                    var charIndex = 0;
+                    var typingSpeed = {
+                        {
+                            $welcomeSpeed
+                        }
+                    };
+                    var welcomeDelay = {
+                        {
+                            $welcomeDelay
+                        }
+                    };
+                    var welcomeSoundUrl = @json($welcomeSound);
 
                     var audioEl = document.getElementById('welcomeAudioElement');
-                    var audioInstance = audioEl || (welcomeSoundUrl ? new Audio(welcomeSoundUrl) : null);
+                    var welcomeAudio = audioEl || (welcomeSoundUrl ? new Audio(welcomeSoundUrl) : null);
+                    var audioPlayed = false;
 
-                    if (audioInstance) {
-                        try {
-                            audioInstance.currentTime = 0;
-                            audioInstance.volume = 1.0;
-                            var p = audioInstance.play();
-                            if (p !== undefined) {
-                                p.then(function() {
-                                    audioPlayed = true;
-                                    var btnText = document.getElementById('welcomeAudioBtnText');
-                                    if (btnText) btnText.textContent = "Welcome Audio Playing ♪";
-                                }).catch(function(e) {
-                                    speakFemaleVoiceFallback();
-                                });
+                    window.playWelcomeSound = function(userAction) {
+                        if (audioPlayed && !userAction) return;
+
+                        var audioEl = document.getElementById('welcomeAudioElement');
+                        var audioInstance = audioEl || (welcomeSoundUrl ? new Audio(welcomeSoundUrl) : null);
+
+                        if (audioInstance) {
+                            try {
+                                audioInstance.currentTime = 0;
+                                audioInstance.volume = 1.0;
+                                var p = audioInstance.play();
+                                if (p !== undefined) {
+                                    p.then(function() {
+                                        audioPlayed = true;
+                                        var btnText = document.getElementById('welcomeAudioBtnText');
+                                        if (btnText) btnText.textContent = "Welcome Audio Playing ♪";
+                                    }).catch(function(e) {
+                                        speakFemaleVoiceFallback();
+                                    });
+                                }
+                            } catch (e) {
+                                speakFemaleVoiceFallback();
                             }
-                        } catch(e) {
+                        } else {
                             speakFemaleVoiceFallback();
                         }
-                    } else {
-                        speakFemaleVoiceFallback();
-                    }
-                };
+                    };
 
-                function speakFemaleVoiceFallback() {
-                    if ('speechSynthesis' in window) {
-                        try {
-                            window.speechSynthesis.cancel();
-                            var utterance = new SpeechSynthesisUtterance(textToType);
-                            utterance.rate = 0.95;
-                            utterance.pitch = 1.2;
-                            var voices = window.speechSynthesis.getVoices();
-                            var femaleVoice = voices.find(function(v) {
-                                return v.name.toLowerCase().includes('female') || 
-                                       v.name.toLowerCase().includes('zira') || 
-                                       v.name.toLowerCase().includes('samantha') || 
-                                       v.name.toLowerCase().includes('google us english');
+                    function speakFemaleVoiceFallback() {
+                        if ('speechSynthesis' in window) {
+                            try {
+                                window.speechSynthesis.cancel();
+                                var utterance = new SpeechSynthesisUtterance(textToType);
+                                utterance.rate = 0.95;
+                                utterance.pitch = 1.2;
+                                var voices = window.speechSynthesis.getVoices();
+                                var femaleVoice = voices.find(function(v) {
+                                    return v.name.toLowerCase().includes('female') ||
+                                        v.name.toLowerCase().includes('zira') ||
+                                        v.name.toLowerCase().includes('samantha') ||
+                                        v.name.toLowerCase().includes('google us english');
+                                });
+                                if (femaleVoice) utterance.voice = femaleVoice;
+                                window.speechSynthesis.speak(utterance);
+                                audioPlayed = true;
+                            } catch (err) {}
+                        }
+                    }
+
+                    function triggerHoverSound() {
+                        if (!audioPlayed) {
+                            playWelcomeSound(false);
+                        }
+                    }
+
+                    ['mousemove', 'pointermove', 'mouseover', 'pointerover', 'mouseenter', 'touchstart', 'pointerdown', 'click'].forEach(function(evt) {
+                        window.addEventListener(evt, triggerHoverSound, {
+                            passive: true
+                        });
+                        document.addEventListener(evt, triggerHoverSound, {
+                            passive: true
+                        });
+                        if (loaderOverlay) {
+                            loaderOverlay.addEventListener(evt, triggerHoverSound, {
+                                passive: true
                             });
-                            if (femaleVoice) utterance.voice = femaleVoice;
-                            window.speechSynthesis.speak(utterance);
-                            audioPlayed = true;
-                        } catch(err) {}
-                    }
-                }
+                        }
+                    });
 
-                function triggerHoverSound() {
-                    if (!audioPlayed) {
-                        playWelcomeSound(false);
+                    function typeNextChar() {
+                        if (charIndex < textToType.length) {
+                            typewriterEl.textContent += textToType.charAt(charIndex);
+                            charIndex++;
+                            var progressPercent = Math.min(100, Math.round((charIndex / textToType.length) * 88));
+                            if (progressBar) progressBar.style.width = progressPercent + '%';
+                            setTimeout(typeNextChar, typingSpeed);
+                        } else {
+                            if (progressBar) progressBar.style.width = '100%';
+                            setTimeout(dismissIntroLoader, 700);
+                        }
                     }
-                }
 
-                ['mousemove', 'pointermove', 'mouseover', 'pointerover', 'mouseenter', 'touchstart', 'pointerdown', 'click'].forEach(function(evt) {
-                    window.addEventListener(evt, triggerHoverSound, { passive: true });
-                    document.addEventListener(evt, triggerHoverSound, { passive: true });
-                    if (loaderOverlay) {
-                        loaderOverlay.addEventListener(evt, triggerHoverSound, { passive: true });
+                    function dismissIntroLoader() {
+                        loaderOverlay.style.opacity = '0';
+                        document.body.style.overflow = '';
+                        sessionStorage.setItem('chap_first_visit_done', 'true');
+                        if (welcomeAudio) {
+                            welcomeAudio.pause();
+                            welcomeAudio.currentTime = 0;
+                        }
+                        setTimeout(function() {
+                            loaderOverlay.style.display = 'none';
+                        }, 600);
                     }
-                });
 
-                function typeNextChar() {
-                    if (charIndex < textToType.length) {
-                        typewriterEl.textContent += textToType.charAt(charIndex);
-                        charIndex++;
-                        var progressPercent = Math.min(100, Math.round((charIndex / textToType.length) * 88));
-                        if (progressBar) progressBar.style.width = progressPercent + '%';
-                        setTimeout(typeNextChar, typingSpeed);
-                    } else {
-                        if (progressBar) progressBar.style.width = '100%';
-                        setTimeout(dismissIntroLoader, 700);
-                    }
-                }
-
-                function dismissIntroLoader() {
-                    loaderOverlay.style.opacity = '0';
-                    document.body.style.overflow = '';
-                    sessionStorage.setItem('chap_first_visit_done', 'true');
-                    if (welcomeAudio) {
-                        welcomeAudio.pause();
-                        welcomeAudio.currentTime = 0;
-                    }
+                    // Kickoff welcome sound and typing after admin delay timeout
                     setTimeout(function() {
-                        loaderOverlay.style.display = 'none';
-                    }, 600);
-                }
-
-                // Kickoff welcome sound and typing after admin delay timeout
-                setTimeout(function() {
-                    playWelcomeSound();
-                    typeNextChar();
-                }, welcomeDelay);
-            });
-        }
-    })();
+                        playWelcomeSound();
+                        typeNextChar();
+                    }, welcomeDelay);
+                });
+            }
+        })();
     </script>
 
     @if(Request::is('/'))
@@ -605,7 +691,7 @@
     <div id="pwaGuideModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.85); backdrop-filter: blur(8px); z-index: 999999; justify-content: center; align-items: center; padding: 20px;" onclick="closePwaGuideModal()">
         <div style="background: #ffffff; border-radius: 20px; max-width: 440px; width: 100%; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid #e2e8f0; position: relative;" onclick="event.stopPropagation();">
             <button type="button" onclick="closePwaGuideModal()" style="position: absolute; top: 16px; right: 16px; background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2rem; color: #64748b; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">&times;</button>
-            
+
             <div style="text-align: center; margin-bottom: 18px;">
                 <img src="{{ asset('logo.png') }}" alt="ChapConnect" style="width: 64px; height: 64px; border-radius: 16px; object-fit: cover; box-shadow: 0 6px 18px rgba(99,102,241,0.25); margin-bottom: 10px;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'">
                 <h3 style="margin: 0 0 4px 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">Install ChapConnect App</h3>
@@ -630,47 +716,194 @@
 
     <!-- PWA Service Worker Registration & Install Script -->
     <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-            navigator.serviceWorker.register('/sw.js').then(function(reg) {
-                console.log('PWA ServiceWorker registered successfully:', reg.scope);
-            }).catch(function(err) {
-                console.log('PWA ServiceWorker registration failed:', err);
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    console.log('PWA ServiceWorker registered successfully:', reg.scope);
+                }).catch(function(err) {
+                    console.log('PWA ServiceWorker registration failed:', err);
+                });
             });
+        }
+
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
         });
-    }
 
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-    });
-
-    function handlePwaInstallClick() {
-        if (deferredPrompt) {
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => {
-                console.log('User outcome:', choiceResult.outcome);
-                deferredPrompt = null;
-            });
-        } else {
-            var modal = document.getElementById('pwaGuideModal');
-            if (modal) modal.style.display = 'flex';
+        function handlePwaInstallClick() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    console.log('User outcome:', choiceResult.outcome);
+                    deferredPrompt = null;
+                });
+            } else {
+                var modal = document.getElementById('pwaGuideModal');
+                if (modal) modal.style.display = 'flex';
+            }
         }
-    }
 
-    function dismissPwaBanner() {
-        const banner = document.getElementById('pwaInstallBanner');
-        if (banner) {
-            banner.style.display = 'none';
+        function dismissPwaBanner() {
+            const banner = document.getElementById('pwaInstallBanner');
+            if (banner) {
+                banner.style.display = 'none';
+            }
         }
-    }
 
-    function closePwaGuideModal() {
-        const modal = document.getElementById('pwaGuideModal');
-        if (modal) modal.style.display = 'none';
-    }
+        function closePwaGuideModal() {
+            const modal = document.getElementById('pwaGuideModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function openGlobalSupportModal() {
+            const modal = document.getElementById('globalSupportModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    modal.style.opacity = '1';
+                }, 10);
+            }
+        }
+
+        function closeGlobalSupportModal() {
+            const modal = document.getElementById('globalSupportModal');
+            if (modal) {
+                modal.style.opacity = '0';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 200);
+            }
+        }
     </script>
+
+    <!-- Global Support Modal Overlay -->
+    <div id="globalSupportModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.8); backdrop-filter: blur(8px); z-index: 999999; justify-content: center; align-items: center; padding: 20px; transition: opacity 0.2s ease-in-out; opacity: 0;" onclick="closeGlobalSupportModal()">
+        <div style="background: #ffffff; border-radius: 20px; max-width: 480px; width: 100%; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid #e2e8f0; position: relative;" onclick="event.stopPropagation();">
+            <button type="button" onclick="closeGlobalSupportModal()" style="position: absolute; top: 16px; right: 16px; background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1.2rem; color: #64748b; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #cbd5e1;">&times;</button>
+
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="{{ asset(\App\Models\SystemSetting::get('site_logo', 'logo.png')) }}" alt="{{ \App\Models\SystemSetting::get('site_title', 'ChapConnect') }} Logo" style="width: 64px; height: 64px; border-radius: 16px; object-fit: cover; box-shadow: 0 6px 18px rgba(99,102,241,0.2); margin-bottom: 10px;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'">
+                <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; font-weight: 800; color: #0f172a;">{{ \App\Models\SystemSetting::get('site_title', 'ChapConnect') }} Support</h3>
+                <p style="margin: 0; color: #64748b; font-size: 0.86rem;">We are here to help you. Reach out to us through any of our channels below.</p>
+            </div>
+
+            <!-- Short Summary about ChapConnect -->
+            <div style="background: #f8fafc; border-radius: 12px; padding: 14px 16px; border: 1px solid #cbd5e1; margin-bottom: 20px; font-size: 0.85rem; color: #334155; line-height: 1.5; text-align: center;">
+                {{ \App\Models\SystemSetting::get('site_summary', 'ChapConnect connects talented artists with opportunities. Discover photos, videos, bullet bulletins and book your next favorite talent.') }}
+            </div>
+
+            <!-- Contact Channels -->
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                <!-- WhatsApp -->
+                @if(\App\Models\SystemSetting::get('whatsapp_number'))
+                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', \App\Models\SystemSetting::get('whatsapp_number')) }}" target="_blank" style="display: flex; align-items: center; gap: 12px; padding: 10px 15px; border-radius: 12px; background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: #ffffff; text-decoration: none; font-weight: 700; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(37,211,102,0.2);">
+                    <i class="bi bi-whatsapp" style="font-size: 1.3rem;"></i>
+                    <div style="text-align: left;">
+                        <span style="font-size: 0.72rem; display: block; opacity: 0.85; font-weight: 500;">Chat on WhatsApp</span>
+                        <span>{{ \App\Models\SystemSetting::get('whatsapp_number') }}</span>
+                    </div>
+                </a>
+                @endif
+
+                <!-- Phone -->
+                @if(\App\Models\SystemSetting::get('support_phone'))
+                <a href="tel:{{ preg_replace('/[^0-9+]/', '', \App\Models\SystemSetting::get('support_phone')) }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 15px; border-radius: 12px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; font-weight: 700; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(59,130,246,0.2);">
+                    <i class="bi bi-telephone-fill" style="font-size: 1.2rem;"></i>
+                    <div style="text-align: left;">
+                        <span style="font-size: 0.72rem; display: block; opacity: 0.85; font-weight: 500;">Call Phone Support</span>
+                        <span>{{ \App\Models\SystemSetting::get('support_phone') }}</span>
+                    </div>
+                </a>
+                @endif
+
+                <!-- Email -->
+                @if(\App\Models\SystemSetting::get('support_email'))
+                <a href="mailto:{{ \App\Models\SystemSetting::get('support_email') }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 15px; border-radius: 12px; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #ffffff; text-decoration: none; font-weight: 700; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(239,68,68,0.2);">
+                    <i class="bi bi-envelope-fill" style="font-size: 1.2rem;"></i>
+                    <div style="text-align: left;">
+                        <span style="font-size: 0.72rem; display: block; opacity: 0.85; font-weight: 500;">Send Support Email</span>
+                        <span>{{ \App\Models\SystemSetting::get('support_email') }}</span>
+                    </div>
+                </a>
+                @endif
+            </div>
+
+            <!-- Social Media Channels Links -->
+            <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; text-align: center;">
+                <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Follow our official pages</span>
+                <div style="display: flex; justify-content: center; gap: 12px;">
+                    @if(\App\Models\SystemSetting::get('site_facebook'))
+                    <a href="{{ \App\Models\SystemSetting::get('site_facebook') }}" target="_blank" style="width: 36px; height: 36px; border-radius: 50%; background: #3b5998; color: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.15rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"><i class="bi bi-facebook"></i></a>
+                    @endif
+                    @if(\App\Models\SystemSetting::get('site_instagram'))
+                    <a href="{{ \App\Models\SystemSetting::get('site_instagram') }}" target="_blank" style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.15rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"><i class="bi bi-instagram"></i></a>
+                    @endif
+                    @if(\App\Models\SystemSetting::get('site_tiktok'))
+                    <a href="{{ \App\Models\SystemSetting::get('site_tiktok') }}" target="_blank" style="width: 36px; height: 36px; border-radius: 50%; background: #000000; color: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.1rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"><i class="bi bi-tiktok"></i></a>
+                    @endif
+                    @if(\App\Models\SystemSetting::get('site_youtube'))
+                    <a href="{{ \App\Models\SystemSetting::get('site_youtube') }}" target="_blank" style="width: 36px; height: 36px; border-radius: 50%; background: #ff0000; color: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.15rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"><i class="bi bi-youtube"></i></a>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @auth
+    <!-- Support Modal for Talent / User / Staff -->
+    <div id="user-support-modal" class="admin-modal">
+        <div class="admin-modal-content" style="border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-width: 520px; width: 90%; margin: auto;">
+            <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
+                <h3 style="margin: 0; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-headset" style="color: var(--primary);"></i> Submit Support Ticket to Customer Care
+                </h3>
+                <button type="button" class="admin-modal-close" onclick="$('#user-support-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+            </div>
+            <form action="{{ route('dashboard.support.submit') }}" method="POST">
+                @csrf
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Issue Category</label>
+                    <select name="category" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                        <option value="Account Access & Credentials">Account Access & Credentials</option>
+                        <option value="Profile Verification">Profile Verification</option>
+                        <option value="Media Uploads (Photos/Videos)">Media Uploads (Photos/Videos)</option>
+                        <option value="Billing & Subscription">Billing & Subscription</option>
+                        <option value="Report Abuse / Content Guidelines">Report Abuse / Content Guidelines</option>
+                        <option value="General Inquiry" selected>General Inquiry</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Subject Title</label>
+                    <input type="text" name="subject" class="form-control" placeholder="Brief summary of what you need help with..." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Priority Level</label>
+                    <select name="priority" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                        <option value="low">Low Priority</option>
+                        <option value="medium" selected>Medium Priority</option>
+                        <option value="high">High Priority</option>
+                        <option value="urgent">Urgent Priority</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Detailed Explanation</label>
+                    <textarea name="description" rows="4" class="form-control" placeholder="Explain your issue or question in detail..." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;"></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                    <button type="button" onclick="$('#user-support-modal').fadeOut(200);" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; font-weight: 600; cursor: pointer;">Cancel</button>
+                    <button type="submit" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.35); cursor: pointer;">Submit Support Ticket</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endauth
 
     @yield('scripts')
 </body>

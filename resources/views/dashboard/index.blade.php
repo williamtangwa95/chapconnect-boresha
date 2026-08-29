@@ -6,7 +6,7 @@
 <main class="main admin-main-container" style="max-width: 100%; width: 100%; margin: 15px 0; padding: 0 30px;">
     <div class="dashboard-container">
 
-        @if($user->role === 'admin')
+        @if(in_array($user->role, ['admin', 'customer_care']))
         <!-- Staff Member Welcome Header -->
         <div class="dashboard-header" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; padding: 25px 30px; border-radius: 16px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
             <div class="dashboard-welcome" style="display: flex; align-items: center; gap: 20px;">
@@ -19,14 +19,14 @@
                 </div>
                 <div class="dashboard-welcome-text">
                     <h2 style="color: #ffffff; margin: 0 0 4px 0; font-size: 1.5rem; font-weight: 800;">Welcome, {{ $user->name }}</h2>
-                    <p style="color: #94a3b8; margin: 0; font-size: 0.92rem;">Staff Account Settings (Role: Super Administrator). Update your profile details and security credentials.</p>
+                    <p style="color: #94a3b8; margin: 0; font-size: 0.92rem;">Staff Account Settings (Role: {{ $user->role === 'admin' ? 'Super Administrator' : 'Customer Care' }}). Update your profile details and security credentials.</p>
                 </div>
             </div>
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                 <button type="button" onclick="$('#user-support-modal').fadeIn(200);" class="nav-btn" style="border-radius: 20px; font-weight: 700; padding: 10px 18px; background: rgba(99,102,241,0.12); color: #6366f1; border: 1px solid rgba(99,102,241,0.3); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
                     <i class="bi bi-headset"></i> Need Help / Support
                 </button>
-                @if(in_array($user->role, ['admin', 'customer_care']))
+                @if(in_array($user->role, ['admin']))
                 <a href="{{ route('admin.dashboard') }}" class="nav-btn nav-btn-login" style="border-radius: 20px; font-weight: 700; padding: 10px 22px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
                     <i class="bi bi-speedometer2"></i> Admin Panel
                 </a>
@@ -160,6 +160,9 @@
             </div>
         </div>
 
+        @if(request('tab') === 'billing')
+            @include('dashboard.billing_tab_stub')
+        @else
         <!-- Stats Widgets Grid -->
         <div class="dashboard-stats" style="margin-top: 25px;">
             <div class="stat-card">
@@ -239,6 +242,10 @@
                     <a href="{{ route('dashboard.news') }}" class="action-card">
                         <i class="bi bi-newspaper"></i>
                         <span>Manage News</span>
+                    </a>
+                    <a href="{{ route('dashboard.comments') }}" class="action-card">
+                        <i class="bi bi-chat-left-text-fill"></i>
+                        <span>Manage Comments</span>
                     </a>
                     <a href="{{ route('profile', $user->id) }}" target="_blank" class="action-card">
                         <i class="bi bi-person-badge-fill"></i>
@@ -342,28 +349,81 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px;">
                     <div class="form-group">
                         <label for="social_instagram">Instagram Link</label>
-                        <input type="url" id="social_instagram" name="social_instagram" class="form-control" value="{{ old('social_instagram', $user->social_instagram) }}" placeholder="https://instagram.com/username">
+                        <input type="url" id="social_instagram" name="social_instagram" class="form-control @error('social_instagram') is-invalid @enderror" value="{{ old('social_instagram', $user->social_instagram) }}" placeholder="https://instagram.com/username">
+                        <div id="social_instagram_status" style="display: none; margin-top: 4px; font-size: 0.78rem; font-weight: 600;"></div>
+                        @error('social_instagram')
+                            <span style="color: #ef4444; font-size: 0.78rem; font-weight: 600; margin-top: 4px; display: block;">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div class="form-group">
                         <label for="social_facebook">Facebook Link</label>
-                        <input type="url" id="social_facebook" name="social_facebook" class="form-control" value="{{ old('social_facebook', $user->social_facebook) }}" placeholder="https://facebook.com/page">
+                        <input type="url" id="social_facebook" name="social_facebook" class="form-control @error('social_facebook') is-invalid @enderror" value="{{ old('social_facebook', $user->social_facebook) }}" placeholder="https://facebook.com/page">
+                        <div id="social_facebook_status" style="display: none; margin-top: 4px; font-size: 0.78rem; font-weight: 600;"></div>
+                        @error('social_facebook')
+                            <span style="color: #ef4444; font-size: 0.78rem; font-weight: 600; margin-top: 4px; display: block;">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div class="form-group">
                         <label for="social_tiktok">TikTok Link</label>
-                        <input type="url" id="social_tiktok" name="social_tiktok" class="form-control" value="{{ old('social_tiktok', $user->social_tiktok) }}" placeholder="https://tiktok.com/@username">
+                        <input type="url" id="social_tiktok" name="social_tiktok" class="form-control @error('social_tiktok') is-invalid @enderror" value="{{ old('social_tiktok', $user->social_tiktok) }}" placeholder="https://tiktok.com/@username">
+                        <div id="social_tiktok_status" style="display: none; margin-top: 4px; font-size: 0.78rem; font-weight: 600;"></div>
+                        @error('social_tiktok')
+                            <span style="color: #ef4444; font-size: 0.78rem; font-weight: 600; margin-top: 4px; display: block;">{{ $message }}</span>
+                        @enderror
                     </div>
 
                     <div class="form-group">
                         <label for="social_youtube">YouTube Link</label>
-                        <input type="url" id="social_youtube" name="social_youtube" class="form-control" value="{{ old('social_youtube', $user->social_youtube) }}" placeholder="https://youtube.com/channel">
+                        <input type="url" id="social_youtube" name="social_youtube" class="form-control @error('social_youtube') is-invalid @enderror" value="{{ old('social_youtube', $user->social_youtube) }}" placeholder="https://youtube.com/channel">
+                        <div id="social_youtube_status" style="display: none; margin-top: 4px; font-size: 0.78rem; font-weight: 600;"></div>
+                        @error('social_youtube')
+                            <span style="color: #ef4444; font-size: 0.78rem; font-weight: 600; margin-top: 4px; display: block;">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <h4 style="font-size: 15px; color: var(--primary); margin-top: 25px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-key-fill" style="color: #d97706;"></i> Update Security Password Credentials (Optional)
+                </h4>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                    <div class="form-group">
+                        <label for="current_password" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Current Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="current_password" name="current_password" class="form-control" placeholder="Enter current password" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 42px 10px 14px;">
+                            <button type="button" class="toggle-password-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; font-size: 1.1rem; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">New Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Leave blank to keep current password" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 42px 10px 14px;">
+                            <button type="button" class="toggle-password-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; font-size: 1.1rem; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password_confirmation" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Confirm New Password</label>
+                        <div style="position: relative;">
+                            <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="Re-type new password" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 42px 10px 14px;">
+                            <button type="button" class="toggle-password-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; font-size: 1.1rem; padding: 0; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-eye-slash"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <button type="submit" class="nav-btn nav-btn-register" style="margin-top: 15px; width: auto; padding: 10px 24px; cursor: pointer; border: none;">Save Changes</button>
             </form>
         </div>
+        @endif
         @endif
     </div>
 </main>
@@ -415,57 +475,47 @@
                 }
             });
         });
+
+        // Real-time client side validation for social links
+        const socialConfigs = [
+            { id: 'social_instagram', statusId: 'social_instagram_status', name: 'Instagram', allowed: ['instagram.com', 'www.instagram.com', 'instagr.am', 'www.instagr.am', 'm.instagram.com'] },
+            { id: 'social_facebook', statusId: 'social_facebook_status', name: 'Facebook', allowed: ['facebook.com', 'www.facebook.com', 'fb.com', 'www.fb.com', 'm.facebook.com', 'web.facebook.com', 'fb.watch'] },
+            { id: 'social_tiktok', statusId: 'social_tiktok_status', name: 'TikTok', allowed: ['tiktok.com', 'www.tiktok.com', 'vm.tiktok.com', 'm.tiktok.com', 'vt.tiktok.com'] },
+            { id: 'social_youtube', statusId: 'social_youtube_status', name: 'YouTube', allowed: ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be', 'www.youtu.be'] }
+        ];
+
+        socialConfigs.forEach(config => {
+            const inputEl = document.getElementById(config.id);
+            const statusEl = document.getElementById(config.statusId);
+            if (!inputEl || !statusEl) return;
+
+            inputEl.addEventListener('input', function() {
+                const val = inputEl.value.trim();
+                if (!val) {
+                    statusEl.style.display = 'none';
+                    return;
+                }
+
+                try {
+                    const parsed = new URL(val);
+                    const host = parsed.hostname.toLowerCase();
+                    if (config.allowed.includes(host)) {
+                        statusEl.style.display = 'block';
+                        statusEl.style.color = '#10b981';
+                        statusEl.innerHTML = `<i class="bi bi-check-circle-fill"></i> Valid ${config.name} link.`;
+                    } else {
+                        statusEl.style.display = 'block';
+                        statusEl.style.color = '#ef4444';
+                        statusEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Link must be a valid ${config.name} URL.`;
+                    }
+                } catch (e) {
+                    statusEl.style.display = 'block';
+                    statusEl.style.color = '#ef4444';
+                    statusEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Please enter a complete URL starting with http:// or https://.`;
+                }
+            });
+        });
     });
 </script>
 
-<!-- Support Modal for Talent / User -->
-<div id="user-support-modal" class="admin-modal">
-    <div class="admin-modal-content" style="border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-width: 520px; width: 90%; margin: auto;">
-        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
-            <h3 style="margin: 0; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                <i class="bi bi-headset" style="color: var(--primary);"></i> Submit Support Ticket to Customer Care
-            </h3>
-            <button type="button" class="admin-modal-close" onclick="$('#user-support-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
-        </div>
-        <form action="{{ route('dashboard.support.submit') }}" method="POST">
-            @csrf
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Issue Category</label>
-                <select name="category" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
-                    <option value="Account Access & Credentials">Account Access & Credentials</option>
-                    <option value="Profile Verification">Profile Verification</option>
-                    <option value="Media Uploads (Photos/Videos)">Media Uploads (Photos/Videos)</option>
-                    <option value="Billing & Subscription">Billing & Subscription</option>
-                    <option value="Report Abuse / Content Guidelines">Report Abuse / Content Guidelines</option>
-                    <option value="General Inquiry" selected>General Inquiry</option>
-                </select>
-            </div>
-
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Subject Title</label>
-                <input type="text" name="subject" class="form-control" placeholder="Brief summary of what you need help with..." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
-            </div>
-
-            <div class="form-group" style="margin-bottom: 15px;">
-                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Priority Level</label>
-                <select name="priority" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
-                    <option value="low">Low Priority</option>
-                    <option value="medium" selected>Medium Priority</option>
-                    <option value="high">High Priority</option>
-                    <option value="urgent">Urgent Priority</option>
-                </select>
-            </div>
-
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Detailed Explanation</label>
-                <textarea name="description" rows="4" class="form-control" placeholder="Explain your issue or question in detail..." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;"></textarea>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                <button type="button" onclick="$('#user-support-modal').fadeOut(200);" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; font-weight: 600; cursor: pointer;">Cancel</button>
-                <button type="submit" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.35); cursor: pointer;">Submit Support Ticket</button>
-            </div>
-        </form>
-    </div>
-</div>
 @endsection

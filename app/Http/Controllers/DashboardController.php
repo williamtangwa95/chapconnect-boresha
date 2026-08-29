@@ -39,9 +39,22 @@ class DashboardController extends Controller
         $user->loadCount(['likesReceived', 'followersReceived', 'commentsReceived']);
         $completion = self::completionScore($user);
 
+        // Package limits and usage metrics
+        $packageDetails = $user->currentPackageDetails();
+        $usage = [
+            'images_used' => $user->media()->where('type', 'photo')->count(),
+            'videos_used' => $user->media()->where('type', 'video')->count(),
+            'news_used' => $user->media()->where('type', 'news')->count(),
+        ];
+
+        $myInvoices = $user->invoices()->latest()->get();
+
         return view('dashboard.index', [
             'user'       => $user,
             'completion' => $completion,
+            'packageDetails' => $packageDetails,
+            'usage' => $usage,
+            'myInvoices' => $myInvoices,
         ]);
     }
 
@@ -57,13 +70,70 @@ class DashboardController extends Controller
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:12288',
         ];
 
+        // Social media account link validation rules
+        $rules['social_instagram'] = [
+            'nullable',
+            'url',
+            'max:255',
+            function ($attribute, $value, $fail) {
+                if ($value) {
+                    $host = strtolower(parse_url($value, PHP_URL_HOST) ?? '');
+                    $allowed = ['instagram.com', 'www.instagram.com', 'instagr.am', 'www.instagr.am', 'm.instagram.com'];
+                    if (!in_array($host, $allowed, true)) {
+                        $fail('The Instagram link must be a valid Instagram URL (e.g. https://instagram.com/username).');
+                    }
+                }
+            },
+        ];
+
+        $rules['social_facebook'] = [
+            'nullable',
+            'url',
+            'max:255',
+            function ($attribute, $value, $fail) {
+                if ($value) {
+                    $host = strtolower(parse_url($value, PHP_URL_HOST) ?? '');
+                    $allowed = ['facebook.com', 'www.facebook.com', 'fb.com', 'www.fb.com', 'm.facebook.com', 'web.facebook.com', 'fb.watch'];
+                    if (!in_array($host, $allowed, true)) {
+                        $fail('The Facebook link must be a valid Facebook URL (e.g. https://facebook.com/page).');
+                    }
+                }
+            },
+        ];
+
+        $rules['social_tiktok'] = [
+            'nullable',
+            'url',
+            'max:255',
+            function ($attribute, $value, $fail) {
+                if ($value) {
+                    $host = strtolower(parse_url($value, PHP_URL_HOST) ?? '');
+                    $allowed = ['tiktok.com', 'www.tiktok.com', 'vm.tiktok.com', 'm.tiktok.com', 'vt.tiktok.com'];
+                    if (!in_array($host, $allowed, true)) {
+                        $fail('The TikTok link must be a valid TikTok URL (e.g. https://tiktok.com/@username).');
+                    }
+                }
+            },
+        ];
+
+        $rules['social_youtube'] = [
+            'nullable',
+            'url',
+            'max:255',
+            function ($attribute, $value, $fail) {
+                if ($value) {
+                    $host = strtolower(parse_url($value, PHP_URL_HOST) ?? '');
+                    $allowed = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be', 'www.youtu.be'];
+                    if (!in_array($host, $allowed, true)) {
+                        $fail('The YouTube link must be a valid YouTube URL (e.g. https://youtube.com/channel).');
+                    }
+                }
+            },
+        ];
+
         if ($user->role === 'user') {
             $rules['country'] = 'required|string|max:100';
             $rules['description'] = 'nullable|string';
-            $rules['social_instagram'] = 'nullable|url|max:255';
-            $rules['social_facebook'] = 'nullable|url|max:255';
-            $rules['social_tiktok'] = 'nullable|url|max:255';
-            $rules['social_youtube'] = 'nullable|url|max:255';
         }
 
         if ($request->filled('password')) {
@@ -75,7 +145,12 @@ class DashboardController extends Controller
             }
         }
 
-        $request->validate($rules);
+        $request->validate($rules, [
+            'social_instagram.url' => 'Please enter a valid Instagram URL including http:// or https://.',
+            'social_facebook.url'  => 'Please enter a valid Facebook URL including http:// or https://.',
+            'social_tiktok.url'    => 'Please enter a valid TikTok URL including http:// or https://.',
+            'social_youtube.url'   => 'Please enter a valid YouTube URL including http:// or https://.',
+        ]);
 
         $data = $request->only([
             'name', 'phone', 'country', 'description',
@@ -127,6 +202,14 @@ class DashboardController extends Controller
     public function storePhoto(Request $request)
     {
         @ini_set('memory_limit', '512M');
+
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $limits = $user->currentPackageDetails();
+        $photoCount = $user->media()->where('type', 'photo')->count();
+        if ($photoCount >= $limits['max_images']) {
+            return redirect()->back()->withErrors(['photo' => "You have used {$photoCount} of {$limits['max_images']} allowed images. Upgrade your package to upload more images."]);
+        }
 
         // Catch POST body overflow (post_max_size exceeded)
         if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
@@ -280,6 +363,14 @@ class DashboardController extends Controller
         @ini_set('memory_limit', '512M');
         @ini_set('max_execution_time', '300');
 
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $limits = $user->currentPackageDetails();
+        $videoCount = $user->media()->where('type', 'video')->count();
+        if ($videoCount >= $limits['max_videos']) {
+            return redirect()->back()->withErrors(['video' => "You have used {$videoCount} of {$limits['max_videos']} allowed videos. Upgrade your package to upload more videos."]);
+        }
+
         // Catch POST body overflow (post_max_size exceeded)
         if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
             return redirect()->back()
@@ -292,13 +383,27 @@ class DashboardController extends Controller
             'caption' => 'nullable|string|max:1000',
         ]);
 
-        // 1. If Video URL (YouTube, Vimeo, TikTok, Direct Link) is provided
+        // 1. If Video URL is provided (must be YouTube)
         if ($request->filled('video_url')) {
+            $cleaned = \App\Helpers\VideoHelper::cleanUrl($request->input('video_url'));
+            $request->merge(['video_url' => $cleaned]);
+
             $request->validate([
-                'video_url' => 'required|url|max:500',
+                'video_url' => [
+                    'required',
+                    'url',
+                    'max:500',
+                    function ($attribute, $value, $fail) {
+                        $host = strtolower(parse_url($value, PHP_URL_HOST) ?? '');
+                        $allowed = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be', 'www.youtu.be'];
+                        if (!in_array($host, $allowed, true)) {
+                            $fail('The video URL must be a valid YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...). No other video platform links are allowed.');
+                        }
+                    },
+                ],
             ], [
-                'video_url.required' => 'Please enter a video URL link.',
-                'video_url.url'      => 'Please enter a valid video URL (e.g. https://www.youtube.com/watch?v=... or direct MP4 link).',
+                'video_url.required' => 'Please enter a YouTube video URL link.',
+                'video_url.url'      => 'Please enter a valid YouTube video URL (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...).',
             ]);
 
             auth()->user()->media()->create([
@@ -308,7 +413,7 @@ class DashboardController extends Controller
                 'file_path' => $request->video_url,
             ]);
 
-            return redirect()->route('dashboard.videos')->with('success', 'Video link added successfully to your portfolio.');
+            return redirect()->route('dashboard.videos')->with('success', 'YouTube video link added successfully to your portfolio.');
         }
 
         // 2. Check if video file upload was attempted but failed PHP ini limits before validation
@@ -319,11 +424,11 @@ class DashboardController extends Controller
                 if ($errorCode === UPLOAD_ERR_INI_SIZE || $errorCode === UPLOAD_ERR_FORM_SIZE) {
                     return redirect()->back()
                         ->withInput()
-                        ->withErrors(['video' => 'The video file exceeds the server upload limit. Please upload a smaller clip (under 50MB) or use a YouTube/video link.']);
+                        ->withErrors(['video' => 'The video file exceeds the server upload limit. Please upload a smaller clip (under 50MB) or use a YouTube video link.']);
                 }
                 return redirect()->back()
                     ->withInput()
-                    ->withErrors(['video' => 'Video upload failed: ' . $videoFile->getErrorMessage() . '. Please try another file or use a video link.']);
+                    ->withErrors(['video' => 'Video upload failed: ' . $videoFile->getErrorMessage() . '. Please try another file or use a YouTube video link.']);
             }
         }
 
@@ -331,11 +436,11 @@ class DashboardController extends Controller
         $request->validate([
             'video' => 'required_without:video_url|nullable|file|mimes:mp4,mov,avi,webm,ogg,mkv,3gp,flv,qt|max:51200', // up to 50MB
         ], [
-            'video.required_without' => 'Please select a video file to upload or enter a video link.',
+            'video.required_without' => 'Please select a video file to upload or enter a YouTube video link.',
             'video.file'             => 'The selected video file is invalid.',
             'video.mimes'            => 'The video format must be: MP4, MOV, AVI, WEBM, OGG, MKV, or 3GP.',
             'video.max'              => 'The video file size cannot exceed 50MB.',
-            'video.uploaded'         => 'The video file failed to upload. Please ensure the clip is under 50MB or use a YouTube / Vimeo link.',
+            'video.uploaded'         => 'The video file failed to upload. Please ensure the clip is under 50MB or use a YouTube video link.',
         ]);
 
         if ($request->hasFile('video') && $request->file('video')->isValid()) {
@@ -351,7 +456,7 @@ class DashboardController extends Controller
             return redirect()->route('dashboard.videos')->with('success', 'Video file uploaded successfully.');
         }
 
-        return redirect()->back()->withInput()->withErrors(['video' => 'Failed to process video upload. Please select a valid video file or enter a video link.']);
+        return redirect()->back()->withInput()->withErrors(['video' => 'Failed to process video upload. Please select a valid video file or enter a YouTube video link.']);
     }
 
     public function updateVideo(Request $request, $id)
@@ -377,10 +482,25 @@ class DashboardController extends Controller
         ];
 
         if ($request->filled('video_url')) {
+            $cleaned = \App\Helpers\VideoHelper::cleanUrl($request->input('video_url'));
+            $request->merge(['video_url' => $cleaned]);
+
             $request->validate([
-                'video_url' => 'required|url|max:500',
+                'video_url' => [
+                    'required',
+                    'url',
+                    'max:500',
+                    function ($attribute, $value, $fail) {
+                        $host = strtolower(parse_url($value, PHP_URL_HOST) ?? '');
+                        $allowed = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be', 'www.youtu.be'];
+                        if (!in_array($host, $allowed, true)) {
+                            $fail('The video URL must be a valid YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...). No other video platform links are allowed.');
+                        }
+                    },
+                ],
             ], [
-                'video_url.url' => 'Please enter a valid video URL (e.g. https://www.youtube.com/watch?v=... or direct MP4 link).',
+                'video_url.required' => 'Please enter a YouTube video URL link.',
+                'video_url.url'      => 'Please enter a valid YouTube video URL (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...).',
             ]);
 
             if ($video->file_path && !str_starts_with($video->file_path, 'http')) {
@@ -455,6 +575,14 @@ class DashboardController extends Controller
 
     public function storeNews(Request $request)
     {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $limits = $user->currentPackageDetails();
+        $newsCount = $user->media()->where('type', 'news')->count();
+        if ($newsCount >= $limits['max_news']) {
+            return redirect()->back()->withErrors(['title' => "You have used {$newsCount} of {$limits['max_news']} allowed news articles. Upgrade your package to publish more news."]);
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
@@ -575,5 +703,45 @@ class DashboardController extends Controller
         $user = auth()->user();
         $user->update(['is_published' => false]);
         return redirect()->route('dashboard')->with('success', 'Your profile has been hidden from the public directory.');
+    }
+
+    /**
+     * View and print invoice details safely.
+     */
+    public function printInvoice($id)
+    {
+        $invoice = \App\Models\Invoice::with('user')->findOrFail($id);
+
+        if (auth()->user()->role !== 'admin' && $invoice->user_id !== auth()->id()) {
+            abort(403, 'Unauthorized access to this invoice.');
+        }
+
+        return view('dashboard.invoice', compact('invoice'));
+    }
+
+    /**
+     * View and manage comments received by authenticated user.
+     */
+    public function comments()
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        $comments = $user->commentsReceived()
+            ->whereNull('parent_id')
+            ->with(['replies.user', 'user'])
+            ->latest()
+            ->get();
+
+        $totalComments = $user->commentsReceived()->count();
+        $totalTopLevel = $comments->count();
+        $totalReplies = $totalComments - $totalTopLevel;
+
+        return view('dashboard.comments', [
+            'comments' => $comments,
+            'totalComments' => $totalComments,
+            'totalTopLevel' => $totalTopLevel,
+            'totalReplies' => $totalReplies,
+        ]);
     }
 }

@@ -5,10 +5,39 @@ namespace App\Helpers;
 class VideoHelper
 {
     /**
+     * Clean and resolve Google search redirects to extract the actual YouTube URL.
+     */
+    public static function cleanUrl(?string $url): ?string
+    {
+        if (empty($url)) {
+            return $url;
+        }
+
+        $trimmed = trim($url);
+
+        // Check if it is a Google redirect URL
+        if (str_contains($trimmed, 'google.com/url?') || str_contains($trimmed, 'google.co.tz/url?') || str_contains($trimmed, 'google.co.uk/url?')) {
+            $parsed = parse_url($trimmed);
+            if (isset($parsed['query'])) {
+                parse_str($parsed['query'], $query);
+                if (isset($query['q'])) {
+                    return trim($query['q']);
+                } elseif (isset($query['url'])) {
+                    return trim($query['url']);
+                }
+            }
+        }
+
+        return $trimmed;
+    }
+
+    /**
      * Helper to render video player HTML for local files or YouTube/Vimeo/external URLs.
      */
     public static function renderEmbed(?string $url, string $extraClass = ''): string
     {
+        $url = self::cleanUrl($url);
+
         if (empty($url)) {
             return '<div style="background:#0f172a; padding:30px; text-align:center; color:#94a3b8; border-radius:10px;"><i class="bi bi-film" style="font-size:2rem; display:block; margin-bottom:6px;"></i>No video available</div>';
         }

@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'customer_care' => \App\Http\Middleware\CustomerCareMiddleware::class,
         ]);
+        $middleware->append(\App\Http\Middleware\TrackVisitorActivity::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

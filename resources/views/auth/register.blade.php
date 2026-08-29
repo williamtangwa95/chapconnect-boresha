@@ -15,34 +15,34 @@
                     </p>
 
                     <div class="form-group">
-                        <label for="reg-name">Full Name / Stage Name</label>
+                        <label for="reg-name">Full Name / Stage Name <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
                         <input id="reg-name" type="text" name="name" value="{{ old('name') }}" placeholder="Enter your full name" required autofocus>
                     </div>
 
                     <div class="form-group">
-                        <label for="reg-email">Email Address</label>
-                        <input id="reg-email" type="email" name="email" value="{{ old('email') }}" placeholder="Enter your email address" required>
+                        <label for="reg-email">Email Address <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">(Optional)</span></label>
+                        <input id="reg-email" type="email" name="email" value="{{ old('email') }}" placeholder="Enter your email address">
                     </div>
 
                     <div class="form-group">
-                        <label for="reg-phone">Phone Number (WhatsApp Preferred)</label>
+                        <label for="reg-phone">Phone Number <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
                         <input id="reg-phone" type="text" name="phone" value="{{ old('phone') }}" placeholder="+255 ...">
                     </div>
 
                     <div class="form-group">
-                        <label for="categories">Talent Category</label>
+                        <label for="categories">Talent Category <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
                         <select name="category" id="categories" required>
                             <option value="" selected disabled>-- Select Category --</option>
                             @foreach($categories as $slug => $label)
-                                <option value="{{ $slug }}" {{ old('category') === $slug ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
+                            <option value="{{ $slug }}" {{ old('category') === $slug ? 'selected' : '' }}>
+                                {{ $label }}
+                            </option>
                             @endforeach
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="reg-password">Password</label>
+                        <label for="reg-password">Password <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
                         <div class="password-wrapper">
                             <input id="reg-password" type="password" name="password" placeholder="Enter password (min. 6 characters)" required>
                             <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this)" title="Toggle password visibility">
@@ -52,7 +52,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="reg-password-confirm">Confirm Password</label>
+                        <label for="reg-password-confirm">Confirm Password <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
                         <div class="password-wrapper">
                             <input id="reg-password-confirm" type="password" name="password_confirmation" placeholder="Confirm password" required>
                             <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this)" title="Toggle password visibility">
@@ -73,7 +73,7 @@
 
 @section('scripts')
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         $('#categories').select2({
             width: '100%',
             placeholder: '-- Select Category --',

@@ -21,7 +21,7 @@
         </div>
         
         <!-- Create News Form -->
-        <form action="{{ route('dashboard.news.store') }}" method="POST" enctype="multipart/form-data" style="margin-bottom: 35px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 25px; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+        <form action="{{ route('dashboard.news.store') }}" method="POST" enctype="multipart/form-data" style="max-width: 640px; margin: 0 auto 35px auto; background: #f8fafc; border: 1px solid #e2e8f0; padding: 25px; border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
             @csrf
             
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">

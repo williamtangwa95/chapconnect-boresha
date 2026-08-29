@@ -12,6 +12,7 @@ class Comment extends Model
     protected $fillable = [
         'user_id',
         'talent_id',
+        'parent_id',
         'author_name',
         'comment',
         'ip_address',
@@ -26,5 +27,15 @@ class Comment extends Model
     public function talent()
     {
         return $this->belongsTo(User::class, 'talent_id');
+    }
+
+    public function replies()
+    {
+        return $this->hasMany(Comment::class, 'parent_id')->oldest();
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
     }
 }

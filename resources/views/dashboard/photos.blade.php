@@ -21,7 +21,7 @@
         </div>
         
         <!-- Upload Form -->
-        <form id="formPhotoUpload" action="{{ route('dashboard.photos.store') }}" method="POST" enctype="multipart/form-data" style="margin-bottom: 35px; background: #f8fafc; border: 2px dashed #cbd5e1; padding: 25px; border-radius: 14px; transition: all 0.2s ease;">
+        <form id="formPhotoUpload" action="{{ route('dashboard.photos.store') }}" method="POST" enctype="multipart/form-data" style="max-width: 640px; margin: 0 auto 35px auto; background: #f8fafc; border: 2px dashed #cbd5e1; padding: 25px; border-radius: 14px; transition: all 0.2s ease;">
             @csrf
             
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">

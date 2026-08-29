@@ -12,8 +12,8 @@
                     <h2>Login</h2>
 
                     <div class="form-group">
-                        <label for="login-email">Email Address</label>
-                        <input id="login-email" type="email" name="email" value="{{ old('email') }}" placeholder="Enter your email address" required autofocus>
+                        <label for="login-email">Username</label>
+                        <input id="login-email" type="text" name="login" value="{{ old('login') }}" placeholder="Enter your email or phone number" required autofocus>
                     </div>
 
                     <div class="form-group">

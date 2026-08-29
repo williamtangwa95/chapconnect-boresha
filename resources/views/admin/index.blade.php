@@ -195,6 +195,10 @@
                                 <span style="display: flex; align-items: center; gap: 8px; word-break: break-word;"><i class="bi bi-grid-fill" style="color: #8b5cf6; flex-shrink: 0;"></i> Browse Talent Directory</span>
                                 <i class="bi bi-box-arrow-up-right" style="font-size: 0.8rem; color: #94a3b8; flex-shrink: 0;"></i>
                             </a>
+                            <a href="#requests" class="tab-link" data-tab="requests" style="width: 100%; box-sizing: border-box; text-align: left; padding: 10px 14px; background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.15); border-radius: 10px; font-size: 0.88rem; font-weight: 600; color: #4f46e5; text-decoration: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.2s ease;">
+                                <span style="display: flex; align-items: center; gap: 8px; word-break: break-word;"><i class="bi bi-person-check-fill" style="color: #6366f1; flex-shrink: 0;"></i> Contact Requests <span style="font-size: 0.7rem; background: rgba(99,102,241,0.15); color: #6366f1; border-radius: 10px; padding: 1px 7px; font-weight: 800;">{{ $contactRequests->where('status','Pending')->count() }}</span></span>
+                                <i class="bi bi-chevron-right" style="font-size: 0.8rem; color: #94a3b8; flex-shrink: 0;"></i>
+                            </a>
                         </div>
                     </div>
 
@@ -428,6 +432,18 @@
                                                 data-is-staff="0"
                                                 style="padding: 4px 9px; font-size: 0.73rem; border: 1px solid #cbd5e1; color: #0284c7; border-radius: 6px; font-weight: 600; background: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; line-height: 1.2;">
                                                 <i class="bi bi-pencil-square" style="font-size: 0.72rem;"></i> Edit
+                                            </button>
+
+                                            <!-- Manage Package -->
+                                            <button type="button" class="btn-manage-user-package"
+                                                data-id="{{ $u->id }}"
+                                                data-name="{{ $u->name }}"
+                                                data-package-id="{{ $u->activeSubscription ? $u->activeSubscription->package_id : '' }}"
+                                                data-package-name="{{ $u->currentPackageDetails()['name'] }}"
+                                                data-start-date="{{ $u->currentPackageDetails()['start_date'] }}"
+                                                data-end-date="{{ $u->currentPackageDetails()['end_date'] }}"
+                                                style="padding: 4px 9px; font-size: 0.73rem; border: 1px solid #cbd5e1; color: #f59e0b; border-radius: 6px; font-weight: 600; background: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; line-height: 1.2;">
+                                                <i class="bi bi-box-seam-fill" style="font-size: 0.72rem;"></i> Package
                                             </button>
 
                                             <!-- Toggle Publish / Unpublish -->
@@ -842,13 +858,34 @@
                         </div>
 
                         <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Platform Logo Image (.png, .jpg, .svg)</label>
+                            <input type="file" name="site_logo_file" accept="image/*" class="form-control" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.88rem;">
+                            @if(!empty($systemSettings['site_logo']))
+                                <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+                                    <img src="{{ asset($systemSettings['site_logo']) }}" alt="Logo" style="height: 32px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                    <span style="font-size: 0.78rem; color: #64748b;">Active Logo</span>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
                             <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Support WhatsApp Number</label>
                             <input type="text" name="whatsapp_number" value="{{ $systemSettings['whatsapp_number'] ?? '0710383352' }}" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
                         </div>
 
                         <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Support Phone Number</label>
+                            <input type="text" name="support_phone" value="{{ $systemSettings['support_phone'] ?? '0710383352' }}" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
                             <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Support Contact Email</label>
                             <input type="email" name="support_email" value="{{ $systemSettings['support_email'] ?? 'support@chapconnect.com' }}" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
+                        </div>
+
+                        <div class="form-group">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">About ChapConnect Summary</label>
+                            <textarea name="site_summary" rows="3" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box; font-size: 0.88rem; line-height: 1.5;">{{ $systemSettings['site_summary'] ?? '' }}</textarea>
                         </div>
                     </div>
 
@@ -908,6 +945,33 @@
                                     <i class="bi bi-arrow-counterclockwise" style="color: #6366f1;"></i> Reset to Default Female Sound
                                 </button>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 5: Platform Social Media Links -->
+                    <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+                        <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-share-fill" style="color: #6366f1;"></i> Platform Social Media Channels
+                        </h3>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Facebook Page / Link</label>
+                            <input type="url" name="site_facebook" value="{{ $systemSettings['site_facebook'] ?? '' }}" placeholder="https://facebook.com/..." style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Instagram Profile / Link</label>
+                            <input type="url" name="site_instagram" value="{{ $systemSettings['site_instagram'] ?? '' }}" placeholder="https://instagram.com/..." style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">TikTok Profile / Link</label>
+                            <input type="url" name="site_tiktok" value="{{ $systemSettings['site_tiktok'] ?? '' }}" placeholder="https://tiktok.com/@..." style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
+                        </div>
+
+                        <div class="form-group">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">YouTube Channel / Link</label>
+                            <input type="url" name="site_youtube" value="{{ $systemSettings['site_youtube'] ?? '' }}" placeholder="https://youtube.com/..." style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
                         </div>
                     </div>
 
@@ -1051,6 +1115,13 @@
                 </div>
             </div>
         </div>
+
+        @include('admin.packages_tab_stub')
+        @include('admin.invoices_tab_stub')
+        @include('admin.contact_requests_tab_stub')
+        @include('admin.analytics_tab_stub')
+        @include('admin.activity_logs_tab_stub')
+        @include('admin.membership_modals_stub')
     </div>
 </main>
 
@@ -1415,9 +1486,13 @@
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('search') || urlParams.has('page')) {
             defaultTab = "talents";
+        } else if (urlParams.get('tab') === 'analytics') {
+            defaultTab = "analytics";
+        } else if (urlParams.get('tab') === 'activity-logs') {
+            defaultTab = "activity-logs";
         } else if (window.location.hash) {
             const hash = window.location.hash.substring(1);
-            if (["dashboard", "talents", "categories", "settings", "staff", "system-settings", "customer-care"].includes(hash)) {
+            if (["dashboard", "talents", "categories", "settings", "staff", "system-settings", "customer-care", "packages", "invoices", "requests", "analytics", "activity-logs"].includes(hash)) {
                 defaultTab = hash;
             }
         }
@@ -1857,8 +1932,84 @@
 
             $('#staff-ticket-action-modal').fadeIn(200);
         });
+
+        // -------------------------------------------------------------
+        // Membership Packages & Invoices Form Modal Handlers
+        // -------------------------------------------------------------
+        $(document).on('click', '.btn-edit-package', function() {
+            const $btn = $(this);
+            const id = $btn.data('id');
+            const name = $btn.data('name');
+            const description = $btn.data('description');
+            const phone = $btn.data('phone');
+            const images = $btn.data('images');
+            const videos = $btn.data('videos');
+            const news = $btn.data('news');
+            const price = $btn.data('price');
+            const duration = $btn.data('duration');
+            const unit = $btn.data('unit');
+            const type = $btn.data('type');
+            const status = $btn.data('status');
+
+            $('#edit-package-form').attr('action', '/admin/packages/' + id + '/update');
+            $('#edit_pkg_name').val(name);
+            $('#edit_pkg_description').val(description || '');
+            $('#edit_pkg_phone_visibility').val(phone);
+            $('#edit_pkg_max_images').val(images);
+            $('#edit_pkg_max_videos').val(videos);
+            $('#edit_pkg_max_news').val(news);
+            $('#edit_pkg_price').val(price);
+            $('#edit_pkg_duration').val(duration);
+            $('#edit_pkg_duration_unit').val(unit);
+            $('#edit_pkg_package_type').val(type);
+            $('#edit_pkg_status').val(status);
+
+            $('#edit-package-modal').fadeIn(200);
+        });
+
+        $(document).on('click', '.btn-record-payment', function() {
+            const $btn = $(this);
+            const id = $btn.data('id');
+            const number = $btn.data('number');
+            const name = $btn.data('name');
+            const outstanding = $btn.data('outstanding');
+
+            $('#record-payment-form').attr('action', '/admin/invoices/' + id + '/pay');
+            $('#pay_invoice_number').text(number);
+            $('#pay_user_name').text('Talent: ' + name);
+            $('#pay_outstanding_balance').text(Number(outstanding).toLocaleString());
+            $('#pay_amount_paid').val(outstanding).attr('max', outstanding);
+
+            $('#record-payment-modal').fadeIn(200);
+        });
+
+        $(document).on('click', '.btn-manage-user-package', function() {
+            const $btn = $(this);
+            const id = $btn.data('id');
+            const name = $btn.data('name');
+            const packageId = $btn.data('package-id');
+            const packageName = $btn.data('package-name');
+            const startDate = $btn.data('start-date');
+            const endDate = $btn.data('end-date');
+
+            $('#assign-package-form').attr('action', '/admin/user/' + id + '/assign-package');
+            $('#assign_user_name').text(name);
+            $('#assign_current_pkg_name').text(packageName || 'None (Standard Free)');
+            $('#assign_current_start').text(startDate || 'N/A');
+            $('#assign_current_end').text(endDate || 'N/A');
+            
+            if (packageId) {
+                $('#assign-package-form select[name="package_id"]').val(packageId);
+            } else {
+                $('#assign-package-form select[name="package_id"]').val('');
+            }
+
+            $('#manage-user-package-modal').fadeIn(200);
+        });
     });
 </script>
+
+@include('admin.membership_modals_stub')
 
 <!-- ==========================================================================
      MODAL: Staff Ticket Action & Recommendations

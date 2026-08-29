@@ -123,6 +123,9 @@ class InteractionController extends Controller
     /**
      * Submit a comment on a talent profile.
      */
+    /**
+     * Submit a comment or reply on a talent profile.
+     */
     public function storeComment(Request $request, $talentId)
     {
         $talent = User::findOrFail($talentId);
@@ -133,7 +136,20 @@ class InteractionController extends Controller
         $request->validate([
             'comment' => 'required|string|max:1000',
             'author_name' => 'nullable|string|max:255',
+            'parent_id' => 'nullable|exists:comments,id',
         ]);
+
+        $parentId = $request->input('parent_id');
+        if ($parentId) {
+            // Ensure parent comment belongs to this talent profile
+            $parentComment = Comment::where('id', $parentId)->where('talent_id', $talentId)->first();
+            if (!$parentComment) {
+                if ($request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Invalid parent comment.'], 400);
+                }
+                return redirect()->back()->with('error', 'Invalid parent comment.');
+            }
+        }
 
         $authorName = $request->input('author_name');
         if (!$authorName) {
@@ -143,6 +159,7 @@ class InteractionController extends Controller
         Comment::create([
             'user_id' => $userId,
             'talent_id' => $talentId,
+            'parent_id' => $parentId,
             'author_name' => $authorName,
             'comment' => $request->input('comment'),
             'ip_address' => $ip,
@@ -153,12 +170,12 @@ class InteractionController extends Controller
             $commentsCount = Comment::where('talent_id', $talentId)->count();
             return response()->json([
                 'success' => true,
-                'message' => 'Comment posted successfully!',
+                'message' => $parentId ? 'Reply posted successfully!' : 'Comment posted successfully!',
                 'count' => $commentsCount,
             ]);
         }
 
-        return redirect()->back()->with('success', 'Your comment has been posted successfully!');
+        return redirect()->back()->with('success', $parentId ? 'Your reply has been posted successfully!' : 'Your comment has been posted successfully!');
     }
 
     /**
@@ -166,20 +183,34 @@ class InteractionController extends Controller
      */
     public function deleteComment(Request $request, $commentId)
     {
-        $comment = Comment::findOrFail($commentId);
-        $userId = Auth::id();
-        $ip = $request->ip();
-        $deviceFingerprint = $this->getDeviceFingerprint($request);
-
-        // Check if current user or guest device is the author or admin
-        $isAuthor = false;
-        if ($userId && ($comment->user_id == $userId || Auth::user()->role === 'admin')) {
-            $isAuthor = true;
-        } elseif (!$comment->user_id && ($comment->ip_address == $ip || ($deviceFingerprint && $comment->device_fingerprint == $deviceFingerprint))) {
-            $isAuthor = true;
+        // If user is not authenticated, redirect to login page
+        if (!Auth::check()) {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'redirect' => route('login'),
+                    'message' => 'Please sign in to manage or delete comments.'
+                ], 401);
+            }
+            return redirect()->route('login')->with('info', 'Please sign in to manage or delete comments.');
         }
 
-        if (!$isAuthor) {
+        $comment = Comment::findOrFail($commentId);
+        $userId = Auth::id();
+        $user = Auth::user();
+
+        // Check authorization:
+        // 1. Current user is comment author ($comment->user_id == $userId)
+        // 2. Current user is profile owner ($comment->talent_id == $userId) - can delete comments violating rules
+        // 3. Current user is admin ($user->role === 'admin')
+        $isAuthorized = false;
+        if ($userId && ($comment->user_id == $userId || $comment->talent_id == $userId || $user->role === 'admin')) {
+            $isAuthorized = true;
+        } elseif (!$comment->user_id && ($comment->ip_address == $request->ip() || ($this->getDeviceFingerprint($request) && $comment->device_fingerprint == $this->getDeviceFingerprint($request)))) {
+            $isAuthorized = true;
+        }
+
+        if (!$isAuthorized) {
             if ($request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'Unauthorized to delete this comment.'], 403);
             }

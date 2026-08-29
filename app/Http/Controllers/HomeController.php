@@ -30,6 +30,15 @@ class HomeController extends Controller
         }
 
         $talents = $query->latest()->get();
+        $currentUser = auth()->user();
+        $isStaff = $currentUser && in_array($currentUser->role, ['admin', 'customer_care', 'staff']);
+        if (!$isStaff) {
+            foreach ($talents as $t) {
+                if ($t->currentPackageDetails()['phone_visibility'] === 'No') {
+                    $t->phone = null;
+                }
+            }
+        }
 
         // Count published talents per category
         $categoryCounts = User::where('role', 'user')->where('is_published', true)
@@ -70,6 +79,15 @@ class HomeController extends Controller
             ->where('category', $category)
             ->latest()
             ->get();
+        $currentUser = auth()->user();
+        $isStaff = $currentUser && in_array($currentUser->role, ['admin', 'customer_care', 'staff']);
+        if (!$isStaff) {
+            foreach ($directors as $t) {
+                if ($t->currentPackageDetails()['phone_visibility'] === 'No') {
+                    $t->phone = null;
+                }
+            }
+        }
 
         return view('category', [
             'talents' => $directors,
@@ -83,6 +101,9 @@ class HomeController extends Controller
         $talent = User::where('role', 'user')
             ->withCount(['likesReceived', 'followersReceived', 'commentsReceived'])
             ->findOrFail($id);
+
+        $currentUser = auth()->user();
+        $isStaff = $currentUser && in_array($currentUser->role, ['admin', 'customer_care', 'staff']);
         
         // Track Unique Profile View & Points
         $userId = auth()->id();
@@ -121,8 +142,18 @@ class HomeController extends Controller
 
         // Load first 4 photos for mini-gallery
         $miniPhotos = $talent->media()->where('type', 'photo')->latest()->take(4)->get();
-        // Load comments for talent
-        $comments = $talent->commentsReceived()->latest()->get();
+        // Load top-level comments for talent with eager loaded replies
+        $comments = $talent->commentsReceived()
+            ->whereNull('parent_id')
+            ->with(['replies.user', 'user'])
+            ->latest()
+            ->get();
+
+        if (!$isStaff) {
+            if ($talent->currentPackageDetails()['phone_visibility'] === 'No') {
+                $talent->phone = null;
+            }
+        }
 
         return view('profile', [
             'talent' => $talent,
@@ -145,6 +176,13 @@ class HomeController extends Controller
     public function photos($id)
     {
         $talent = User::where('role', 'user')->findOrFail($id);
+        $currentUser = auth()->user();
+        $isStaff = $currentUser && in_array($currentUser->role, ['admin', 'customer_care', 'staff']);
+        if (!$isStaff) {
+            if ($talent->currentPackageDetails()['phone_visibility'] === 'No') {
+                $talent->phone = null;
+            }
+        }
         $photos = $talent->media()->where('type', 'photo')->latest()->get();
 
         return view('profile-photos', [
@@ -156,6 +194,13 @@ class HomeController extends Controller
     public function videos($id)
     {
         $talent = User::where('role', 'user')->findOrFail($id);
+        $currentUser = auth()->user();
+        $isStaff = $currentUser && in_array($currentUser->role, ['admin', 'customer_care', 'staff']);
+        if (!$isStaff) {
+            if ($talent->currentPackageDetails()['phone_visibility'] === 'No') {
+                $talent->phone = null;
+            }
+        }
         $videos = $talent->media()->where('type', 'video')->latest()->get();
 
         return view('profile-videos', [

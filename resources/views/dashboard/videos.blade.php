@@ -13,101 +13,105 @@
                 <h2 style="margin: 0 0 6px 0; font-size: 1.35rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 10px;">
                     <i class="bi bi-film" style="color: #6366f1;"></i> Portfolio Video Showreels
                 </h2>
-                <p style="margin: 0; color: #94a3b8; font-size: 0.88rem;">Upload video files or embed YouTube/Vimeo links with custom titles and captions.</p>
+                <p style="margin: 0; color: #94a3b8; font-size: 0.88rem;">Upload video files or embed YouTube links with custom titles and captions.</p>
             </div>
             <div style="background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 0.82rem; color: #a5b4fc;">
                 Total Videos: {{ $videos->count() }}
             </div>
         </div>
         
-        <!-- Upload Mode Switcher Tabs -->
-        <div style="display: flex; gap: 10px; margin-bottom: 20px; background: #f1f5f9; padding: 6px; border-radius: 12px; border: 1px solid #e2e8f0; width: fit-content; max-width: 100%; flex-wrap: wrap;">
-            <button type="button" id="tabUploadFile" class="btn-tab active-tab" style="padding: 9px 20px; border-radius: 8px; font-size: 0.88rem; font-weight: 700; cursor: pointer; background: #6366f1; color: white; border: none; box-shadow: 0 2px 8px rgba(99,102,241,0.3); transition: all 0.2s ease;">
-                <i class="bi bi-file-earmark-play-fill"></i> Upload File
-            </button>
-            <button type="button" id="tabUploadUrl" class="btn-tab" style="padding: 9px 20px; border-radius: 8px; font-size: 0.88rem; font-weight: 700; cursor: pointer; background: transparent; color: #64748b; border: none; transition: all 0.2s ease;">
-                <i class="bi bi-youtube"></i> Embed YouTube / Video Link
-            </button>
+        <!-- Upload forms wrapper -->
+        <div style="max-width: 640px; margin: 0 auto 35px auto;">
+            <!-- Upload Mode Switcher Tabs -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; background: #f1f5f9; padding: 6px; border-radius: 12px; border: 1px solid #e2e8f0; width: fit-content; max-width: 100%; flex-wrap: wrap;">
+                <button type="button" id="tabUploadFile" class="btn-tab active-tab" style="padding: 9px 20px; border-radius: 8px; font-size: 0.88rem; font-weight: 700; cursor: pointer; background: #6366f1; color: white; border: none; box-shadow: 0 2px 8px rgba(99,102,241,0.3); transition: all 0.2s ease;">
+                    <i class="bi bi-file-earmark-play-fill"></i> Upload File
+                </button>
+                <button type="button" id="tabUploadUrl" class="btn-tab" style="padding: 9px 20px; border-radius: 8px; font-size: 0.88rem; font-weight: 700; cursor: pointer; background: transparent; color: #64748b; border: none; transition: all 0.2s ease;">
+                    <i class="bi bi-youtube"></i> Embed YouTube Link
+                </button>
+            </div>
+
+            <!-- Option A: File Upload Form -->
+            <form id="formFileUpload" action="{{ route('dashboard.videos.store') }}" method="POST" enctype="multipart/form-data" style="margin-bottom: 35px; background: #f8fafc; border: 2px dashed #cbd5e1; padding: 25px; border-radius: 14px; transition: all 0.2s ease;">
+                @csrf
+                
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+                    <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(99,102,241,0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Upload Video File</h3>
+                        <p style="margin: 0; font-size: 0.8rem; color: #64748b;">Upload MP4, MOV, AVI, WEBM, MKV, or 3GP (Max 50MB per video clip).</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
+                    <!-- Video Title -->
+                    <div class="form-group">
+                        <label for="video_title_file" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Video Title (Optional)</label>
+                        <input type="text" id="video_title_file" name="title" class="form-control" value="{{ old('title') }}" placeholder="e.g. Official Music Video or Live Performance Showreel" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%;">
+                    </div>
+
+                    <!-- Video Caption -->
+                    <div class="form-group">
+                        <label for="video_caption_file" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Video Description / Caption (Optional)</label>
+                        <textarea id="video_caption_file" name="caption" class="form-control" rows="2" placeholder="Write a short description or notes about this video clip..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%; line-height: 1.5;">{{ old('caption') }}</textarea>
+                    </div>
+
+                    <!-- File Input -->
+                    <div class="form-group">
+                        <label for="video" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Select Video File *</label>
+                        <input type="file" id="video" name="video" class="form-control" accept="video/*" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.88rem; width: 100%;">
+                        <div id="videoFileStatus" style="display: none; margin-top: 8px; font-size: 0.82rem; font-weight: 600;"></div>
+                    </div>
+                </div>
+                
+                <button type="submit" id="btnSubmitFileUpload" style="padding: 11px 26px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                    <i class="bi bi-upload"></i> Upload Video &amp; Details
+                </button>
+            </form>
+
+            <!-- Option B: URL Link Form -->
+            <form id="formUrlUpload" action="{{ route('dashboard.videos.store') }}" method="POST" style="display: none; margin-bottom: 35px; background: #f8fafc; border: 2px dashed #cbd5e1; padding: 25px; border-radius: 14px; transition: all 0.2s ease;">
+                @csrf
+                
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+                    <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(236,72,153,0.12); color: #ec4899; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-youtube"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Embed YouTube Link</h3>
+                        <p style="margin: 0; font-size: 0.8rem; color: #64748b;">Paste any public YouTube video link (YouTube watch, shorts, or share link).</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
+                    <!-- Video Title -->
+                    <div class="form-group">
+                        <label for="video_title_url" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Video Title (Optional)</label>
+                        <input type="text" id="video_title_url" name="title" class="form-control" value="{{ old('title') }}" placeholder="e.g. YouTube Live Performance or Concert Highlight" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%;">
+                    </div>
+
+                    <!-- Video Caption -->
+                    <div class="form-group">
+                        <label for="video_caption_url" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Video Description / Caption (Optional)</label>
+                        <textarea id="video_caption_url" name="caption" class="form-control" rows="2" placeholder="Write a short description or notes about this video link..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%; line-height: 1.5;">{{ old('caption') }}</textarea>
+                    </div>
+
+                    <!-- URL Input -->
+                    <div class="form-group">
+                        <label for="video_url" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">YouTube Link URL *</label>
+                        <input type="url" id="video_url" name="video_url" class="form-control" value="{{ old('video_url') }}" placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%;">
+                        <div id="videoUrlStatus" style="display: none; margin-top: 8px; font-size: 0.82rem; font-weight: 600;"></div>
+                    </div>
+                </div>
+
+                <button type="submit" id="btnSubmitUrlUpload" style="padding: 11px 26px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(236,72,153,0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem;">
+                    <i class="bi bi-plus-circle-fill"></i> Add YouTube Video Link
+                </button>
+            </form>
         </div>
-
-        <!-- Option A: File Upload Form -->
-        <form id="formFileUpload" action="{{ route('dashboard.videos.store') }}" method="POST" enctype="multipart/form-data" style="margin-bottom: 35px; background: #f8fafc; border: 2px dashed #cbd5e1; padding: 25px; border-radius: 14px; transition: all 0.2s ease;">
-            @csrf
-            
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
-                <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(99,102,241,0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
-                    <i class="bi bi-file-earmark-arrow-up-fill"></i>
-                </div>
-                <div>
-                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Upload Video File</h3>
-                    <p style="margin: 0; font-size: 0.8rem; color: #64748b;">Upload MP4, MOV, AVI, WEBM, MKV, or 3GP (Max 50MB per video clip).</p>
-                </div>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
-                <!-- Video Title -->
-                <div class="form-group">
-                    <label for="video_title_file" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Video Title (Optional)</label>
-                    <input type="text" id="video_title_file" name="title" class="form-control" value="{{ old('title') }}" placeholder="e.g. Official Music Video or Live Performance Showreel" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%;">
-                </div>
-
-                <!-- Video Caption -->
-                <div class="form-group">
-                    <label for="video_caption_file" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Video Description / Caption (Optional)</label>
-                    <textarea id="video_caption_file" name="caption" class="form-control" rows="2" placeholder="Write a short description or notes about this video clip..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%; line-height: 1.5;">{{ old('caption') }}</textarea>
-                </div>
-
-                <!-- File Input -->
-                <div class="form-group">
-                    <label for="video" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Select Video File *</label>
-                    <input type="file" id="video" name="video" class="form-control" accept="video/*" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.88rem; width: 100%;">
-                    <div id="videoFileStatus" style="display: none; margin-top: 8px; font-size: 0.82rem; font-weight: 600;"></div>
-                </div>
-            </div>
-            
-            <button type="submit" id="btnSubmitFileUpload" style="padding: 11px 26px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem;">
-                <i class="bi bi-upload"></i> Upload Video &amp; Details
-            </button>
-        </form>
-
-        <!-- Option B: URL Link Form -->
-        <form id="formUrlUpload" action="{{ route('dashboard.videos.store') }}" method="POST" style="display: none; margin-bottom: 35px; background: #f8fafc; border: 2px dashed #cbd5e1; padding: 25px; border-radius: 14px; transition: all 0.2s ease;">
-            @csrf
-            
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
-                <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(236,72,153,0.12); color: #ec4899; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
-                    <i class="bi bi-youtube"></i>
-                </div>
-                <div>
-                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Embed YouTube / Video Link</h3>
-                    <p style="margin: 0; font-size: 0.8rem; color: #64748b;">Paste any public YouTube link, Vimeo video, or direct MP4 URL.</p>
-                </div>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
-                <!-- Video Title -->
-                <div class="form-group">
-                    <label for="video_title_url" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Video Title (Optional)</label>
-                    <input type="text" id="video_title_url" name="title" class="form-control" value="{{ old('title') }}" placeholder="e.g. YouTube Live Performance or Concert Highlight" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%;">
-                </div>
-
-                <!-- Video Caption -->
-                <div class="form-group">
-                    <label for="video_caption_url" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Video Description / Caption (Optional)</label>
-                    <textarea id="video_caption_url" name="caption" class="form-control" rows="2" placeholder="Write a short description or notes about this video link..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%; line-height: 1.5;">{{ old('caption') }}</textarea>
-                </div>
-
-                <!-- URL Input -->
-                <div class="form-group">
-                    <label for="video_url" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">YouTube, Vimeo, or Video Link URL *</label>
-                    <input type="url" id="video_url" name="video_url" class="form-control" value="{{ old('video_url') }}" placeholder="https://www.youtube.com/watch?v=... or https://vimeo.com/..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%;">
-                </div>
-            </div>
-
-            <button type="submit" id="btnSubmitUrlUpload" style="padding: 11px 26px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(236,72,153,0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem;">
-                <i class="bi bi-plus-circle-fill"></i> Add Video Link &amp; Details
-            </button>
-        </form>
 
         <h3 style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 18px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
             <span><i class="bi bi-collection-play-fill" style="color: #6366f1; margin-right: 6px;"></i> Your Video Assets</span>
@@ -184,8 +188,9 @@
 
                 <!-- Video URL Link -->
                 <div class="form-group">
-                    <label for="edit_video_url" style="display: block; font-weight: 700; font-size: 0.84rem; color: #334155; margin-bottom: 6px;">Update Video Link / YouTube URL (Optional)</label>
-                    <input type="url" id="edit_video_url" name="video_url" class="form-control" placeholder="https://www.youtube.com/watch?v=..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%;">
+                    <label for="edit_video_url" style="display: block; font-weight: 700; font-size: 0.84rem; color: #334155; margin-bottom: 6px;">Update YouTube Video Link (Optional)</label>
+                    <input type="url" id="edit_video_url" name="video_url" class="form-control" placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%;">
+                    <div id="editVideoUrlStatus" style="display: none; margin-top: 6px; font-size: 0.8rem; font-weight: 600;"></div>
                 </div>
 
                 <!-- Or Replace File -->
@@ -198,7 +203,7 @@
 
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
                 <button type="button" onclick="$('#editVideoModal').fadeOut(200);" style="padding: 10px 20px; border-radius: 10px; font-weight: 700; background: #f1f5f9; color: #475569; border: none; cursor: pointer;">Cancel</button>
-                <button type="submit" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(99,102,241,0.35);">Save Changes</button>
+                <button type="submit" id="btnSubmitEditVideo" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border: none; cursor: pointer; box-shadow: 0 4px 12px rgba(99,102,241,0.35);">Save Changes</button>
             </div>
         </form>
     </div>
@@ -212,6 +217,7 @@
         $('#edit_video_title').val(title);
         $('#edit_video_caption').val(caption);
         $('#edit_video_url').val(videoUrl);
+        $('#editVideoUrlStatus').hide();
         $('#editVideoModal').css('display', 'flex').hide().fadeIn(200);
     }
 
@@ -222,8 +228,65 @@
         const formUrlUpload = document.getElementById('formUrlUpload');
         const videoInput = document.getElementById('video');
         const statusEl = document.getElementById('videoFileStatus');
+        const videoUrlInput = document.getElementById('video_url');
+        const videoUrlStatusEl = document.getElementById('videoUrlStatus');
+        const editVideoUrlInput = document.getElementById('edit_video_url');
+        const editVideoUrlStatusEl = document.getElementById('editVideoUrlStatus');
         const btnSubmitFileUpload = document.getElementById('btnSubmitFileUpload');
         const btnSubmitUrlUpload = document.getElementById('btnSubmitUrlUpload');
+        const btnSubmitEditVideo = document.getElementById('btnSubmitEditVideo');
+
+        function isYouTubeUrl(urlStr) {
+            if (!urlStr || !urlStr.trim()) return true; // empty allowed unless submitting empty
+            try {
+                const parsed = new URL(urlStr.trim());
+                const host = parsed.hostname.toLowerCase();
+                const allowed = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be', 'www.youtu.be'];
+                return allowed.includes(host);
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function validateYouTubeInput(inputEl, statusEl, submitBtn) {
+            if (!inputEl || !statusEl || !submitBtn) return;
+            const val = inputEl.value.trim();
+            if (!val) {
+                statusEl.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
+                return;
+            }
+
+            if (isYouTubeUrl(val)) {
+                statusEl.style.display = 'block';
+                statusEl.style.color = '#10b981';
+                statusEl.innerHTML = `<i class="bi bi-check-circle-fill"></i> Valid YouTube video link format.`;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.style.cursor = 'pointer';
+            } else {
+                statusEl.style.display = 'block';
+                statusEl.style.color = '#ef4444';
+                statusEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Please enter a valid YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...). No other video platforms are allowed.`;
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.6';
+                submitBtn.style.cursor = 'not-allowed';
+            }
+        }
+
+        if (videoUrlInput) {
+            videoUrlInput.addEventListener('input', function() {
+                validateYouTubeInput(videoUrlInput, videoUrlStatusEl, btnSubmitUrlUpload);
+            });
+        }
+
+        if (editVideoUrlInput) {
+            editVideoUrlInput.addEventListener('input', function() {
+                validateYouTubeInput(editVideoUrlInput, editVideoUrlStatusEl, btnSubmitEditVideo);
+            });
+        }
 
         function showTabFile() {
             tabUploadFile.style.background = '#6366f1';
@@ -300,7 +363,12 @@
         }
 
         if (formUrlUpload && btnSubmitUrlUpload) {
-            formUrlUpload.addEventListener('submit', function() {
+            formUrlUpload.addEventListener('submit', function(e) {
+                if (!isYouTubeUrl(videoUrlInput.value)) {
+                    e.preventDefault();
+                    validateYouTubeInput(videoUrlInput, videoUrlStatusEl, btnSubmitUrlUpload);
+                    return false;
+                }
                 btnSubmitUrlUpload.disabled = true;
                 btnSubmitUrlUpload.innerHTML = `<i class="bi bi-hourglass-split"></i> Saving Link...`;
                 btnSubmitUrlUpload.style.opacity = '0.7';

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Notification;
 use App\Models\SupportTicket;
 use App\Models\User;
+use App\Models\AccountBlock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -50,6 +51,10 @@ class CustomerCareController extends Controller
         // Fetch staff list for assignment dropdown
         $staffMembers = User::whereIn('role', ['admin', 'customer_care', 'staff'])->orderBy('name')->get();
 
+        $blockedAccounts = AccountBlock::with('user')->latest()->get();
+        $allUsers = User::where('role', 'user')->orderBy('name')->get(['id', 'name', 'email', 'phone', 'role']);
+        $contactRequests = \App\Models\ContactRequest::with(['targetUser', 'requesterUser'])->latest()->get();
+
         return view('customer_care.index', compact(
             'tickets',
             'totalTickets',
@@ -60,7 +65,10 @@ class CustomerCareController extends Controller
             'staffMembers',
             'statusFilter',
             'priorityFilter',
-            'searchQuery'
+            'searchQuery',
+            'blockedAccounts',
+            'allUsers',
+            'contactRequests'
         ));
     }
 
@@ -248,5 +256,35 @@ class CustomerCareController extends Controller
         $ticket->delete();
 
         return redirect()->back()->with('success', "Support ticket '{$num}' deleted.");
+    }
+
+    /**
+     * Unblock a user account and log details.
+     */
+    public function unblockAccount(Request $request, $id)
+    {
+        $block = AccountBlock::findOrFail($id);
+
+        $request->validate([
+            'customer_complaint' => 'required|string',
+            'requested_by' => 'required|string|max:255',
+            'status' => 'required|string|in:unblocked',
+        ]);
+
+        $block->update([
+            'customer_complaint' => $request->customer_complaint,
+            'requested_by' => $request->requested_by,
+            'issued_by' => auth()->user()->name,
+            'status' => 'unblocked',
+            'unblocked_at' => now(),
+        ]);
+
+        $user = $block->user;
+        if ($user) {
+            $user->update(['is_blocked' => false]);
+            $user->failedLoginAttempts()->delete();
+        }
+
+        return redirect()->back()->with('success', "User account '" . ($user ? $user->name : 'Unknown') . "' unblocked successfully.");
     }
 }

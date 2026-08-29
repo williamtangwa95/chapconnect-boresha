@@ -21,6 +21,10 @@ Route::get('/profile/{id}', [HomeController::class, 'profile'])->name('profile')
 Route::get('/profile/{id}/photos', [HomeController::class, 'photos'])->name('profile.photos');
 Route::get('/profile/{id}/videos', [HomeController::class, 'videos'])->name('profile.videos');
 Route::get('/download/app', [HomeController::class, 'downloadApp'])->name('app.download');
+// Public contact request — throttled to 5/hour per IP (additional app-level check inside controller)
+Route::post('/profile/{id}/connect', [\App\Http\Controllers\ContactRequestController::class, 'store'])
+    ->middleware('throttle:5,60')
+    ->name('profile.connect');
 
 // Public Talent Interaction Routes (Likes, Followers, Comments)
 Route::post('/talent/{id}/like', [InteractionController::class, 'toggleLike'])->name('talent.like');
@@ -65,6 +69,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/dashboard/news/{id}/update', [DashboardController::class, 'updateNews'])->name('dashboard.news.update');
     Route::delete('/dashboard/news/{id}', [DashboardController::class, 'deleteNews'])->name('dashboard.news.delete');
 
+    // Comments management
+    Route::get('/dashboard/comments', [DashboardController::class, 'comments'])->name('dashboard.comments');
+
     // Publish / Unpublish profile
     Route::post('/dashboard/publish', [DashboardController::class, 'publish'])->name('dashboard.publish');
     Route::post('/dashboard/unpublish', [DashboardController::class, 'unpublish'])->name('dashboard.unpublish');
@@ -79,6 +86,15 @@ Route::middleware(['auth'])->group(function () {
 
     // Assigned staff ticket action route
     Route::post('/admin/tickets/{id}/staff-action', [\App\Http\Controllers\CustomerCareController::class, 'staffAction'])->name('admin.tickets.staff-action');
+
+    // Invoice printing view route
+    Route::get('/dashboard/invoice/{id}', [DashboardController::class, 'printInvoice'])->name('dashboard.invoice.print');
+
+    // Target user dashboard action route
+    Route::post('/dashboard/contact-requests/{id}/action', [\App\Http\Controllers\ContactRequestController::class, 'userAction'])->name('dashboard.contact-requests.action');
+
+    // Administrative action route (Admin / Customer Care)
+    Route::post('/admin/contact-requests/{id}/action', [\App\Http\Controllers\ContactRequestController::class, 'adminAction'])->name('admin.contact-requests.action');
 });
 
 // Customer Care Dashboard & Support Ticket Management (Protected by auth and customer_care middleware)
@@ -87,11 +103,16 @@ Route::middleware(['auth', 'customer_care'])->group(function () {
     Route::post('/customer-care/tickets', [\App\Http\Controllers\CustomerCareController::class, 'store'])->name('customer-care.tickets.store');
     Route::post('/customer-care/tickets/{id}/update', [\App\Http\Controllers\CustomerCareController::class, 'update'])->name('customer-care.tickets.update');
     Route::delete('/customer-care/tickets/{id}', [\App\Http\Controllers\CustomerCareController::class, 'destroy'])->name('customer-care.tickets.delete');
+    Route::post('/customer-care/unblock/{id}', [\App\Http\Controllers\CustomerCareController::class, 'unblockAccount'])->name('customer-care.unblock');
 });
 
 // Super Admin Panel Routes (Protected by auth and admin middleware)
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/analytics/export-excel', [AdminController::class, 'exportAnalyticsExcel'])->name('admin.analytics.export-excel');
+    Route::get('/admin/analytics/download-pdf', [AdminController::class, 'downloadAnalyticsPdf'])->name('admin.analytics.download-pdf');
+    Route::get('/admin/activity-logs/export-excel', [AdminController::class, 'exportActivityExcel'])->name('admin.activity-logs.export-excel');
+    Route::get('/admin/activity-logs/download-pdf', [AdminController::class, 'downloadActivityPdf'])->name('admin.activity-logs.download-pdf');
     Route::post('/admin/user/store', [AdminController::class, 'storeUser'])->name('admin.user.store');
     Route::post('/admin/staff/store', [AdminController::class, 'storeStaff'])->name('admin.staff.store');
     Route::delete('/admin/user/{id}', [AdminController::class, 'deleteUser'])->name('admin.user.delete');
@@ -109,4 +130,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/settings/update', [AdminController::class, 'updateSystemSettings'])->name('admin.settings.update');
     Route::post('/admin/settings/reset-welcome-sound', [AdminController::class, 'resetWelcomeSound'])->name('admin.settings.reset-welcome-sound');
     Route::post('/admin/settings/clear-cache', [AdminController::class, 'clearCache'])->name('admin.settings.clear-cache');
+
+    // Packages & Invoices CRUD/Payment Routes
+    Route::post('/admin/packages', [AdminController::class, 'storePackage']);
+    Route::post('/admin/packages/{id}/update', [AdminController::class, 'updatePackage']);
+    Route::delete('/admin/packages/{id}', [AdminController::class, 'deletePackage'])->name('admin.packages.delete');
+    Route::post('/admin/user/{id}/assign-package', [AdminController::class, 'assignPackage']);
+    Route::post('/admin/invoices/{id}/pay', [AdminController::class, 'recordInvoicePayment']);
 });

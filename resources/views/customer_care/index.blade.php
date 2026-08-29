@@ -55,74 +55,70 @@
                     <i class="bi bi-speedometer2"></i> Admin Dashboard & Assigned Tickets
                 </a>
                 @endif
-
+                @if(auth()->user()->role === 'customer_care')
+                <button type="button" onclick="$('#user-support-modal').fadeIn(200);" style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease; outline: none; border: 1px solid rgba(255,255,255,0.2);">
+                    <i class="bi bi-headset"></i> Need Help / Support
+                </button>
+                @endif
                 <button type="button" onclick="$('#create-ticket-modal').fadeIn(200);" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; border: none; border-radius: 30px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35); transition: all 0.3s ease;">
                     <i class="bi bi-plus-circle-fill" style="font-size: 1.1rem;"></i> Log New Support Ticket
                 </button>
             </div>
         </div>
 
-        <!-- Statistics Cards Grid (Horizontal 5-Column Grid) -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; width: 100%;">
-            <!-- Card 1: Total Support Tickets -->
-            <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(99,102,241,0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
-                    <i class="bi bi-ticket-detailed-fill"></i>
+        <!-- Tab: Support Issues & Tickets Roster -->
+        <div id="tab-tickets" class="tab-content">
+            <!-- Statistics Cards Grid (5-Column Grid for Tickets) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; width: 100%; margin-bottom: 20px;">
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(99,102,241,0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-ticket-detailed-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #0f172a;">{{ $totalTickets }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Total Tickets</div>
+                    </div>
                 </div>
-                <div>
-                    <div style="font-size: 1.4rem; font-weight: 800; color: #0f172a;">{{ $totalTickets }}</div>
-                    <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Total Tickets</div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(239,68,68,0.12); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-exclamation-octagon-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #ef4444;">{{ $openTickets }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Open Issues</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245,158,11,0.12); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #f59e0b;">{{ $inProgressTickets }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">In Progress</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-check-all"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #10b981;">{{ $resolvedTickets }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Resolved / Closed</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(220,38,38,0.15); color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #dc2626;">{{ $urgentTickets }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Urgent Action Needed</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Card 2: Open Issues -->
-            <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(239,68,68,0.12); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
-                    <i class="bi bi-exclamation-octagon-fill"></i>
-                </div>
-                <div>
-                    <div style="font-size: 1.4rem; font-weight: 800; color: #ef4444;">{{ $openTickets }}</div>
-                    <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Open Issues</div>
-                </div>
-            </div>
+            <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); box-sizing: border-box; width: 100%; min-width: 0;">
 
-            <!-- Card 3: In Progress -->
-            <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245,158,11,0.12); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
-                    <i class="bi bi-hourglass-split"></i>
-                </div>
-                <div>
-                    <div style="font-size: 1.4rem; font-weight: 800; color: #f59e0b;">{{ $inProgressTickets }}</div>
-                    <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">In Progress</div>
-                </div>
-            </div>
-
-            <!-- Card 4: Resolved & Closed -->
-            <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
-                    <i class="bi bi-check-all"></i>
-                </div>
-                <div>
-                    <div style="font-size: 1.4rem; font-weight: 800; color: #10b981;">{{ $resolvedTickets }}</div>
-                    <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Resolved / Closed</div>
-                </div>
-            </div>
-
-            <!-- Card 5: Urgent Priority -->
-            <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
-                <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(220,38,38,0.15); color: #dc2626; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
-                    <i class="bi bi-bell-fill"></i>
-                </div>
-                <div>
-                    <div style="font-size: 1.4rem; font-weight: 800; color: #dc2626;">{{ $urgentTickets }}</div>
-                    <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Urgent Action Needed</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Support Roster Card -->
-        <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); box-sizing: border-box; width: 100%; min-width: 0;">
-            
             <!-- Filter Controls Bar -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
                 <div>
@@ -219,6 +215,26 @@
                             </td>
                             <td style="text-align: right; white-space: nowrap;">
                                 <div style="display: flex; gap: 6px; justify-content: flex-end; align-items: center;">
+                                    @if($t->status === 'resolved')
+                                    <!-- View Ticket Modal Button (Resolved state) -->
+                                    <button type="button" class="btn-update-ticket"
+                                        data-id="{{ $t->id }}"
+                                        data-ticket="{{ $t->ticket_number }}"
+                                        data-name="{{ $t->reporter_name }}"
+                                        data-email="{{ $t->reporter_email }}"
+                                        data-phone="{{ $t->reporter_phone }}"
+                                        data-subject="{{ $t->subject }}"
+                                        data-category="{{ $t->category }}"
+                                        data-priority="{{ $t->priority }}"
+                                        data-status="{{ $t->status }}"
+                                        data-assigned="{{ $t->assigned_to }}"
+                                        data-description="{{ $t->description }}"
+                                        data-notes="{{ $t->resolution_notes }}"
+                                        data-view-only="true"
+                                        style="padding: 6px 12px; font-size: 0.78rem; border: 1px solid #cbd5e1; color: var(--primary); border-radius: 8px; font-weight: 600; background: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                        <i class="bi bi-eye-fill"></i> View
+                                    </button>
+                                    @else
                                     <!-- Update Ticket Modal Button -->
                                     <button type="button" class="btn-update-ticket"
                                         data-id="{{ $t->id }}"
@@ -236,12 +252,13 @@
                                         style="padding: 6px 12px; font-size: 0.78rem; border: 1px solid #cbd5e1; color: var(--primary); border-radius: 8px; font-weight: 600; background: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                                         <i class="bi bi-pencil-square"></i> Manage
                                     </button>
-
+                                    @endif
+ 
                                     <!-- Delete Ticket -->
-                                    <form action="{{ route('customer-care.tickets.delete', $t->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete support ticket {{ $t->ticket_number }}?');" style="margin: 0; display: inline;">
+                                    <form action="{{ route('customer-care.tickets.delete', $t->id) }}" method="POST" onsubmit="return {{ $t->status === 'resolved' ? 'false' : 'confirm(\'Are you sure you want to delete support ticket ' . $t->ticket_number . '?\')' }};" style="margin: 0; display: inline;">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" style="padding: 6px 10px; font-size: 0.78rem; border: 1px solid rgba(239,68,68,0.3); color: #ef4444; border-radius: 8px; font-weight: 600; background: rgba(239,68,68,0.05); cursor: pointer;">
+                                        <button type="submit" {{ $t->status === 'resolved' ? 'disabled' : '' }} style="padding: 6px 10px; font-size: 0.78rem; border-radius: 8px; font-weight: 600; {{ $t->status === 'resolved' ? 'border: 1px solid #cbd5e1; color: #94a3b8; background: #f1f5f9; cursor: not-allowed; opacity: 0.7;' : 'border: 1px solid rgba(239,68,68,0.3); color: #ef4444; background: rgba(239,68,68,0.05); cursor: pointer;' }}">
                                             <i class="bi bi-trash-fill"></i>
                                         </button>
                                     </form>
@@ -253,8 +270,326 @@
                 </table>
             </div>
         </div>
-    </div>
+        </div>{{-- /tab-tickets --}}
+
+        <!-- Tab: Blocked Accounts & Login Control -->
+        <div id="tab-blocked" class="tab-content">
+            <!-- Statistics Cards Grid (4-Column Grid for Blocked Accounts) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; width: 100%; margin-bottom: 20px;">
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(15,23,42,0.1); color: #0f172a; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #0f172a;">{{ $blockedAccounts->count() }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Total Block Logged</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(239,68,68,0.12); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-shield-slash-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #ef4444;">{{ $blockedAccounts->where('status','blocked')->count() }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Currently Blocked</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #10b981;">{{ $blockedAccounts->where('status','unblocked')->count() }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Unblocked / Released</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245,158,11,0.12); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #f59e0b;">{{ $blockedAccounts->sum('attempts_count') }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Failed Login Attempts</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); box-sizing: border-box; width: 100%; min-width: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h2 style="margin: 0 0 4px 0; font-size: 1.2rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-shield-slash-fill" style="color: #dc2626;"></i> Blocked Accounts & Login Control
+                    </h2>
+                    <p style="margin: 0; color: #64748b; font-size: 0.85rem;">Review accounts blocked due to consecutive failed login attempts, audit customer complaints, and release blocks.</p>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="admin-table-container">
+                <table class="admin-table display nowrap" id="blocked-accounts-table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="width: 45px; text-align: center;">S/N</th>
+                            <th>User Details</th>
+                            <th>Block Reason / Trigger</th>
+                            <th>Blocked At</th>
+                            <th>Complaints / Audit Notes</th>
+                            <th>Status</th>
+                            <th style="width: 130px; text-align: right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($blockedAccounts as $b)
+                        <tr>
+                            <td style="font-weight: 700; color: #64748b; font-size: 0.85rem; text-align: center;">{{ $loop->iteration }}</td>
+                            <td>
+                                @if($b->user)
+                                <div style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">{{ $b->user->name }}</div>
+                                <div style="font-size: 0.78rem; color: #64748b;">
+                                    @if($b->user->email)
+                                    <i class="bi bi-envelope"></i> {{ $b->user->email }}
+                                    @endif
+                                    @if($b->user->email && $b->user->phone) | @endif
+                                    @if($b->user->phone)
+                                    <i class="bi bi-telephone"></i> {{ $b->user->phone }}
+                                    @endif
+                                </div>
+                                @else
+                                <div style="font-weight: 700; color: #dc2626; font-size: 0.88rem; font-style: italic;">Unknown / Deleted User</div>
+                                @endif
+                            </td>
+                            <td>
+                                <span style="font-weight: 700; color: #991b1b; background: #fee2e2; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #fecaca; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="bi bi-exclamation-triangle-fill"></i> {{ $b->attempts_count }} failed attempts in {{ $b->time_interval }}
+                                </span>
+                            </td>
+                            <td style="font-size: 0.82rem; color: #64748b;">
+                                {{ $b->created_at->format('M d, Y H:i') }}
+                            </td>
+                            <td style="max-width: 250px; font-size: 0.82rem; color: #334155; white-space: normal; word-break: break-word;">
+                                @if($b->status === 'unblocked')
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px;">
+                                    <strong>Complaint:</strong> {{ $b->customer_complaint }}<br>
+                                    <span style="font-size: 0.74rem; color: #64748b;">
+                                        Req by: {{ $b->requested_by }} | Iss by: {{ $b->issued_by }}
+                                    </span>
+                                </div>
+                                @else
+                                <span style="font-style: italic; color: #94a3b8;">Pending customer complaint & unblock</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($b->status === 'blocked')
+                                <span style="font-size: 0.78rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); display: inline-flex; align-items: center; gap: 4px;">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #ef4444; display: inline-block;"></span> Blocked
+                                </span>
+                                @else
+                                <span style="font-size: 0.78rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; background: rgba(16,185,129,0.1); color: #10b981; border: 1px solid rgba(16,185,129,0.2); display: inline-flex; align-items: center; gap: 4px;">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block;"></span> Unblocked
+                                </span>
+                                @endif
+                            </td>
+                            <td style="text-align: right; white-space: nowrap;">
+                                @if($b->status === 'blocked')
+                                <button type="button" class="btn-unblock-account"
+                                    data-id="{{ $b->id }}"
+                                    data-name="{{ $b->user ? $b->user->name : 'Unknown User' }}"
+                                    style="padding: 6px 14px; font-size: 0.78rem; border: none; color: #ffffff; border-radius: 8px; font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 5px rgba(16,185,129,0.2); transition: all 0.2s;">
+                                    <i class="bi bi-unlock-fill"></i> Unblock Account
+                                </button>
+                                @else
+                                <span style="font-size: 0.78rem; color: #94a3b8; font-style: italic; font-weight: 600;">Resolved</span>
+                                @endif
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>{{-- /admin-card --}}
+        </div>{{-- /tab-blocked --}}
+
+        <!-- Tab: Guest Contact Requests -->
+        <div id="tab-requests" class="tab-content">
+            <!-- Statistics Cards Grid (4-Column Grid for Guest Contact Requests) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; width: 100%; margin-bottom: 20px;">
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(99,102,241,0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-person-lines-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #0f172a;">{{ $contactRequests->count() }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Total Contact Requests</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245,158,11,0.12); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-hourglass-top"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #f59e0b;">{{ $contactRequests->where('status','Pending')->count() }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Pending Review</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #10b981;">{{ $contactRequests->where('status','Approved')->count() }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Approved Requests</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(14,165,233,0.12); color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-person-check-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #0284c7;">{{ $contactRequests->where('status','Completed')->count() }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Completed Connections</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); box-sizing: border-box; width: 100%; min-width: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2 style="margin: 0 0 4px 0; font-size: 1.2rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-person-check-fill" style="color: #6366f1;"></i> Guest Contact Requests
+                    <span style="font-size: 0.78rem; background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); padding: 2px 9px; border-radius: 12px; font-weight: 800;">
+                        {{ $contactRequests->where('status','Pending')->count() }} Pending
+                    </span>
+                </h2>
+                <p style="margin: 0; color: #64748b; font-size: 0.85rem;">Visitors requesting to connect with talent profiles that have private contact information.</p>
+            </div>
+        </div>
+
+        <div class="admin-table-container">
+            <table class="admin-table display nowrap" id="cc-contact-requests-table" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Guest Name</th>
+                        <th>Contact Type</th>
+                        <th>Contact Value</th>
+                        <th>Requested Talent</th>
+                        <th>Message</th>
+                        <th>Status</th>
+                        <th style="text-align: right; width: 120px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($contactRequests as $req)
+                    <tr>
+                        <td style="font-size: 0.82rem; color: #475569; white-space: nowrap;">{{ date('d M Y', strtotime($req->created_at)) }}</td>
+                        <td style="font-weight: 700; color: #0f172a;">{{ $req->requester_full_name }}</td>
+                        <td>
+                            @if($req->contact_type === 'whatsapp')
+                                <i class="bi bi-whatsapp" style="color: #10b981;"></i> WhatsApp
+                            @elseif($req->contact_type === 'phone')
+                                <i class="bi bi-telephone-fill" style="color: #6366f1;"></i> Phone
+                            @elseif($req->contact_type === 'email')
+                                <i class="bi bi-envelope-fill" style="color: #ef4444;"></i> Email
+                            @else
+                                <i class="bi bi-geo-alt-fill" style="color: #f59e0b;"></i> Region
+                            @endif
+                        </td>
+                        <td style="font-weight: 600; color: #1e293b;">{{ $req->contact_value }}</td>
+                        <td style="font-weight: 700; color: #4f46e5;">{{ $req->targetUser ? $req->targetUser->name : 'Deleted' }}</td>
+                        <td style="max-width: 180px; font-size: 0.8rem; color: #64748b; word-wrap: break-word; white-space: normal;">{{ $req->message ? Str::limit($req->message, 50) : '—' }}</td>
+                        <td>
+                            <span style="font-size: 0.72rem; font-weight: 800; padding: 3px 9px; border-radius: 20px; 
+                                @if($req->status === 'Pending') background: rgba(245,158,11,0.1); color: #f59e0b;
+                                @elseif($req->status === 'Approved') background: rgba(16,185,129,0.1); color: #10b981;
+                                @elseif($req->status === 'Completed') background: rgba(99,102,241,0.1); color: #6366f1;
+                                @else background: rgba(239,68,68,0.1); color: #ef4444; @endif">
+                                {{ $req->status }}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <button type="button" class="btn-cc-review-request"
+                                data-id="{{ $req->id }}"
+                                data-name="{{ $req->requester_full_name }}"
+                                data-type="{{ $req->contact_type }}"
+                                data-value="{{ $req->contact_value }}"
+                                data-region="{{ $req->region }}"
+                                data-target="{{ $req->targetUser ? $req->targetUser->name : 'N/A' }}"
+                                data-message="{{ $req->message }}"
+                                data-status="{{ $req->status }}"
+                                data-staff-notes="{{ $req->staff_notes }}"
+                                style="padding: 5px 10px; font-size: 0.75rem; border: none; color: #fff; border-radius: 7px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="bi bi-eye"></i> Review
+                            </button>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        </div>{{-- /admin-card --}}
+        </div>{{-- /tab-requests --}}
+    </div>{{-- /dashboard-container --}}
 </main>
+
+<!-- CC Review Contact Request Modal -->
+<div id="cc-review-contact-modal" class="admin-modal">
+    <div class="admin-modal-content" style="border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-width: 520px; width: 90%; margin: auto;">
+        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-person-check-fill" style="color: #6366f1;"></i> Review Contact Request
+            </h3>
+            <button type="button" onclick="$('#cc-review-contact-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <form id="cc-review-form" action="" method="POST">
+            @csrf
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 18px; font-size: 0.85rem; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div>
+                    <span style="color: #64748b; font-weight: 600;">Guest Name:</span>
+                    <div id="cc_rev_guest_name" style="font-weight: 800; color: #0f172a; margin-top: 2px;"></div>
+                </div>
+                <div>
+                    <span style="color: #64748b; font-weight: 600;">Requested Talent:</span>
+                    <div id="cc_rev_target_name" style="font-weight: 800; color: #4f46e5; margin-top: 2px;"></div>
+                </div>
+                <div style="margin-top: 6px;">
+                    <span style="color: #64748b; font-weight: 600;">Contact Type:</span>
+                    <div id="cc_rev_type" style="font-weight: 700; color: #0f172a; margin-top: 2px; text-transform: capitalize;"></div>
+                </div>
+                <div style="margin-top: 6px;">
+                    <span style="color: #64748b; font-weight: 600;">Contact Value:</span>
+                    <div id="cc_rev_value" style="font-weight: 700; color: #0f172a; margin-top: 2px;"></div>
+                </div>
+                <div id="cc_rev_region_wrap" style="margin-top: 6px; display: none; grid-column: 1 / -1;">
+                    <span style="color: #64748b; font-weight: 600;"><i class="bi bi-geo-alt-fill" style="color:#f59e0b;"></i> Region:</span>
+                    <div id="cc_rev_region" style="font-weight: 700; color: #0f172a; margin-top: 2px;"></div>
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Guest Message</label>
+                <textarea id="cc_rev_message" readonly rows="2" class="form-control" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; font-size: 0.85rem; resize: none;"></textarea>
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Update Status</label>
+                <select id="cc_rev_status" name="status" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <option value="Pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Staff Internal Notes</label>
+                <textarea id="cc_rev_staff_notes" name="staff_notes" rows="2" class="form-control" placeholder="Add internal support notes..." style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem;"></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <button type="button" onclick="$('#cc-review-contact-modal').fadeOut(200);" style="padding: 10px 20px; border-radius: 10px; font-weight: 600; background: #e2e8f0; border: none; color: #475569; cursor: pointer;">Cancel</button>
+                <button type="submit" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; cursor: pointer;">Save Updates</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 
 <!-- ==========================================================================
      MODAL 1: Create New Support Ticket
@@ -270,6 +605,20 @@
         <form action="{{ route('customer-care.tickets.store') }}" method="POST">
             @csrf
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label style="color: #475569; font-size: 0.84rem; font-weight: 600; display: block; margin-bottom: 6px;">Search/Select Existing User (Optional)</label>
+                    <select id="search-user-select" class="form-control" style="width: 100%;">
+                        <option value="">-- Select or Search User --</option>
+                        @foreach($allUsers as $u)
+                        @if($u->role === 'user')
+                        <option value="{{ $u->id }}" data-name="{{ $u->name }}" data-email="{{ $u->email }}" data-phone="{{ $u->phone }}">
+                            {{ $u->name }} ({{ $u->email ?: 'No Email' }} - {{ $u->phone ?: 'No Phone' }})
+                        </option>
+                        @endif
+                        @endforeach
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label style="color: #475569; font-size: 0.84rem; font-weight: 600; display: block; margin-bottom: 6px;">Reporter Full Name</label>
                     <input type="text" name="reporter_name" class="form-control" placeholder="e.g. Alex Kassim" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
@@ -282,7 +631,7 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
                 <div class="form-group">
-                    <label style="color: #475569; font-size: 0.84rem; font-weight: 600; display: block; margin-bottom: 6px;">WhatsApp / Phone Number</label>
+                    <label style="color: #475569; font-size: 0.84rem; font-weight: 600; display: block; margin-bottom: 6px;">Phone Number</label>
                     <input type="text" name="reporter_phone" class="form-control" placeholder="e.g. 0710383352" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
                 </div>
                 <div class="form-group">
@@ -423,6 +772,57 @@
         </form>
     </div>
 </div>
+
+<!-- ==========================================================================
+     MODAL 3: Unblock User Account Modal
+   ========================================================================== -->
+<div id="unblock-account-modal" class="admin-modal">
+    <div class="admin-modal-content" style="border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-width: 500px; width: 90%; margin: auto;">
+        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-unlock-fill" style="color: #10b981;"></i> Unblock User Account: <span id="unblock_user_name" style="color: #10b981;"></span>
+            </h3>
+            <button type="button" class="admin-modal-close" onclick="$('#unblock-account-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+
+        <form id="unblock-account-form" method="POST" action="">
+            @csrf
+
+            <!-- Customer Complaint -->
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label style="color: #475569; font-size: 0.84rem; font-weight: 700; display: block; margin-bottom: 6px;">Customer Complaints Why Blocked</label>
+                <textarea name="customer_complaint" rows="3" class="form-control" placeholder="Provide reason or complaint submitted by customer..." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.86rem;"></textarea>
+            </div>
+
+            <!-- Requested By -->
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label style="color: #475569; font-size: 0.84rem; font-weight: 700; display: block; margin-bottom: 6px;">Requested By</label>
+                <input type="text" id="unblock_requested_by" name="requested_by" class="form-control" placeholder="e.g. Customer, Agent Name, etc." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; font-size: 0.86rem;">
+            </div>
+
+            <!-- Issued By -->
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label style="color: #475569; font-size: 0.84rem; font-weight: 700; display: block; margin-bottom: 6px;">Issued By</label>
+                <input type="text" name="issued_by" class="form-control" value="{{ auth()->user()->name }}" readonly style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; font-size: 0.86rem; cursor: not-allowed;">
+            </div>
+
+            <!-- Status -->
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="color: #475569; font-size: 0.84rem; font-weight: 700; display: block; margin-bottom: 6px;">Status</label>
+                <select name="status" class="form-control" required style="background: #e2e8f0; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; font-size: 0.86rem;">
+                    <option value="unblocked" selected>Unblocked</option>
+                </select>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <button type="button" onclick="$('#unblock-account-modal').fadeOut(200);" style="padding: 10px 20px; border-radius: 10px; font-weight: 600; background: #e2e8f0; border: none; color: #475569; cursor: pointer;">Cancel</button>
+                <button type="submit" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(16,185,129,0.3); cursor: pointer;">
+                    Unblock Account
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -454,6 +854,7 @@
             const ticket = $btn.data('ticket');
             const name = $btn.data('name');
             const email = $btn.data('email');
+            const phone = $btn.data('phone');
             const subject = $btn.data('subject');
             const category = $btn.data('category');
             const priority = $btn.data('priority');
@@ -461,11 +862,12 @@
             const assigned = $btn.data('assigned');
             const description = $btn.data('description');
             const notes = $btn.data('notes');
+            const isViewOnly = $btn.data('view-only') === true;
 
             $('#update-ticket-form').attr('action', '/customer-care/tickets/' + id + '/update');
             $('#modal_ticket_num').text('#' + ticket);
             $('#modal_reporter_name').text(name);
-            $('#modal_reporter_email').text(email);
+            $('#modal_reporter_email').text(email + (phone ? ' | ' + phone : ''));
             $('#modal_category_badge').text(category);
             $('#modal_subject').text(subject);
             $('#modal_description').text(description || 'No detailed description provided.');
@@ -475,8 +877,177 @@
             $('#modal_assigned_to').val(assigned || '');
             $('#modal_resolution_notes').val(notes || '');
 
+            // Handle read-only mode for resolved tickets
+            if (isViewOnly) {
+                $('#update-ticket-form').find('select, textarea').prop('disabled', true);
+                $('#update-ticket-form').find('button[type="submit"]').hide();
+                $('#update-ticket-form').find('.admin-modal-header h3 i').removeClass('bi-pencil-square').addClass('bi-eye-fill').css('color', '#10b981');
+                $('#update-ticket-form').find('.admin-modal-header h3').contents().each(function() {
+                    if (this.nodeType === 3) {
+                        this.nodeValue = " View Support Ticket ";
+                    }
+                });
+            } else {
+                $('#update-ticket-form').find('select, textarea').prop('disabled', false);
+                $('#update-ticket-form').find('button[type="submit"]').show();
+                $('#update-ticket-form').find('.admin-modal-header h3 i').removeClass('bi-eye-fill').addClass('bi-pencil-square').css('color', 'var(--primary)');
+                $('#update-ticket-form').find('.admin-modal-header h3').contents().each(function() {
+                    if (this.nodeType === 3) {
+                        this.nodeValue = " Manage Support Ticket ";
+                    }
+                });
+            }
+
             $('#update-ticket-modal').fadeIn(200);
         });
+
+        // Initialize DataTables for Blocked Accounts Table
+        if (typeof $.fn.DataTable !== "undefined" && !$.fn.DataTable.isDataTable('#blocked-accounts-table')) {
+            $('#blocked-accounts-table').DataTable({
+                pageLength: 10,
+                lengthMenu: [10, 25, 50, 100],
+                responsive: true,
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search blocked accounts...",
+                    emptyTable: "No blocked account entries found.",
+                    zeroRecords: "No matching blocked account entries found.",
+                },
+                columnDefs: [{
+                    orderable: false,
+                    targets: [-1]
+                }]
+            });
+        }
+
+        // Initialize Select2 for User Search in Modal
+        if (typeof $.fn.select2 !== "undefined") {
+            $('#search-user-select').select2({
+                placeholder: '-- Select or Search User --',
+                allowClear: true,
+                minimumInputLength: 3,
+                width: '100%',
+                dropdownParent: $('#create-ticket-modal')
+            });
+
+            // Listen to User Change Event to auto-fill inputs
+            $('#search-user-select').on('change', function() {
+                const selectedOption = $(this).find('option:selected');
+                const name = selectedOption.data('name') || '';
+                const email = selectedOption.data('email') || '';
+                const phone = selectedOption.data('phone') || '';
+
+                const $modal = $('#create-ticket-modal');
+                $modal.find('input[name="reporter_name"]').val(name);
+                $modal.find('input[name="reporter_email"]').val(email);
+                $modal.find('input[name="reporter_phone"]').val(phone);
+            });
+        }
+
+        // Initialize DataTables for Guest Contact Requests Table
+        if (typeof $.fn.DataTable !== "undefined" && !$.fn.DataTable.isDataTable('#cc-contact-requests-table')) {
+            $('#cc-contact-requests-table').DataTable({
+                pageLength: 10,
+                lengthMenu: [10, 25, 50, 100],
+                responsive: true,
+                order: [[0, 'desc']],
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search guest name, contact value, or talent...",
+                    emptyTable: "No guest contact requests found.",
+                    zeroRecords: "No matching guest contact requests found.",
+                },
+                columnDefs: [{
+                    orderable: false,
+                    targets: [-1]
+                }]
+            });
+        }
+
+        // Review Contact Request Modal Click Handler
+        $(document).on('click', '.btn-cc-review-request', function() {
+            const id = $(this).data('id');
+            const region = $(this).data('region');
+            $('#cc_rev_guest_name').text($(this).data('name'));
+            $('#cc_rev_target_name').text($(this).data('target'));
+            $('#cc_rev_type').text($(this).data('type'));
+            $('#cc_rev_value').text($(this).data('value'));
+            if (region) {
+                $('#cc_rev_region').text(region);
+                $('#cc_rev_region_wrap').show();
+            } else {
+                $('#cc_rev_region_wrap').hide();
+            }
+            $('#cc_rev_message').val($(this).data('message') || 'No message provided.');
+            $('#cc_rev_status').val($(this).data('status'));
+            $('#cc_rev_staff_notes').val($(this).data('staff-notes') || '');
+            $('#cc-review-form').attr('action', `/admin/contact-requests/${id}/action`);
+            $('#cc-review-contact-modal').fadeIn(200);
+        });
+
+        // Open Unblock Account Modal & Populate Action URL
+        $(document).on('click', '.btn-unblock-account', function() {
+            const $btn = $(this);
+            const id = $btn.data('id');
+            const name = $btn.data('name');
+
+            $('#unblock-account-form').attr('action', '/customer-care/unblock/' + id);
+            $('#unblock_user_name').text(name);
+            $('#unblock_requested_by').val(name);
+            $('#unblock-account-modal').fadeIn(200);
+        });
+
+        // -------------------------------------------------------
+        // CC Page Tab Navigation (tickets | blocked | requests)
+        // -------------------------------------------------------
+        const ccTabs = ['tickets', 'blocked', 'requests'];
+
+        function ccSwitchTab(tabId) {
+            // Hide all tab panels
+            ccTabs.forEach(function(t) {
+                const el = document.getElementById('tab-' + t);
+                if (el) el.classList.remove('active');
+            });
+            // Show active tab panel
+            const active = document.getElementById('tab-' + tabId);
+            if (active) active.classList.add('active');
+
+            // Update sidebar active state
+            document.querySelectorAll('.cc-tab-link').forEach(function(link) {
+                if (link.getAttribute('data-cctab') === tabId) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // Update URL hash without page jump
+            if (window.history && window.history.pushState) {
+                window.history.pushState(null, null, '#' + tabId);
+            }
+
+            // Recalculate DataTables layout
+            setTimeout(function() {
+                $.fn.dataTable && $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+            }, 50);
+        }
+
+        // Read initial tab from URL hash
+        const ccValidTabs = ['tickets', 'blocked', 'requests'];
+        let ccDefaultTab = 'tickets';
+        if (window.location.hash) {
+            const h = window.location.hash.substring(1);
+            if (ccValidTabs.includes(h)) ccDefaultTab = h;
+        }
+        ccSwitchTab(ccDefaultTab);
+
+        // Handle sidebar link clicks
+        $(document).on('click', '.cc-tab-link', function(e) {
+            e.preventDefault();
+            const tabId = $(this).data('cctab');
+            if (tabId) ccSwitchTab(tabId);
+        });
+
     });
 </script>
 @endsection
