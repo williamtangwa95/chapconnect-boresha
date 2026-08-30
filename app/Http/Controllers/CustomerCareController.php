@@ -52,8 +52,9 @@ class CustomerCareController extends Controller
         $staffMembers = User::whereIn('role', ['admin', 'customer_care', 'staff'])->orderBy('name')->get();
 
         $blockedAccounts = AccountBlock::with('user')->latest()->get();
-        $allUsers = User::where('role', 'user')->orderBy('name')->get(['id', 'name', 'email', 'phone', 'role']);
+        $allUsers = User::where('role', 'user')->orderBy('name')->get(['id', 'name', 'email', 'phone', 'role', 'security_question', 'security_answer']);
         $contactRequests = \App\Models\ContactRequest::with(['targetUser', 'requesterUser'])->latest()->get();
+        $paymentRequests = \App\Models\TalentPaymentRequest::with(['user', 'payer'])->latest()->get();
 
         return view('customer_care.index', compact(
             'tickets',
@@ -68,7 +69,8 @@ class CustomerCareController extends Controller
             'searchQuery',
             'blockedAccounts',
             'allUsers',
-            'contactRequests'
+            'contactRequests',
+            'paymentRequests'
         ));
     }
 

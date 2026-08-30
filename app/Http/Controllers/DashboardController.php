@@ -49,12 +49,24 @@ class DashboardController extends Controller
 
         $myInvoices = $user->invoices()->latest()->get();
 
+        $paymentSettings = [
+            'payment_likes_required' => intval(\App\Models\SystemSetting::get('payment_likes_required', 100)),
+            'payment_followers_required' => intval(\App\Models\SystemSetting::get('payment_followers_required', 50)),
+            'payment_comments_required' => intval(\App\Models\SystemSetting::get('payment_comments_required', 20)),
+            'payment_views_required' => intval(\App\Models\SystemSetting::get('payment_views_required', 500)),
+            'payment_amount' => floatval(\App\Models\SystemSetting::get('payment_amount', 10000.00)),
+        ];
+
+        $paymentRequest = \App\Models\TalentPaymentRequest::where('user_id', $user->id)->first();
+
         return view('dashboard.index', [
             'user'       => $user,
             'completion' => $completion,
             'packageDetails' => $packageDetails,
             'usage' => $usage,
             'myInvoices' => $myInvoices,
+            'paymentSettings' => $paymentSettings,
+            'paymentRequest' => $paymentRequest,
         ]);
     }
 
@@ -743,5 +755,78 @@ class DashboardController extends Controller
             'totalTopLevel' => $totalTopLevel,
             'totalReplies' => $totalReplies,
         ]);
+    }
+
+    public function requestPayment(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        if ($user->role !== 'user') {
+            return redirect()->back()->with('error', 'Only talent accounts are eligible to request payments.');
+        }
+
+        if ($user->hasBeenPaid()) {
+            return redirect()->back()->with('error', 'You have already received a payment and cannot request again.');
+        }
+
+        $existingPending = \App\Models\TalentPaymentRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->exists();
+
+        if ($existingPending) {
+            return redirect()->back()->with('error', 'You already have a pending payment request.');
+        }
+
+        $likesCount = $user->likesReceived()->count();
+        $followersCount = $user->followersReceived()->count();
+        $commentsCount = $user->commentsReceived()->count();
+        $viewsCount = $user->views_count;
+
+        $likesRequired = intval(\App\Models\SystemSetting::get('payment_likes_required', 100));
+        $followersRequired = intval(\App\Models\SystemSetting::get('payment_followers_required', 50));
+        $commentsRequired = intval(\App\Models\SystemSetting::get('payment_comments_required', 20));
+        $viewsRequired = intval(\App\Models\SystemSetting::get('payment_views_required', 500));
+        $amount = floatval(\App\Models\SystemSetting::get('payment_amount', 10000.00));
+
+        if ($likesCount < $likesRequired ||
+            $followersCount < $followersRequired ||
+            $commentsCount < $commentsRequired ||
+            $viewsCount < $viewsRequired) {
+            return redirect()->back()->with('error', 'You do not meet the minimum criteria to request payment yet.');
+        }
+
+        $paymentRequest = \App\Models\TalentPaymentRequest::create([
+            'user_id' => $user->id,
+            'likes_count' => $likesCount,
+            'followers_count' => $followersCount,
+            'comments_count' => $commentsCount,
+            'views_count' => $viewsCount,
+            'amount' => $amount,
+            'status' => 'pending',
+        ]);
+
+        $staffMembers = \App\Models\User::whereIn('role', ['admin', 'customer_care'])->get();
+        foreach ($staffMembers as $staff) {
+            \App\Models\Notification::create([
+                'user_id' => $staff->id,
+                'type' => 'new_payment_request',
+                'title' => '💰 New Talent Payment Request',
+                'message' => "Talent '{$user->name}' has requested a payout of " . number_format($amount, 2) . " TZS.",
+                'link' => $staff->role === 'admin' 
+                    ? route('admin.dashboard') . '#payments' 
+                    : route('customer-care.dashboard') . '#payments',
+            ]);
+        }
+
+        \App\Models\UserActivityLog::log('CREATED', "Talent '{$user->name}' requested payout of " . number_format($amount, 2) . " TZS.", [
+            'likes_count' => $likesCount,
+            'followers_count' => $followersCount,
+            'comments_count' => $commentsCount,
+            'views_count' => $viewsCount,
+            'amount' => $amount,
+        ], $user->id, 'TalentPaymentRequest', $paymentRequest->id);
+
+        return redirect()->back()->with('success', 'Your payment request has been submitted successfully.');
     }
 }

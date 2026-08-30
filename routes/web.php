@@ -40,11 +40,11 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Forgot Password Routes
+// Forgot Password Routes (Security Question & Answer)
 Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
-Route::post('/forgot-password', [AuthController::class, 'sendResetCode'])->name('password.email');
-Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->name('password.reset');
-Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+Route::post('/forgot-password', [AuthController::class, 'processForgotPassword'])->name('password.email');
+Route::get('/forgot-password/verify', [AuthController::class, 'showSecurityQuestionRecovery'])->name('password.verify-question');
+Route::post('/forgot-password/verify', [AuthController::class, 'verifySecurityQuestionAndReset'])->name('password.verify-submit');
 
 // User Dashboard Panel Routes (Authenticated)
 Route::middleware(['auth'])->group(function () {
@@ -75,7 +75,9 @@ Route::middleware(['auth'])->group(function () {
     // Publish / Unpublish profile
     Route::post('/dashboard/publish', [DashboardController::class, 'publish'])->name('dashboard.publish');
     Route::post('/dashboard/unpublish', [DashboardController::class, 'unpublish'])->name('dashboard.unpublish');
-
+Route::get('/dashboard/support/submit', function () {
+    return redirect()->route('login');
+});
     // Submit support issue / ticket
     Route::post('/dashboard/support/submit', [\App\Http\Controllers\CustomerCareController::class, 'userSubmit'])->name('dashboard.support.submit');
 
@@ -95,6 +97,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Administrative action route (Admin / Customer Care)
     Route::post('/admin/contact-requests/{id}/action', [\App\Http\Controllers\ContactRequestController::class, 'adminAction'])->name('admin.contact-requests.action');
+
+    // Talent Payment Request submission
+    Route::post('/dashboard/request-payment', [DashboardController::class, 'requestPayment'])->name('dashboard.request-payment');
 });
 
 // Customer Care Dashboard & Support Ticket Management (Protected by auth and customer_care middleware)
@@ -137,4 +142,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/admin/packages/{id}', [AdminController::class, 'deletePackage'])->name('admin.packages.delete');
     Route::post('/admin/user/{id}/assign-package', [AdminController::class, 'assignPackage']);
     Route::post('/admin/invoices/{id}/pay', [AdminController::class, 'recordInvoicePayment']);
+
+    // Talent Payment Request Administration Routes
+    Route::post('/admin/settings/payment-criteria', [AdminController::class, 'updatePaymentCriteria'])->name('admin.settings.payment-criteria');
+    Route::post('/admin/payment-requests/{id}/pay', [AdminController::class, 'payRequest'])->name('admin.payment-requests.pay');
+    Route::post('/admin/payment-requests/{id}/reject', [AdminController::class, 'rejectRequest'])->name('admin.payment-requests.reject');
 });

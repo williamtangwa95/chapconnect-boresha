@@ -292,6 +292,171 @@
             </div>
         </div>
 
+        <!-- Talent Payout & Performance Section -->
+        <div class="dashboard-panel" style="margin-top: 25px; background: #ffffff; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-wallet2" style="color: var(--primary);"></i> Talent Performance Payout Section
+                    </h3>
+                    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.88rem;">Track your progress towards unlocking cash payouts from the platform.</p>
+                </div>
+                <div>
+                    <span style="font-weight: 800; color: #10b981; font-size: 1.1rem; background: rgba(16,185,129,0.1); padding: 6px 14px; border-radius: 10px; display: inline-block;">
+                        Payout Amount: {{ number_format($paymentSettings['payment_amount'], 2) }} TZS
+                    </span>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                <!-- Target Checklist -->
+                <!-- Like Requirement -->
+                @php
+                    $likesCount = $user->likesReceived()->count();
+                    $likesRequired = $paymentSettings['payment_likes_required'];
+                    $likesMet = $likesCount >= $likesRequired;
+                @endphp
+                <div style="background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid {{ $likesMet ? '#bbf7d0' : '#e2e8f0' }}; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <div>
+                        <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Likes Milestone</span>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-top: 4px;">{{ $likesCount }} / {{ $likesRequired }}</div>
+                    </div>
+                    <div style="font-size: 1.5rem; color: {{ $likesMet ? '#10b981' : '#cbd5e1' }}">
+                        <i class="bi {{ $likesMet ? 'bi-patch-check-fill' : 'bi-dash-circle' }}"></i>
+                    </div>
+                </div>
+
+                <!-- Followers Requirement -->
+                @php
+                    $followersCount = $user->followersReceived()->count();
+                    $followersRequired = $paymentSettings['payment_followers_required'];
+                    $followersMet = $followersCount >= $followersRequired;
+                @endphp
+                <div style="background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid {{ $followersMet ? '#bbf7d0' : '#e2e8f0' }}; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <div>
+                        <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Followers Milestone</span>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-top: 4px;">{{ $followersCount }} / {{ $followersRequired }}</div>
+                    </div>
+                    <div style="font-size: 1.5rem; color: {{ $followersMet ? '#10b981' : '#cbd5e1' }}">
+                        <i class="bi {{ $followersMet ? 'bi-patch-check-fill' : 'bi-dash-circle' }}"></i>
+                    </div>
+                </div>
+
+                <!-- Comments Requirement -->
+                @php
+                    $commentsCount = $user->commentsReceived()->count();
+                    $commentsRequired = $paymentSettings['payment_comments_required'];
+                    $commentsMet = $commentsCount >= $commentsRequired;
+                @endphp
+                <div style="background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid {{ $commentsMet ? '#bbf7d0' : '#e2e8f0' }}; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <div>
+                        <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Comments Milestone</span>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-top: 4px;">{{ $commentsCount }} / {{ $commentsRequired }}</div>
+                    </div>
+                    <div style="font-size: 1.5rem; color: {{ $commentsMet ? '#10b981' : '#cbd5e1' }}">
+                        <i class="bi {{ $commentsMet ? 'bi-patch-check-fill' : 'bi-dash-circle' }}"></i>
+                    </div>
+                </div>
+
+                <!-- Views Requirement -->
+                @php
+                    $viewsCount = $user->views_count;
+                    $viewsRequired = $paymentSettings['payment_views_required'];
+                    $viewsMet = $viewsCount >= $viewsRequired;
+                @endphp
+                <div style="background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid {{ $viewsMet ? '#bbf7d0' : '#e2e8f0' }}; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <div>
+                        <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Page Views Milestone</span>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-top: 4px;">{{ $viewsCount }} / {{ $viewsRequired }}</div>
+                    </div>
+                    <div style="font-size: 1.5rem; color: {{ $viewsMet ? '#10b981' : '#cbd5e1' }}">
+                        <i class="bi {{ $viewsMet ? 'bi-patch-check-fill' : 'bi-dash-circle' }}"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payout Action & Status Center -->
+            @php
+                $allMet = $likesMet && $followersMet && $commentsMet && $viewsMet;
+            @endphp
+            @if($paymentRequest)
+                @if($paymentRequest->status === 'pending')
+                    <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(245,158,11,0.1); color: #d97706; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                        <div style="flex-grow: 1;">
+                            <h4 style="margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 700; color: #b45309;">Payout Request Submitted &amp; Pending</h4>
+                            <p style="margin: 0; color: #64748b; font-size: 0.85rem;">You requested payment on {{ $paymentRequest->created_at->format('M d, Y') }}. Our administrative and customer care personnel are currently auditing your stats.</p>
+                        </div>
+                    </div>
+                @elseif($paymentRequest->status === 'paid')
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(16,185,129,0.1); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                            <i class="bi bi-patch-check-fill"></i>
+                        </div>
+                        <div style="flex-grow: 1;">
+                            <h4 style="margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 700; color: #15803d;">🎉 Payout Request Approved &amp; Paid!</h4>
+                            <p style="margin: 0; color: #64748b; font-size: 0.85rem;">
+                                You were successfully paid <strong>{{ number_format($paymentRequest->amount, 2) }} TZS</strong> on {{ $paymentRequest->paid_at->format('M d, Y') }} via <strong>{{ $paymentRequest->payment_method }}</strong>.
+                                @if($paymentRequest->payment_reference)
+                                    Reference ID: <strong>{{ $paymentRequest->payment_reference }}</strong>.
+                                @endif
+                                <br>
+                                <span style="font-weight:700; color:#15803d;">Note: As per rules, you have received your milestone payment and cannot apply for additional payouts.</span>
+                            </p>
+                        </div>
+                    </div>
+                @elseif($paymentRequest->status === 'rejected')
+                    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 15px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 48px; height: 48px; border-radius: 50%; background: rgba(239,68,68,0.1); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </div>
+                            <div style="flex-grow: 1;">
+                                <h4 style="margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 700; color: #991b1b;">Payout Request Rejected</h4>
+                                <p style="margin: 0; color: #64748b; font-size: 0.85rem;">Reason: <strong style="color: #991b1b;">{{ $paymentRequest->admin_notes }}</strong></p>
+                            </div>
+                        </div>
+                        @if($allMet)
+                        <form action="{{ route('dashboard.request-payment') }}" method="POST" style="margin: 0; border-top: 1px solid #fecaca; padding-top: 15px;">
+                            @csrf
+                            <button type="submit" style="padding: 10px 22px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(59,130,246,0.35); cursor: pointer; font-size: 0.88rem;">
+                                Re-submit Payout Request
+                            </button>
+                        </form>
+                        @endif
+                    </div>
+                @endif
+            @else
+                <!-- No Request Exists Yet -->
+                @if($allMet)
+                    <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                        <div style="flex-grow: 1;">
+                            <h4 style="margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 700; color: #1e3a8a;">✨ You are Eligible for Payout!</h4>
+                            <p style="margin: 0; color: #64748b; font-size: 0.85rem;">Congratulations, all performance milestones have been completed successfully. You can now request your payment.</p>
+                        </div>
+                        <form action="{{ route('dashboard.request-payment') }}" method="POST" style="margin: 0;">
+                            @csrf
+                            <button type="submit" style="padding: 12px 26px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(16,185,129,0.35); cursor: pointer; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px;">
+                                <i class="bi bi-wallet2"></i> Submit Payout Request
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0;">
+                            <i class="bi bi-lock-fill"></i>
+                        </div>
+                        <div style="flex-grow: 1;">
+                            <h4 style="margin: 0 0 4px 0; font-size: 0.95rem; font-weight: 700; color: #334155;">Payout Eligibility Locked</h4>
+                            <p style="margin: 0; color: #64748b; font-size: 0.85rem;">You need to complete all four milestone targets above to unlock the cash payout feature.</p>
+                        </div>
+                    </div>
+                @endif
+            @endif
+        </div>
+
         <!-- Settings Form Panel -->
         <div class="dashboard-panel" style="margin-top: 25px;">
             <h3><i class="bi bi-gear-fill" style="color: var(--primary);"></i> Edit Profile Information</h3>

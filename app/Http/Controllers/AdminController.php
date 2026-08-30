@@ -61,6 +61,11 @@ class AdminController extends Controller
             'site_tiktok' => \App\Models\SystemSetting::get('site_tiktok', 'https://tiktok.com/@chapconnect'),
             'site_youtube' => \App\Models\SystemSetting::get('site_youtube', 'https://youtube.com/chapconnect'),
             'site_logo' => \App\Models\SystemSetting::get('site_logo', '/logo.png'),
+            'payment_likes_required' => \App\Models\SystemSetting::get('payment_likes_required', '100'),
+            'payment_followers_required' => \App\Models\SystemSetting::get('payment_followers_required', '50'),
+            'payment_comments_required' => \App\Models\SystemSetting::get('payment_comments_required', '20'),
+            'payment_views_required' => \App\Models\SystemSetting::get('payment_views_required', '500'),
+            'payment_amount' => \App\Models\SystemSetting::get('payment_amount', '10000.00'),
         ];
         $notificationSound = $systemSettings['notification_sound'];
 
@@ -104,6 +109,7 @@ class AdminController extends Controller
 
         $invoices = \App\Models\Invoice::with(['user'])->latest()->get();
         $contactRequests = \App\Models\ContactRequest::with(['targetUser', 'requesterUser'])->latest()->get();
+        $paymentRequests = \App\Models\TalentPaymentRequest::with(['user', 'payer'])->latest()->get();
 
         // Auto-seed mock data if empty
         if (\App\Models\VisitorActivity::count() === 0) {
@@ -272,6 +278,7 @@ class AdminController extends Controller
             'packages' => $packages,
             'invoices' => $invoices,
             'contactRequests' => $contactRequests,
+            'paymentRequests' => $paymentRequests,
             // Analytics view variables
             'todaysVisits' => $todaysVisits,
             'totalPageViews' => $totalPageViews,
@@ -676,6 +683,11 @@ class AdminController extends Controller
             'site_tiktok' => 'nullable|url|max:255',
             'site_youtube' => 'nullable|url|max:255',
             'site_logo_file' => 'nullable|image|mimes:png,jpg,jpeg,webp,svg|max:5120',
+            'payment_likes_required' => 'nullable|integer|min:0',
+            'payment_followers_required' => 'nullable|integer|min:0',
+            'payment_comments_required' => 'nullable|integer|min:0',
+            'payment_views_required' => 'nullable|integer|min:0',
+            'payment_amount' => 'nullable|numeric|min:0',
         ]);
 
         \App\Models\SystemSetting::set('site_title', $request->site_title);
@@ -690,6 +702,22 @@ class AdminController extends Controller
         \App\Models\SystemSetting::set('site_instagram', $request->site_instagram);
         \App\Models\SystemSetting::set('site_tiktok', $request->site_tiktok);
         \App\Models\SystemSetting::set('site_youtube', $request->site_youtube);
+
+        if ($request->has('payment_likes_required')) {
+            \App\Models\SystemSetting::set('payment_likes_required', $request->payment_likes_required);
+        }
+        if ($request->has('payment_followers_required')) {
+            \App\Models\SystemSetting::set('payment_followers_required', $request->payment_followers_required);
+        }
+        if ($request->has('payment_comments_required')) {
+            \App\Models\SystemSetting::set('payment_comments_required', $request->payment_comments_required);
+        }
+        if ($request->has('payment_views_required')) {
+            \App\Models\SystemSetting::set('payment_views_required', $request->payment_views_required);
+        }
+        if ($request->has('payment_amount')) {
+            \App\Models\SystemSetting::set('payment_amount', $request->payment_amount);
+        }
 
         if ($request->filled('welcome_text')) {
             \App\Models\SystemSetting::set('welcome_text', $request->welcome_text);
@@ -1371,5 +1399,110 @@ class AdminController extends Controller
             'activityStart' => $activityStart,
             'activityEnd' => $activityEnd
         ]);
+    }
+
+    public function updatePaymentCriteria(Request $request)
+    {
+        $request->validate([
+            'payment_likes_required' => 'required|integer|min:0',
+            'payment_followers_required' => 'required|integer|min:0',
+            'payment_comments_required' => 'required|integer|min:0',
+            'payment_views_required' => 'required|integer|min:0',
+            'payment_amount' => 'required|numeric|min:0',
+        ]);
+
+        \App\Models\SystemSetting::set('payment_likes_required', $request->payment_likes_required);
+        \App\Models\SystemSetting::set('payment_followers_required', $request->payment_followers_required);
+        \App\Models\SystemSetting::set('payment_comments_required', $request->payment_comments_required);
+        \App\Models\SystemSetting::set('payment_views_required', $request->payment_views_required);
+        \App\Models\SystemSetting::set('payment_amount', $request->payment_amount);
+
+        \App\Models\UserActivityLog::log('UPDATED', 'Updated platform Talent Payment Criteria & Payout settings.', [
+            'new' => $request->only([
+                'payment_likes_required',
+                'payment_followers_required',
+                'payment_comments_required',
+                'payment_views_required',
+                'payment_amount'
+            ])
+        ], null, 'SystemSetting');
+
+        return redirect()->back()->with('success', 'Talent payment criteria settings updated successfully.');
+    }
+
+    public function payRequest(Request $request, $id)
+    {
+        $paymentRequest = \App\Models\TalentPaymentRequest::findOrFail($id);
+
+        if ($paymentRequest->status !== 'pending') {
+            return redirect()->back()->with('error', 'This payment request is not in a pending state.');
+        }
+
+        $request->validate([
+            'payment_method' => 'required|string|max:100',
+            'payment_reference' => 'nullable|string|max:100',
+            'admin_notes' => 'nullable|string',
+        ]);
+
+        if ($paymentRequest->user->hasBeenPaid()) {
+            return redirect()->back()->with('error', 'This talent has already received a payment previously and cannot be paid again.');
+        }
+
+        $paymentRequest->update([
+            'status' => 'paid',
+            'payment_method' => $request->payment_method,
+            'payment_reference' => $request->payment_reference,
+            'admin_notes' => $request->admin_notes,
+            'paid_at' => now(),
+            'paid_by' => auth()->id(),
+        ]);
+
+        \App\Models\Notification::create([
+            'user_id' => $paymentRequest->user_id,
+            'type' => 'payment_paid',
+            'title' => '🎉 Payout Request Approved & Paid!',
+            'message' => "Your payment of " . number_format($paymentRequest->amount, 2) . " has been approved and completed via " . $request->payment_method . ".",
+            'link' => route('dashboard'),
+        ]);
+
+        \App\Models\UserActivityLog::log('UPDATED', "Approved and recorded payout to Talent: {$paymentRequest->user->name}", [
+            'payout_amount' => $paymentRequest->amount,
+            'payment_method' => $request->payment_method,
+            'payment_reference' => $request->payment_reference,
+        ], null, 'TalentPaymentRequest', $paymentRequest->id);
+
+        return redirect()->back()->with('success', 'Payment processed and logged successfully.');
+    }
+
+    public function rejectRequest(Request $request, $id)
+    {
+        $paymentRequest = \App\Models\TalentPaymentRequest::findOrFail($id);
+
+        if ($paymentRequest->status !== 'pending') {
+            return redirect()->back()->with('error', 'This payment request is not in a pending state.');
+        }
+
+        $request->validate([
+            'admin_notes' => 'required|string|min:3',
+        ]);
+
+        $paymentRequest->update([
+            'status' => 'rejected',
+            'admin_notes' => $request->admin_notes,
+        ]);
+
+        \App\Models\Notification::create([
+            'user_id' => $paymentRequest->user_id,
+            'type' => 'payment_rejected',
+            'title' => '❌ Payment Request Rejected',
+            'message' => "Your payment request was rejected. Reason: " . $request->admin_notes,
+            'link' => route('dashboard'),
+        ]);
+
+        \App\Models\UserActivityLog::log('UPDATED', "Rejected payout request from Talent: {$paymentRequest->user->name}", [
+            'reason' => $request->admin_notes,
+        ], null, 'TalentPaymentRequest', $paymentRequest->id);
+
+        return redirect()->back()->with('success', 'Payment request rejected successfully.');
     }
 }

@@ -131,6 +131,7 @@
                 <a href="#categories" class="tab-link nav-mobile-link" data-tab="categories"><i class="bi bi-tags-fill" style="color: var(--accent);"></i> Manage Categories</a>
                 <a href="#packages" class="tab-link nav-mobile-link" data-tab="packages"><i class="bi bi-box-seam-fill" style="color: #f59e0b;"></i> Membership Packages</a>
                 <a href="#invoices" class="tab-link nav-mobile-link" data-tab="invoices"><i class="bi bi-receipt-cutoff" style="color: #ef4444;"></i> Invoices & Billing</a>
+                <a href="#payments" class="tab-link nav-mobile-link" data-tab="payments"><i class="bi bi-wallet2" style="color: #10b981;"></i> Talent Payments</a>
                 <a href="#settings" class="tab-link nav-mobile-link" data-tab="settings"><i class="bi bi-person-gear" style="color: #0284c7;"></i> User Profile</a>
                 <a href="#staff" class="tab-link nav-mobile-link" data-tab="staff"><i class="bi bi-person-plus-fill" style="color: #6366f1;"></i> Registered Staff</a>
                 <a href="#analytics" class="tab-link nav-mobile-link" data-tab="analytics"><i class="bi bi-graph-up-arrow" style="color: #10b981;"></i> Visitor Analytics</a>
@@ -138,11 +139,14 @@
                 <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link"><i class="bi bi-life-preserver" style="color: #6366f1;"></i> Support Issues & Tickets Roster</a>
                 <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link"><i class="bi bi-shield-slash-fill" style="color: #dc2626;"></i> Blocked Accounts & Login Control</a>
                 <a href="{{ route('customer-care.dashboard') }}#requests" class="nav-mobile-link"><i class="bi bi-person-check-fill" style="color: #6366f1;"></i> Guest Contact Requests</a>
+                <a href="{{ route('customer-care.dashboard') }}#payments" class="nav-mobile-link"><i class="bi bi-wallet2" style="color: #6366f1;"></i> Talent Payment Requests</a>
                 <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> Public Directory</a>
                 @elseif(Request::is('customer-care*'))
                 <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link cc-tab-link" data-cctab="tickets"><i class="bi bi-life-preserver" style="color: #6366f1;"></i> Support Issues & Tickets Roster</a>
                 <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link cc-tab-link" data-cctab="blocked"><i class="bi bi-shield-slash-fill" style="color: #dc2626;"></i> Blocked Accounts & Login Control</a>
+                <a href="{{ route('customer-care.dashboard') }}#talents" class="nav-mobile-link cc-tab-link" data-cctab="talents"><i class="bi bi-people-fill" style="color: var(--primary);"></i> Talents Directory & Q&A</a>
                 <a href="{{ route('customer-care.dashboard') }}#requests" class="nav-mobile-link cc-tab-link" data-cctab="requests"><i class="bi bi-person-check-fill" style="color: #6366f1;"></i> Guest Contact Requests</a>
+                <a href="{{ route('customer-care.dashboard') }}#payments" class="nav-mobile-link cc-tab-link" data-cctab="payments"><i class="bi bi-wallet2" style="color: #6366f1;"></i> Talent Payment Requests</a>
                 @if(auth()->user()->role === 'admin')
                 <a href="{{ route('admin.dashboard') }}" class="nav-mobile-link"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> Super Admin Panel</a>
                 @endif
@@ -305,8 +309,14 @@
                 <a href="{{ route('customer-care.dashboard') }}#blocked" class="sidebar-link cc-tab-link" data-cctab="blocked">
                     <i class="bi bi-shield-slash-fill" style="color:#dc2626;"></i> <span>Blocked Accounts & Login Control</span>
                 </a>
+                <a href="{{ route('customer-care.dashboard') }}#talents" class="sidebar-link cc-tab-link" data-cctab="talents">
+                    <i class="bi bi-people-fill" style="color:var(--primary);"></i> <span>Talents Directory & Q&A</span>
+                </a>
                 <a href="{{ route('customer-care.dashboard') }}#requests" class="sidebar-link cc-tab-link" data-cctab="requests">
                     <i class="bi bi-person-check-fill" style="color:#6366f1;"></i> <span>Guest Contact Requests</span>
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#payments" class="sidebar-link cc-tab-link" data-cctab="payments">
+                    <i class="bi bi-wallet2"></i> <span>Talent Payment Requests</span>
                 </a>
 
                 <div class="sidebar-group-label">SETTINGS & PROFILES</div>
@@ -336,6 +346,9 @@
                 <a href="{{ Request::is('admin*') ? '#invoices' : route('admin.dashboard') . '#invoices' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="invoices">
                     <i class="bi bi-receipt-cutoff"></i> <span>Invoices & Billing</span>
                 </a>
+                <a href="{{ Request::is('admin*') ? '#payments' : route('admin.dashboard') . '#payments' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="payments">
+                    <i class="bi bi-wallet2"></i> <span>Talent Payments</span>
+                </a>
                 <a href="{{ Request::is('admin*') ? '#staff' : route('admin.dashboard') . '#staff' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="staff">
                     <i class="bi bi-person-plus-fill"></i> <span>Registered Staff</span>
                 </a>
@@ -353,8 +366,14 @@
                 <a href="{{ route('customer-care.dashboard') }}#blocked" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="blocked">
                     <i class="bi bi-shield-slash-fill" style="color:#dc2626;"></i> <span>Blocked Accounts & Login Control</span>
                 </a>
+                <a href="{{ route('customer-care.dashboard') }}#talents" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="talents">
+                    <i class="bi bi-people-fill" style="color:var(--primary);"></i> <span>Talents Directory & Q&amp;A</span>
+                </a>
                 <a href="{{ route('customer-care.dashboard') }}#requests" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="requests">
                     <i class="bi bi-person-check-fill" style="color:#6366f1;"></i> <span>Guest Contact Requests</span>
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#payments" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="payments">
+                    <i class="bi bi-wallet2"></i> <span>Talent Payment Requests</span>
                 </a>
 
                 <div class="sidebar-group-label">SETTINGS & PROFILES</div>

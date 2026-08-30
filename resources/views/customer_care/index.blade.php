@@ -409,6 +409,78 @@
         </div>{{-- /admin-card --}}
         </div>{{-- /tab-blocked --}}
 
+        <!-- Tab: Talents Directory & Q&A -->
+        <div id="tab-talents" class="tab-content">
+            <!-- Statistics Cards Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; width: 100%; margin-bottom: 20px;">
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(99,102,241,0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #0f172a;">{{ $allUsers->count() }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Total Talents</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); box-sizing: border-box; width: 100%; min-width: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h2 style="margin: 0 0 4px 0; font-size: 1.2rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-people-fill" style="color: var(--primary);"></i> Registered Talents Directory &amp; Support Recovery
+                        </h2>
+                        <p style="margin: 0; color: #64748b; font-size: 0.85rem;">Look up talent details and view their security recovery questions and answers to support password recovery calls.</p>
+                    </div>
+                </div>
+
+                <!-- Table Container -->
+                <div class="admin-table-container">
+                    <table class="admin-table display nowrap" id="cc-talents-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="width: 45px; text-align: center;">S/N</th>
+                                <th>Name / Stage Name</th>
+                                <th>Email</th>
+                                <th>Phone Number</th>
+                                <th style="width: 150px; text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($allUsers as $u)
+                            <tr>
+                                <td style="font-weight: 700; color: #64748b; font-size: 0.85rem; text-align: center;">{{ $loop->iteration }}</td>
+                                <td style="font-weight: 700; color: #0f172a; font-size: 0.88rem;">{{ $u->name }}</td>
+                                <td>{{ $u->email ?? '—' }}</td>
+                                <td style="font-weight: 600; color: #1e293b;">{{ $u->phone ?? '—' }}</td>
+                                <td style="text-align: right; white-space: nowrap;">
+                                    @php
+                                        $decryptedAnswer = 'Not Configured';
+                                        if ($u->security_answer) {
+                                            try {
+                                                $decryptedAnswer = \Illuminate\Support\Facades\Crypt::decryptString($u->security_answer);
+                                            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                                                $decryptedAnswer = 'Legacy (Hashed Answer)';
+                                            }
+                                        }
+                                    @endphp
+
+                                    <button type="button" class="btn-see-qa"
+                                        data-name="{{ $u->name }}"
+                                        data-question="{{ $u->security_question ?? 'Not Configured' }}"
+                                        data-answer="{{ $decryptedAnswer }}"
+                                        style="padding: 6px 12px; font-size: 0.78rem; border: 1px solid #cbd5e1; color: #10b981; border-radius: 8px; font-weight: 600; background: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                        <i class="bi bi-shield-lock-fill"></i> See Q&amp;A
+                                    </button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>{{-- /admin-card --}}
+        </div>{{-- /tab-talents --}}
+
         <!-- Tab: Guest Contact Requests -->
         <div id="tab-requests" class="tab-content">
             <!-- Statistics Cards Grid (4-Column Grid for Guest Contact Requests) -->
@@ -528,8 +600,178 @@
         </div>
         </div>{{-- /admin-card --}}
         </div>{{-- /tab-requests --}}
+
+        <!-- Tab: Talent Payment Requests -->
+        <div id="tab-payments" class="tab-content">
+            <!-- Payout Statistics Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; width: 100%; margin-bottom: 20px;">
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245,158,11,0.12); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #0f172a;">{{ $paymentRequests->where('status', 'pending')->count() }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Pending Requests</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #0f172a;">{{ $paymentRequests->where('status', 'paid')->count() }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Paid Talents</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(99,102,241,0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #0f172a;">{{ number_format($paymentRequests->where('status', 'paid')->sum('amount'), 2) }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Total Paid (TZS)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Requests Table -->
+            <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h2 style="margin: 0 0 4px 0; font-size: 1.15rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-wallet2" style="color: var(--primary);"></i> Talent Payment Requests &amp; Logs
+                        </h2>
+                        <p style="margin: 0; color: #64748b; font-size: 0.85rem;">View payment requests submitted by platform talents.</p>
+                    </div>
+                </div>
+
+                <div class="admin-table-container">
+                    <table class="admin-table display nowrap" id="cc-payments-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px; text-align: center;">S/N</th>
+                                <th>Talent</th>
+                                <th>Snapshot Stats (L/F/C/V)</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Request Date</th>
+                                <th>Payment Details</th>
+                                <th style="width: 150px; text-align: right;">Processing</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($paymentRequests as $req)
+                            <tr>
+                                <td style="font-weight: 700; color: #64748b; font-size: 0.82rem; text-align: center;">{{ $loop->iteration }}</td>
+                                <td style="font-weight: 700; color: #0f172a; font-size: 0.9rem;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        @if($req->user->profile_image)
+                                        <img src="{{ asset($req->user->profile_image) }}" alt="{{ $req->user->name }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
+                                        @else
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem;">
+                                            {{ strtoupper(substr($req->user->name, 0, 1)) }}
+                                        </div>
+                                        @endif
+                                        <div>
+                                            <span style="display: block;">{{ $req->user->name }}</span>
+                                            <span style="font-size: 0.75rem; color: #64748b; font-weight: 400;">{{ $req->user->email }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="font-weight: 600; font-size: 0.82rem; color: #334155;">
+                                    <span style="display: inline-block; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; margin-right: 4px;" title="Likes">❤️ {{ $req->likes_count }}</span>
+                                    <span style="display: inline-block; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; margin-right: 4px;" title="Followers">👥 {{ $req->followers_count }}</span>
+                                    <span style="display: inline-block; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; margin-right: 4px;" title="Comments">💬 {{ $req->comments_count }}</span>
+                                    <span style="display: inline-block; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;" title="Views">👁️ {{ $req->views_count }}</span>
+                                </td>
+                                <td style="font-weight: 800; color: #0f172a; font-size: 0.88rem;">
+                                    {{ number_format($req->amount, 2) }} TZS
+                                </td>
+                                <td>
+                                    @if($req->status === 'pending')
+                                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(245,158,11,0.12);color:#d97706;border:1px solid rgba(245,158,11,0.25);"><span style="width:5px;height:5px;border-radius:50%;background:#d97706;display:inline-block;"></span>Pending</span>
+                                    @elseif($req->status === 'paid')
+                                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.25);"><span style="width:5px;height:5px;border-radius:50%;background:#10b981;display:inline-block;"></span>Paid</span>
+                                    @else
+                                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);"><span style="width:5px;height:5px;border-radius:50%;background:#ef4444;display:inline-block;"></span>Rejected</span>
+                                    @endif
+                                </td>
+                                <td style="font-size: 0.8rem; color: #64748b;">
+                                    {{ $req->created_at->format('M d, Y') }}
+                                    <div style="font-size: 0.72rem; color: #94a3b8;">{{ $req->created_at->format('H:i') }}</div>
+                                </td>
+                                <td style="font-size: 0.8rem; color: #334155;">
+                                    @if($req->status === 'paid')
+                                        <strong>Method:</strong> {{ $req->payment_method }}<br>
+                                        <strong>Ref:</strong> {{ $req->payment_reference ?? 'N/A' }}<br>
+                                        <strong>By:</strong> {{ $req->payer ? $req->payer->name : 'Admin' }}
+                                    @elseif($req->status === 'rejected')
+                                        <span style="color:#ef4444;"><strong>Reason:</strong> {{ $req->admin_notes }}</span>
+                                    @else
+                                        <span style="color:#94a3b8; font-style:italic;">Awaiting Processing</span>
+                                    @endif
+                                </td>
+                                <td style="text-align: right; white-space: nowrap;">
+                                    @if($req->status === 'pending')
+                                        @if(auth()->user()->role === 'admin')
+                                        <a href="{{ route('admin.dashboard') }}#payments" class="btn" style="padding: 6px 12px; font-size: 0.75rem; border: none; color: #fff; border-radius: 8px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(99,102,241,0.3);">
+                                            <i class="bi bi-wallet2"></i> Process Payments
+                                        </a>
+                                        @else
+                                        <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; background: #f1f5f9; padding: 4px 10px; border-radius: 6px; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; gap: 4px;">
+                                            <i class="bi bi-lock-fill"></i> Admin Action Req.
+                                        </span>
+                                        @endif
+                                    @else
+                                    <span style="font-size: 0.8rem; color:#94a3b8; font-style:italic;">No Action Needed</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="8" style="text-align: center; color: #94a3b8; padding: 30px; font-style: italic;">No talent payment requests registered in the system.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>{{-- /dashboard-container --}}
 </main>
+
+<!-- View Security Q&A Modal Popup -->
+<div id="see-qa-modal" class="admin-modal">
+    <div class="admin-modal-content" style="border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-width: 480px; width: 90%; margin: auto;">
+        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-shield-lock-fill" style="color: #10b981;"></i> Talent Security Q&amp;A Details
+            </h3>
+            <button type="button" class="admin-modal-close" onclick="$('#see-qa-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 18px;">
+            <span style="font-size: 0.78rem; font-weight: 600; color: #64748b;">Talent Stage Name:</span>
+            <div id="qa-modal-talent-name" style="font-weight: 800; color: #0f172a; font-size: 1.05rem; margin-top: 2px;"></div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Security Question</label>
+            <div id="qa-modal-question" style="background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px 14px; font-weight: 700; font-size: 0.92rem; min-height: 20px;"></div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Decrypted Answer</label>
+            <div id="qa-modal-answer" style="background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; border-radius: 10px; padding: 12px 14px; font-weight: 800; font-size: 1rem; min-height: 20px;"></div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 15px;">
+            <button type="button" onclick="$('#see-qa-modal').fadeOut(200);" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.35); cursor: pointer;">
+                Close Details
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- CC Review Contact Request Modal -->
 <div id="cc-review-contact-modal" class="admin-modal">
@@ -997,10 +1239,42 @@
             $('#unblock-account-modal').fadeIn(200);
         });
 
+        // Initialize DataTables for cc-talents-table
+        if (typeof $.fn.DataTable !== "undefined" && !$.fn.DataTable.isDataTable('#cc-talents-table')) {
+            $('#cc-talents-table').DataTable({
+                pageLength: 10,
+                lengthMenu: [10, 25, 50, 100],
+                responsive: true,
+                language: {
+                    search: "_INPUT_",
+                    searchPlaceholder: "Search talents...",
+                    emptyTable: "No talents found.",
+                    zeroRecords: "No matching talents found.",
+                },
+                columnDefs: [{
+                    orderable: false,
+                    targets: [-1]
+                }]
+            });
+        }
+
+        // See Q&A Click Handler
+        $(document).on("click", ".btn-see-qa", function() {
+            const name = $(this).attr("data-name");
+            const question = $(this).attr("data-question");
+            const answer = $(this).attr("data-answer");
+
+            $("#qa-modal-talent-name").text(name);
+            $("#qa-modal-question").text(question);
+            $("#qa-modal-answer").text(answer);
+
+            $("#see-qa-modal").fadeIn(200);
+        });
+
         // -------------------------------------------------------
-        // CC Page Tab Navigation (tickets | blocked | requests)
+        // CC Page Tab Navigation (tickets | blocked | requests | talents | payments)
         // -------------------------------------------------------
-        const ccTabs = ['tickets', 'blocked', 'requests'];
+        const ccTabs = ['tickets', 'blocked', 'requests', 'payments', 'talents'];
 
         function ccSwitchTab(tabId) {
             // Hide all tab panels
@@ -1033,7 +1307,7 @@
         }
 
         // Read initial tab from URL hash
-        const ccValidTabs = ['tickets', 'blocked', 'requests'];
+        const ccValidTabs = ['tickets', 'blocked', 'requests', 'payments', 'talents'];
         let ccDefaultTab = 'tickets';
         if (window.location.hash) {
             const h = window.location.hash.substring(1);

@@ -454,6 +454,26 @@
                                                 </button>
                                             </form>
 
+                                            @php
+                                                $decryptedAnswer = 'Not Configured';
+                                                if ($u->security_answer) {
+                                                    try {
+                                                        $decryptedAnswer = \Illuminate\Support\Facades\Crypt::decryptString($u->security_answer);
+                                                    } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                                                        $decryptedAnswer = 'Legacy (Hashed Answer)';
+                                                    }
+                                                }
+                                            @endphp
+
+                                            <!-- See Q&A -->
+                                            <button type="button" class="btn-see-qa"
+                                                data-name="{{ $u->name }}"
+                                                data-question="{{ $u->security_question ?? 'Not Configured' }}"
+                                                data-answer="{{ $decryptedAnswer }}"
+                                                style="padding: 4px 9px; font-size: 0.73rem; border: 1px solid #cbd5e1; color: #10b981; border-radius: 6px; font-weight: 600; background: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; line-height: 1.2;">
+                                                <i class="bi bi-shield-lock-fill" style="font-size: 0.72rem;"></i> See Q&amp;A
+                                            </button>
+
                                             <!-- Reset Password -->
                                             <button type="button" class="btn-reset-password"
                                                 data-id="{{ $u->id }}"
@@ -975,6 +995,38 @@
                         </div>
                     </div>
 
+                    <!-- Card 6: Talent Payout & Criteria Settings -->
+                    <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+                        <h3 style="margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-wallet2" style="color: #10b981;"></i> Talent Payment Criteria Settings
+                        </h3>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Likes Required</label>
+                            <input type="number" name="payment_likes_required" value="{{ $systemSettings['payment_likes_required'] ?? '100' }}" min="0" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Followers Required</label>
+                            <input type="number" name="payment_followers_required" value="{{ $systemSettings['payment_followers_required'] ?? '50' }}" min="0" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Comments Required</label>
+                            <input type="number" name="payment_comments_required" value="{{ $systemSettings['payment_comments_required'] ?? '20' }}" min="0" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Profile Page Views Required</label>
+                            <input type="number" name="payment_views_required" value="{{ $systemSettings['payment_views_required'] ?? '500' }}" min="0" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
+                        </div>
+
+                        <div class="form-group">
+                            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Payout Amount (TZS)</label>
+                            <input type="number" name="payment_amount" value="{{ $systemSettings['payment_amount'] ?? '10000.00' }}" min="0" step="0.01" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; width: 100%; box-sizing: border-box;">
+                        </div>
+                    </div>
+
                 </div>
 
                 <div style="margin-top: 25px; display: flex; justify-content: flex-end;">
@@ -1116,6 +1168,156 @@
             </div>
         </div>
 
+        <!-- ==========================================
+             TAB: Talent Payments & Logs
+             ========================================== -->
+        <div id="tab-payments" class="tab-content">
+            <!-- Payout Statistics Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 22px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 52px; height: 52px; border-radius: 12px; background: rgba(245,158,11,0.12); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0;">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a;">
+                            {{ $paymentRequests->where('status', 'pending')->count() }}
+                        </div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Pending Requests</div>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 22px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 52px; height: 52px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0;">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a;">
+                            {{ $paymentRequests->where('status', 'paid')->count() }}
+                        </div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Paid Talents</div>
+                    </div>
+                </div>
+
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 22px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 52px; height: 52px; border-radius: 12px; background: rgba(99,102,241,0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; flex-shrink: 0;">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.6rem; font-weight: 800; color: #0f172a;">
+                            {{ number_format($paymentRequests->where('status', 'paid')->sum('amount'), 2) }}
+                        </div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Total Payouts (TZS)</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Requests Table -->
+            <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h2 style="margin: 0 0 4px 0; font-size: 1.25rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-wallet2" style="color: var(--primary);"></i> Talent Payment Requests &amp; Logs
+                        </h2>
+                        <p style="margin: 0; color: #64748b; font-size: 0.88rem;">Manage payouts for talents who met their profile performance criteria.</p>
+                    </div>
+                </div>
+
+                <div class="admin-table-container">
+                    <table class="admin-table display nowrap" id="admin-payments-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px; text-align: center;">S/N</th>
+                                <th>Talent</th>
+                                <th>Snapshot Stats (L/F/C/V)</th>
+                                <th>Payout Amount</th>
+                                <th>Status</th>
+                                <th>Request Date</th>
+                                <th>Payment Details</th>
+                                <th style="width: 150px; text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($paymentRequests as $req)
+                            <tr>
+                                <td style="font-weight: 700; color: #64748b; font-size: 0.82rem; text-align: center;">{{ $loop->iteration }}</td>
+                                <td style="font-weight: 700; color: #0f172a; font-size: 0.9rem;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        @if($req->user->profile_image)
+                                        <img src="{{ asset($req->user->profile_image) }}" alt="{{ $req->user->name }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
+                                        @else
+                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem;">
+                                            {{ strtoupper(substr($req->user->name, 0, 1)) }}
+                                        </div>
+                                        @endif
+                                        <div>
+                                            <span style="display: block;">{{ $req->user->name }}</span>
+                                            <span style="font-size: 0.75rem; color: #64748b; font-weight: 400;">{{ $req->user->email }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="font-weight: 600; font-size: 0.82rem; color: #334155;">
+                                    <span style="display: inline-block; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; margin-right: 4px;" title="Likes">❤️ {{ $req->likes_count }}</span>
+                                    <span style="display: inline-block; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; margin-right: 4px;" title="Followers">👥 {{ $req->followers_count }}</span>
+                                    <span style="display: inline-block; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; margin-right: 4px;" title="Comments">💬 {{ $req->comments_count }}</span>
+                                    <span style="display: inline-block; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;" title="Views">👁️ {{ $req->views_count }}</span>
+                                </td>
+                                <td style="font-weight: 800; color: #0f172a; font-size: 0.88rem;">
+                                    {{ number_format($req->amount, 2) }} TZS
+                                </td>
+                                <td>
+                                    @if($req->status === 'pending')
+                                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(245,158,11,0.12);color:#d97706;border:1px solid rgba(245,158,11,0.25);"><span style="width:5px;height:5px;border-radius:50%;background:#d97706;display:inline-block;"></span>Pending</span>
+                                    @elseif($req->status === 'paid')
+                                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.25);"><span style="width:5px;height:5px;border-radius:50%;background:#10b981;display:inline-block;"></span>Paid</span>
+                                    @else
+                                    <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.72rem;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);"><span style="width:5px;height:5px;border-radius:50%;background:#ef4444;display:inline-block;"></span>Rejected</span>
+                                    @endif
+                                </td>
+                                <td style="font-size: 0.8rem; color: #64748b;">
+                                    {{ $req->created_at->format('M d, Y') }}
+                                    <div style="font-size: 0.72rem; color: #94a3b8;">{{ $req->created_at->format('H:i') }}</div>
+                                </td>
+                                <td style="font-size: 0.8rem; color: #334155; max-width: 220px; white-space: normal;">
+                                    @if($req->status === 'paid')
+                                        <strong>Method:</strong> {{ $req->payment_method }}<br>
+                                        <strong>Ref:</strong> {{ $req->payment_reference ?? 'N/A' }}<br>
+                                        <strong>By:</strong> {{ $req->payer ? $req->payer->name : 'Admin' }}<br>
+                                        <small class="text-muted">{{ $req->paid_at->format('Y-m-d H:i') }}</small>
+                                    @elseif($req->status === 'rejected')
+                                        <span style="color:#ef4444;"><strong>Reason:</strong> {{ $req->admin_notes }}</span>
+                                    @else
+                                        <span style="color:#94a3b8; font-style:italic;">Awaiting Processing</span>
+                                    @endif
+                                </td>
+                                <td style="text-align: right; white-space: nowrap;">
+                                    @if($req->status === 'pending')
+                                    <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                                        <button type="button" class="btn-process-payout"
+                                            data-id="{{ $req->id }}"
+                                            data-name="{{ $req->user->name }}"
+                                            data-amount="{{ number_format($req->amount, 2) }} TZS"
+                                            style="padding: 6px 12px; font-size: 0.78rem; border: none; color: #fff; border-radius: 8px; font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(16,185,129,0.3);">
+                                            <i class="bi bi-wallet2"></i> Pay
+                                        </button>
+                                        <button type="button" class="btn-reject-payout"
+                                            data-id="{{ $req->id }}"
+                                            data-name="{{ $req->user->name }}"
+                                            style="padding: 6px 10px; font-size: 0.78rem; border: 1px solid rgba(239,68,68,0.3); color: #ef4444; border-radius: 8px; font-weight: 600; background: rgba(239,68,68,0.05); cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                            <i class="bi bi-x-circle"></i> Reject
+                                        </button>
+                                    </div>
+                                    @else
+                                    <span style="font-size: 0.8rem; color:#94a3b8; font-style:italic;">No Actions</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         @include('admin.packages_tab_stub')
         @include('admin.invoices_tab_stub')
         @include('admin.contact_requests_tab_stub')
@@ -1128,6 +1330,117 @@
 <!-- ==========================================
      MODALS SECTION
      ========================================== -->
+
+<!-- View Security Q&A Modal Popup -->
+<div id="see-qa-modal" class="admin-modal">
+    <div class="admin-modal-content" style="border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-width: 480px; width: 90%; margin: auto;">
+        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-shield-lock-fill" style="color: #10b981;"></i> Talent Security Q&amp;A Details
+            </h3>
+            <button type="button" class="admin-modal-close" onclick="$('#see-qa-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 18px;">
+            <span style="font-size: 0.78rem; font-weight: 600; color: #64748b;">Talent Stage Name:</span>
+            <div id="qa-modal-talent-name" style="font-weight: 800; color: #0f172a; font-size: 1.05rem; margin-top: 2px;"></div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Security Question</label>
+            <div id="qa-modal-question" style="background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 12px 14px; font-weight: 700; font-size: 0.92rem; min-height: 20px;"></div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Decrypted Answer</label>
+            <div id="qa-modal-answer" style="background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; border-radius: 10px; padding: 12px 14px; font-weight: 800; font-size: 1rem; min-height: 20px;"></div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; border-top: 1px solid var(--border-color); padding-top: 15px;">
+            <button type="button" onclick="$('#see-qa-modal').fadeOut(200);" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.35); cursor: pointer;">
+                Close Details
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Process Payout Modal Popup -->
+<div id="payout-process-modal" class="admin-modal">
+    <div class="admin-modal-content" style="border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-width: 480px; width: 90%; margin: auto;">
+        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-wallet2" style="color: #10b981;"></i> Process Talent Payout
+            </h3>
+            <button type="button" class="admin-modal-close" onclick="$('#payout-process-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <form id="payout-process-form" action="" method="POST">
+            @csrf
+            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 12px; margin-bottom: 20px; font-size: 0.88rem; color: #166534;">
+                Paying: <strong id="payout-talent-name"></strong><br>
+                Amount: <strong id="payout-talent-amount"></strong>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="payment_method" style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Payment Method</label>
+                <select name="payment_method" id="payment_method" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <option value="M-Pesa">M-Pesa</option>
+                    <option value="Tigo Pesa">Tigo Pesa</option>
+                    <option value="Airtel Money">Airtel Money</option>
+                    <option value="Halopesa">Halopesa</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                    <option value="Cash">Cash</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="payment_reference" style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Payment Reference / TX ID (Optional)</label>
+                <input type="text" id="payment_reference" name="payment_reference" class="form-control" placeholder="e.g. PP260830..." style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="payout_admin_notes" style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Administrative Notes (Optional)</label>
+                <textarea id="payout_admin_notes" name="admin_notes" class="form-control" rows="3" placeholder="Additional notes about the payout transaction..." style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <button type="button" onclick="$('#payout-process-modal').fadeOut(200);" style="padding: 10px 20px; border-radius: 10px; font-weight: 600; background: #e2e8f0; border: none; color: #475569; cursor: pointer;">Cancel</button>
+                <button type="submit" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(16,185,129,0.35); cursor: pointer;">
+                    Complete Payment
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Reject Payout Modal Popup -->
+<div id="payout-reject-modal" class="admin-modal">
+    <div class="admin-modal-content" style="border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-width: 450px; width: 90%; margin: auto;">
+        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-x-circle" style="color: #ef4444;"></i> Reject Payment Request
+            </h3>
+            <button type="button" class="admin-modal-close" onclick="$('#payout-reject-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <form id="payout-reject-form" action="" method="POST">
+            @csrf
+            <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 12px; margin-bottom: 20px; font-size: 0.88rem; color: #991b1b;">
+                Rejecting request from: <strong id="payout-reject-talent-name"></strong>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label for="payout_reject_reason" style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Reason for Rejection</label>
+                <textarea id="payout_reject_reason" name="admin_notes" class="form-control" rows="3" required placeholder="Please provide details on why this request is being rejected..." style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <button type="button" onclick="$('#payout-reject-modal').fadeOut(200);" style="padding: 10px 20px; border-radius: 10px; font-weight: 600; background: #e2e8f0; border: none; color: #475569; cursor: pointer;">Cancel</button>
+                <button type="submit" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(239,68,68,0.35); cursor: pointer;">
+                    Reject Request
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- Register New Staff Account Modal Popup -->
 <div id="add-staff-modal" class="admin-modal">
@@ -1492,7 +1805,7 @@
             defaultTab = "activity-logs";
         } else if (window.location.hash) {
             const hash = window.location.hash.substring(1);
-            if (["dashboard", "talents", "categories", "settings", "staff", "system-settings", "customer-care", "packages", "invoices", "requests", "analytics", "activity-logs"].includes(hash)) {
+            if (["dashboard", "talents", "categories", "settings", "staff", "system-settings", "customer-care", "packages", "invoices", "requests", "analytics", "activity-logs", "payments"].includes(hash)) {
                 defaultTab = hash;
             }
         }
@@ -1871,34 +2184,42 @@
         // -------------------------------------------------------------
         // 5. Single Row Action Form Triggers
         // -------------------------------------------------------------
-        document.querySelectorAll(".btn-single-delete").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const id = btn.getAttribute("data-id");
-                const name = btn.getAttribute("data-name");
+        $(document).on("click", ".btn-see-qa", function() {
+            const name = $(this).attr("data-name");
+            const question = $(this).attr("data-question");
+            const answer = $(this).attr("data-answer");
 
-                if (confirm(`WARNING: Are you sure you want to permanently delete user account '${name}' and all their photos/videos?`)) {
-                    const deleteForm = document.getElementById("single-delete-form");
-                    if (deleteForm) {
-                        deleteForm.setAttribute("action", `/admin/user/${id}`);
-                        deleteForm.submit();
-                    }
-                }
-            });
+            $("#qa-modal-talent-name").text(name);
+            $("#qa-modal-question").text(question);
+            $("#qa-modal-answer").text(answer);
+
+            $("#see-qa-modal").fadeIn(200);
         });
 
-        document.querySelectorAll(".btn-reset-password").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const id = btn.getAttribute("data-id");
-                const name = btn.getAttribute("data-name");
+        $(document).on("click", ".btn-single-delete", function() {
+            const id = $(this).attr("data-id") || $(this).data("id");
+            const name = $(this).attr("data-name") || $(this).data("name");
 
-                if (confirm(`Are you sure you want to reset the password for talent '${name}' to 'password123'?`)) {
-                    const resetForm = document.getElementById("reset-password-form");
-                    if (resetForm) {
-                        resetForm.setAttribute("action", `/admin/user/${id}/reset-password`);
-                        resetForm.submit();
-                    }
+            if (confirm(`WARNING: Are you sure you want to permanently delete user account '${name}' and all their photos/videos?`)) {
+                const deleteForm = document.getElementById("single-delete-form");
+                if (deleteForm) {
+                    deleteForm.setAttribute("action", `/admin/user/${id}`);
+                    deleteForm.submit();
                 }
-            });
+            }
+        });
+
+        $(document).on("click", ".btn-reset-password", function() {
+            const id = $(this).attr("data-id") || $(this).data("id");
+            const name = $(this).attr("data-name") || $(this).data("name");
+
+            if (confirm(`Are you sure you want to reset the password for talent '${name}' to 'password123'?`)) {
+                const resetForm = document.getElementById("reset-password-form");
+                if (resetForm) {
+                    resetForm.setAttribute("action", `/admin/user/${id}/reset-password`);
+                    resetForm.submit();
+                }
+            }
         });
 
         // -------------------------------------------------------------
@@ -1981,6 +2302,28 @@
             $('#pay_amount_paid').val(outstanding).attr('max', outstanding);
 
             $('#record-payment-modal').fadeIn(200);
+        });
+
+        // Payout process modal trigger
+        $(document).on('click', '.btn-process-payout', function() {
+            const id = $(this).data('id');
+            const name = $(this).data('name');
+            const amount = $(this).data('amount');
+            
+            $('#payout-talent-name').text(name);
+            $('#payout-talent-amount').text(amount);
+            $('#payout-process-form').attr('action', `/admin/payment-requests/${id}/pay`);
+            $('#payout-process-modal').fadeIn(200);
+        });
+
+        // Payout reject modal trigger
+        $(document).on('click', '.btn-reject-payout', function() {
+            const id = $(this).data('id');
+            const name = $(this).data('name');
+            
+            $('#payout-reject-talent-name').text(name);
+            $('#payout-reject-form').attr('action', `/admin/payment-requests/${id}/reject`);
+            $('#payout-reject-modal').fadeIn(200);
         });
 
         $(document).on('click', '.btn-manage-user-package', function() {

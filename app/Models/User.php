@@ -27,7 +27,9 @@ use Illuminate\Notifications\Notifiable;
     'social_instagram', 
     'social_facebook', 
     'social_tiktok', 
-    'social_youtube'
+    'social_youtube',
+    'security_question',
+    'security_answer'
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
@@ -115,6 +117,16 @@ class User extends Authenticatable
     public function invoices()
     {
         return $this->hasMany(Invoice::class, 'user_id');
+    }
+
+    public function paymentRequests()
+    {
+        return $this->hasMany(TalentPaymentRequest::class, 'user_id');
+    }
+
+    public function hasBeenPaid()
+    {
+        return $this->paymentRequests()->where('status', 'paid')->exists();
     }
 
     public function contactRequestsReceived()

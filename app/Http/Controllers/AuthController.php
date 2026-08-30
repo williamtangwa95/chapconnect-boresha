@@ -43,10 +43,22 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
             'category' => 'required|string|in:' . implode(',', array_keys(self::categories())),
             'phone' => 'required_without:email|nullable|string|max:30|unique:users',
+            'security_question' => 'required|string|max:255',
+            'security_answer' => 'required|string|max:255',
         ], [
             'email.unique' => 'Email already taken',
             'phone.unique' => 'Phone number already taken',
         ]);
+
+        $q = $request->input('security_question');
+        $a = $request->input('security_answer');
+        
+        similar_text(\Illuminate\Support\Str::lower($q), \Illuminate\Support\Str::lower($a), $percent);
+        if ($percent >= 50) {
+            throw ValidationException::withMessages([
+                'security_answer' => 'The security question and answer are too similar (must be less than 50% match).',
+            ]);
+        }
 
         $category = $request->input('category');
         $categoryLabel = self::categories()[$category];
@@ -60,6 +72,8 @@ class AuthController extends Controller
             'phone' => $request->phone ?: null,
             'country' => 'East Africa Tanzania',
             'role' => 'user', // default registration role
+            'security_question' => $q,
+            'security_answer' => \Illuminate\Support\Facades\Crypt::encryptString(\Illuminate\Support\Str::lower($a)),
         ]);
 
         Auth::login($user);
@@ -193,93 +207,112 @@ class AuthController extends Controller
         return view('auth.forgot-password');
     }
 
-    public function sendResetCode(Request $request)
+    public function processForgotPassword(Request $request)
     {
         $request->validate([
-            'email' => 'required|string|email',
+            'login' => 'required|string',
         ]);
 
-        $user = User::where('email', $request->email)->first();
+        $login = $request->input('login');
+
+        // Look up user by email or phone
+        $user = User::where('email', $login)
+            ->orWhere(function($query) use ($login) {
+                $query->whereNotNull('phone')->where('phone', $login);
+            })
+            ->first();
 
         if (!$user) {
             throw ValidationException::withMessages([
-                'email' => 'We could not find a user with that email address.',
+                'login' => 'We could not find a user with that email address or phone number.',
             ]);
         }
 
-        // Generate 6-digit verification code
-        $code = sprintf('%06d', mt_rand(0, 999999));
-
-        // Save token to password_reset_tokens table
-        DB::table('password_reset_tokens')->updateOrInsert(
-            ['email' => $request->email],
-            [
-                'token' => Hash::make($code),
-                'created_at' => now(),
-            ]
-        );
-
-        // Send verification email
-        try {
-            Mail::to($request->email)->send(new ResetPasswordCodeMail($code));
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Failed to send reset code email: ' . $e->getMessage());
+        // Check if user has security question set
+        if (empty($user->security_question) || empty($user->security_answer)) {
+            throw ValidationException::withMessages([
+                'login' => 'This account has not configured a security recovery question. Please contact support.',
+            ]);
         }
 
-        return redirect()->route('password.reset', ['email' => $request->email])
-            ->with('success', 'Verification code sent to ' . $request->email . '. Please check your email.');
+        return redirect()->route('password.verify-question', ['login' => $login])
+            ->with('success', 'Security question retrieved successfully.');
     }
 
-    public function showResetPassword(Request $request)
+    public function showSecurityQuestionRecovery(Request $request)
     {
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
-        return view('auth.reset-password', [
-            'email' => $request->query('email')
+
+        $login = $request->query('login');
+
+        if (empty($login)) {
+            return redirect()->route('password.request')->with('error', 'Please enter your email or phone first.');
+        }
+
+        $user = User::where('email', $login)
+            ->orWhere(function($query) use ($login) {
+                $query->whereNotNull('phone')->where('phone', $login);
+            })
+            ->first();
+
+        if (!$user) {
+            return redirect()->route('password.request')->with('error', 'User not found.');
+        }
+
+        return view('auth.verify-security-question', [
+            'login' => $login,
+            'security_question' => $user->security_question,
         ]);
     }
 
-    public function resetPassword(Request $request)
+    public function verifySecurityQuestionAndReset(Request $request)
     {
         $request->validate([
-            'email' => 'required|string|email',
-            'code' => 'required|string|digits:6',
+            'login' => 'required|string',
+            'security_answer' => 'required|string',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
-        $resetRecord = DB::table('password_reset_tokens')->where('email', $request->email)->first();
+        $login = $request->input('login');
+        $answer = $request->input('security_answer');
 
-        if (!$resetRecord) {
+        $user = User::where('email', $login)
+            ->orWhere(function($query) use ($login) {
+                $query->whereNotNull('phone')->where('phone', $login);
+            })
+            ->first();
+
+        if (!$user) {
             throw ValidationException::withMessages([
-                'code' => 'No password reset code requested for this email, or the code has expired.',
+                'security_answer' => 'User not found.',
             ]);
         }
 
-        // Check if code is expired (valid for 30 minutes)
-        if (Carbon::parse($resetRecord->created_at)->addMinutes(30)->isPast()) {
-            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
-            throw ValidationException::withMessages([
-                'code' => 'Verification code has expired. Please request a new code.',
-            ]);
+        // Verify security answer (case-insensitive check, supports both Encrypted and old Hashed formats)
+        $isCorrect = false;
+        try {
+            $decryptedAnswer = \Illuminate\Support\Facades\Crypt::decryptString($user->security_answer);
+            $isCorrect = ($decryptedAnswer === \Illuminate\Support\Str::lower($answer));
+        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+            $isCorrect = Hash::check(\Illuminate\Support\Str::lower($answer), $user->security_answer);
         }
 
-        // Verify token
-        if (!Hash::check($request->code, $resetRecord->token)) {
+        if (!$isCorrect) {
             throw ValidationException::withMessages([
-                'code' => 'The verification code provided is incorrect.',
+                'security_answer' => 'The security answer provided is incorrect.',
             ]);
         }
 
         // Reset password
-        $user = User::where('email', $request->email)->first();
-        if ($user) {
-            $user->password = Hash::make($request->password);
-            $user->save();
-        }
+        $user->password = Hash::make($request->password);
+        $user->save();
 
-        // Remove token record
-        DB::table('password_reset_tokens')->where('email', $request->email)->delete();
+        // Clear failed login attempts
+        $user->failedLoginAttempts()->delete();
+
+        \App\Models\UserActivityLog::log('PASSWORD_RESET', 'Reset password using security question.', null, $user->id);
 
         return redirect()->route('login')->with('success', 'Your password has been reset successfully! Please log in with your new password.');
     }
