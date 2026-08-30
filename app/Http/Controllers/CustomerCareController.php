@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\AccountBlock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\\Http\\Requests\\StoreSupportTicketRequest;
+use App\\Http\\Requests\\StaffSupportTicketRequest;
 
 class CustomerCareController extends Controller
 {
@@ -75,18 +77,9 @@ class CustomerCareController extends Controller
     /**
      * Store a new support ticket / issue from Customer Care Portal.
      */
-    public function store(Request $request)
+    public function store(StaffSupportTicketRequest $request)
     {
-        $request->validate([
-            'reporter_name' => 'required|string|max:255',
-            'reporter_email' => 'required|string|email|max:255',
-            'reporter_phone' => 'nullable|string|max:50',
-            'subject' => 'required|string|max:255',
-            'category' => 'required|string|max:100',
-            'priority' => 'required|string|in:low,medium,high,urgent',
-            'description' => 'required|string',
-            'assigned_to' => 'nullable|exists:users,id',
-        ]);
+        
 
         $ticket = SupportTicket::create([
             'reporter_name' => $request->reporter_name,
@@ -97,9 +90,12 @@ class CustomerCareController extends Controller
             'priority' => $request->priority,
             'status' => 'open',
             'description' => $request->description,
-            'assigned_to' => $request->assigned_to,
             'user_id' => Auth::check() ? Auth::id() : null,
         ]);
+        if ($request->assigned_to) {
+            $ticket->assigned_to = $request->assigned_to;
+            $ticket->save();
+        }
 
         // Send notification to assigned staff member if set
         if ($request->assigned_to) {
@@ -118,14 +114,9 @@ class CustomerCareController extends Controller
     /**
      * Submit support ticket / issue directly from User Dashboard.
      */
-    public function userSubmit(Request $request)
+    public function userSubmit(StoreSupportTicketRequest $request)
     {
-        $request->validate([
-            'subject' => 'required|string|max:255',
-            'category' => 'required|string|max:100',
-            'priority' => 'required|string|in:low,medium,high,urgent',
-            'description' => 'required|string',
-        ]);
+        
 
         $user = Auth::user();
 
@@ -173,13 +164,12 @@ class CustomerCareController extends Controller
             'recommendations' => 'nullable|string',
         ]);
 
-        $ticket->update([
-            'status' => $request->status,
-            'priority' => $request->priority,
-            'assigned_to' => $request->assigned_to,
-            'resolution_notes' => $request->resolution_notes,
-            'recommendations' => $request->recommendations,
-        ]);
+        $ticket->status = $request->status;
+            $ticket->priority = $request->priority;
+            $ticket->assigned_to = $request->assigned_to;
+            $ticket->resolution_notes = $request->resolution_notes;
+            $ticket->recommendations = $request->recommendations;
+            $ticket->save();
 
         // Notify assigned staff if newly assigned
         if ($request->assigned_to && $request->assigned_to != $oldAssignedTo) {
@@ -225,11 +215,10 @@ class CustomerCareController extends Controller
             'resolution_notes' => 'nullable|string',
         ]);
 
-        $ticket->update([
-            'status' => $request->status,
-            'recommendations' => $request->recommendations,
-            'resolution_notes' => $request->resolution_notes ?? $ticket->resolution_notes,
-        ]);
+        $ticket->status = $request->status;
+            $ticket->recommendations = $request->recommendations;
+            $ticket->resolution_notes = $request->resolution_notes ?? $ticket->resolution_notes;
+            $ticket->save();
 
         // Notify reporter user if registered
         if ($ticket->user_id) {

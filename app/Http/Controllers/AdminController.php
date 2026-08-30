@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\StoreCategoryRequest;
 
 class AdminController extends Controller
 {
@@ -330,17 +332,13 @@ class AdminController extends Controller
             Storage::disk('public')->delete($relativePath);
         }
 
-        $media->delete();
+$media->delete();
 
         return redirect()->back()->with('success', 'Media item deleted by administrator.');
     }
 
-    public function storeCategory(Request $request)
+    public function storeCategory(StoreCategoryRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:100|unique:categories,name',
-        ]);
-
         $name = $request->input('name');
         $slug = strtolower(str_replace([' ', '-', '_', '/'], '', $name));
 
@@ -566,17 +564,8 @@ class AdminController extends Controller
     /**
      * Store a newly created talent account by administrator.
      */
-    public function storeUser(Request $request)
+    public function storeUser(StoreUserRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:6',
-            'category' => 'required|string',
-            'phone' => 'nullable|string|max:50',
-            'country' => 'nullable|string|max:100',
-        ]);
-
         $categoryObj = Category::where('slug', $request->category)->first();
         $categoryLabel = $categoryObj ? $categoryObj->name : ucfirst($request->category);
 

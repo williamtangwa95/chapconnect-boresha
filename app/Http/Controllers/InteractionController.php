@@ -8,6 +8,7 @@ use App\Models\Like;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class InteractionController extends Controller
 {
@@ -196,26 +197,7 @@ class InteractionController extends Controller
         }
 
         $comment = Comment::findOrFail($commentId);
-        $userId = Auth::id();
-        $user = Auth::user();
-
-        // Check authorization:
-        // 1. Current user is comment author ($comment->user_id == $userId)
-        // 2. Current user is profile owner ($comment->talent_id == $userId) - can delete comments violating rules
-        // 3. Current user is admin ($user->role === 'admin')
-        $isAuthorized = false;
-        if ($userId && ($comment->user_id == $userId || $comment->talent_id == $userId || $user->role === 'admin')) {
-            $isAuthorized = true;
-        } elseif (!$comment->user_id && ($comment->ip_address == $request->ip() || ($this->getDeviceFingerprint($request) && $comment->device_fingerprint == $this->getDeviceFingerprint($request)))) {
-            $isAuthorized = true;
-        }
-
-        if (!$isAuthorized) {
-            if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized to delete this comment.'], 403);
-            }
-            return redirect()->back()->with('error', 'Unauthorized to delete this comment.');
-        }
+        $this->authorize('delete', $comment);
 
         $talentId = $comment->talent_id;
         $comment->delete();
