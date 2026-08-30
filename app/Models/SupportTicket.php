@@ -10,19 +10,10 @@ class SupportTicket extends Model
     use HasFactory;
 
     protected $fillable = [
-        'ticket_number',
-        'user_id',
-        'reporter_name',
-        'reporter_email',
-        'reporter_phone',
         'subject',
         'category',
         'priority',
-        'status',
         'description',
-        'assigned_to',
-        'resolution_notes',
-        'recommendations',
     ];
 
     /**
