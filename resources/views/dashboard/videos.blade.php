@@ -28,7 +28,7 @@
                     <i class="bi bi-file-earmark-play-fill"></i> Upload File
                 </button>
                 <button type="button" id="tabUploadUrl" class="btn-tab" style="padding: 9px 20px; border-radius: 8px; font-size: 0.88rem; font-weight: 700; cursor: pointer; background: transparent; color: #64748b; border: none; transition: all 0.2s ease;">
-                    <i class="bi bi-youtube"></i> Embed YouTube Link
+                    <i class="bi bi-link-45deg"></i> Embed Social Link
                 </button>
             </div>
 
@@ -77,13 +77,20 @@
                 @csrf
                 
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
-                    <div style="width: 42px; height: 42px; border-radius: 10px; background: rgba(236,72,153,0.12); color: #ec4899; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
-                        <i class="bi bi-youtube"></i>
+                    <div id="socialIconBox" style="width: 42px; height: 42px; border-radius: 10px; background: rgba(236,72,153,0.12); color: #ec4899; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; transition: background 0.3s, color 0.3s;">
+                        <i id="socialIcon" class="bi bi-link-45deg"></i>
                     </div>
                     <div>
-                        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Embed YouTube Link</h3>
-                        <p style="margin: 0; font-size: 0.8rem; color: #64748b;">Paste any public YouTube video link (YouTube watch, shorts, or share link).</p>
+                        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0f172a;">Embed Social Video Link</h3>
+                        <p style="margin: 0; font-size: 0.8rem; color: #64748b;">Paste a YouTube, Instagram, Facebook, or TikTok video link.</p>
                     </div>
+                </div>
+                <!-- Platform pills -->
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+                    <span style="display: inline-flex; align-items: center; gap: 5px; background: #fff3f3; color: #ff0000; border: 1px solid #ffcccc; border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; font-weight: 700;"><i class="bi bi-youtube"></i> YouTube</span>
+                    <span style="display: inline-flex; align-items: center; gap: 5px; background: #fff0f9; color: #c13584; border: 1px solid #f5c6e8; border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; font-weight: 700;"><i class="bi bi-instagram"></i> Instagram</span>
+                    <span style="display: inline-flex; align-items: center; gap: 5px; background: #f0f2ff; color: #1877F2; border: 1px solid #c3cdfb; border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; font-weight: 700;"><i class="bi bi-facebook"></i> Facebook</span>
+                    <span style="display: inline-flex; align-items: center; gap: 5px; background: #f0fffe; color: #010101; border: 1px solid #a0e9e5; border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; font-weight: 700;"><i class="bi bi-tiktok"></i> TikTok</span>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 20px;">
@@ -101,14 +108,14 @@
 
                     <!-- URL Input -->
                     <div class="form-group">
-                        <label for="video_url" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">YouTube Link URL *</label>
-                        <input type="url" id="video_url" name="video_url" class="form-control" value="{{ old('video_url') }}" placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%;">
-                        <div id="videoUrlStatus" style="display: none; margin-top: 8px; font-size: 0.82rem; font-weight: 600;"></div>
+                        <label for="video_url" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Video Link URL *</label>
+                        <input type="url" id="video_url" name="video_url" class="form-control" value="{{ old('video_url') }}" placeholder="Paste YouTube, Instagram, Facebook or TikTok link..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem; width: 100%;">
+                        <div id="videoUrlStatus" style="margin-top: 8px; font-size: 0.82rem; font-weight: 600; display: flex; align-items: center; gap: 6px; min-height: 24px;"></div>
                     </div>
                 </div>
 
                 <button type="submit" id="btnSubmitUrlUpload" style="padding: 11px 26px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(236,72,153,0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem;">
-                    <i class="bi bi-plus-circle-fill"></i> Add YouTube Video Link
+                    <i class="bi bi-plus-circle-fill"></i> Add Video Link
                 </button>
             </form>
         </div>
@@ -236,40 +243,70 @@
         const btnSubmitUrlUpload = document.getElementById('btnSubmitUrlUpload');
         const btnSubmitEditVideo = document.getElementById('btnSubmitEditVideo');
 
-        function isYouTubeUrl(urlStr) {
-            if (!urlStr || !urlStr.trim()) return true; // empty allowed unless submitting empty
+        // Platform detection
+        function detectPlatform(urlStr) {
+            if (!urlStr || !urlStr.trim()) return null;
             try {
-                const parsed = new URL(urlStr.trim());
-                const host = parsed.hostname.toLowerCase();
-                const allowed = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be', 'www.youtu.be'];
-                return allowed.includes(host);
-            } catch (e) {
-                return false;
-            }
+                const host = new URL(urlStr.trim()).hostname.toLowerCase();
+                if (host.includes('youtube.com') || host.includes('youtu.be')) return 'youtube';
+                if (host.includes('instagram.com')) return 'instagram';
+                if (host.includes('facebook.com') || host.includes('fb.watch')) return 'facebook';
+                if (host.includes('tiktok.com')) return 'tiktok';
+                if (host.includes('vimeo.com')) return 'vimeo';
+            } catch(e) {}
+            return null;
         }
 
-        function validateYouTubeInput(inputEl, statusEl, submitBtn) {
+        const platformMeta = {
+            youtube:   { icon: 'bi-youtube',   color: '#ff0000', bg: 'rgba(255,0,0,0.1)',    label: 'YouTube',   iconBoxBg: 'rgba(255,0,0,0.12)' },
+            instagram: { icon: 'bi-instagram', color: '#c13584', bg: 'rgba(193,53,132,0.1)',  label: 'Instagram', iconBoxBg: 'rgba(193,53,132,0.12)' },
+            facebook:  { icon: 'bi-facebook',  color: '#1877F2', bg: 'rgba(24,119,242,0.1)',  label: 'Facebook',  iconBoxBg: 'rgba(24,119,242,0.12)' },
+            tiktok:    { icon: 'bi-tiktok',    color: '#010101', bg: 'rgba(105,201,208,0.15)', label: 'TikTok',   iconBoxBg: 'rgba(69,201,208,0.15)' },
+            vimeo:     { icon: 'bi-play-circle-fill', color: '#1ab7ea', bg: 'rgba(26,183,234,0.1)', label: 'Vimeo', iconBoxBg: 'rgba(26,183,234,0.12)' },
+        };
+
+        function isSocialUrl(urlStr) {
+            return detectPlatform(urlStr) !== null;
+        }
+
+        function validateSocialInput(inputEl, statusEl, submitBtn) {
             if (!inputEl || !statusEl || !submitBtn) return;
             const val = inputEl.value.trim();
+            const iconBox = document.getElementById('socialIconBox');
+            const iconEl = document.getElementById('socialIcon');
+
             if (!val) {
-                statusEl.style.display = 'none';
+                statusEl.innerHTML = '';
                 submitBtn.disabled = false;
                 submitBtn.style.opacity = '1';
                 submitBtn.style.cursor = 'pointer';
+                if (iconBox && iconEl) {
+                    iconBox.style.background = 'rgba(236,72,153,0.12)';
+                    iconBox.style.color = '#ec4899';
+                    iconEl.className = 'bi bi-link-45deg';
+                }
                 return;
             }
 
-            if (isYouTubeUrl(val)) {
-                statusEl.style.display = 'block';
-                statusEl.style.color = '#10b981';
-                statusEl.innerHTML = `<i class="bi bi-check-circle-fill"></i> Valid YouTube video link format.`;
+            const platform = detectPlatform(val);
+            if (platform && platformMeta[platform]) {
+                const meta = platformMeta[platform];
+                statusEl.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;background:${meta.bg};color:${meta.color};border-radius:20px;padding:3px 12px;font-size:0.8rem;"><i class="bi ${meta.icon}"></i> ${meta.label} link detected &mdash; ready to embed</span>`;
+                if (iconBox && iconEl) {
+                    iconBox.style.background = meta.iconBoxBg;
+                    iconBox.style.color = meta.color;
+                    iconEl.className = 'bi ' + meta.icon;
+                }
                 submitBtn.disabled = false;
                 submitBtn.style.opacity = '1';
                 submitBtn.style.cursor = 'pointer';
             } else {
-                statusEl.style.display = 'block';
-                statusEl.style.color = '#ef4444';
-                statusEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Please enter a valid YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...). No other video platforms are allowed.`;
+                statusEl.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;color:#ef4444;"><i class="bi bi-exclamation-triangle-fill"></i> Unsupported link. Use YouTube, Instagram, Facebook, or TikTok.</span>`;
+                if (iconBox && iconEl) {
+                    iconBox.style.background = 'rgba(239,68,68,0.1)';
+                    iconBox.style.color = '#ef4444';
+                    iconEl.className = 'bi bi-exclamation-triangle-fill';
+                }
                 submitBtn.disabled = true;
                 submitBtn.style.opacity = '0.6';
                 submitBtn.style.cursor = 'not-allowed';
@@ -278,13 +315,15 @@
 
         if (videoUrlInput) {
             videoUrlInput.addEventListener('input', function() {
-                validateYouTubeInput(videoUrlInput, videoUrlStatusEl, btnSubmitUrlUpload);
+                validateSocialInput(videoUrlInput, videoUrlStatusEl, btnSubmitUrlUpload);
             });
+            // Run on page load if there is a prefilled value
+            validateSocialInput(videoUrlInput, videoUrlStatusEl, btnSubmitUrlUpload);
         }
 
         if (editVideoUrlInput) {
             editVideoUrlInput.addEventListener('input', function() {
-                validateYouTubeInput(editVideoUrlInput, editVideoUrlStatusEl, btnSubmitEditVideo);
+                validateSocialInput(editVideoUrlInput, editVideoUrlStatusEl, btnSubmitEditVideo);
             });
         }
 
@@ -364,9 +403,9 @@
 
         if (formUrlUpload && btnSubmitUrlUpload) {
             formUrlUpload.addEventListener('submit', function(e) {
-                if (!isYouTubeUrl(videoUrlInput.value)) {
+                if (!isSocialUrl(videoUrlInput.value)) {
                     e.preventDefault();
-                    validateYouTubeInput(videoUrlInput, videoUrlStatusEl, btnSubmitUrlUpload);
+                    validateSocialInput(videoUrlInput, videoUrlStatusEl, btnSubmitUrlUpload);
                     return false;
                 }
                 btnSubmitUrlUpload.disabled = true;

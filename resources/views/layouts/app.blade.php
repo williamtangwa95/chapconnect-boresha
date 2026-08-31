@@ -24,7 +24,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ChapConnect">
 
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/Style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/Style.css') }}?v={{ filemtime(public_path('css/Style.css')) }}">
     @yield('styles')
 </head>
 
@@ -36,8 +36,9 @@
     $welcomeSpeed = (int) \App\Models\SystemSetting::get('welcome_typing_speed', 55);
     $welcomeDelay = (int) \App\Models\SystemSetting::get('welcome_delay', 300);
     $welcomeSound = \App\Models\SystemSetting::get('welcome_sound', '/sounds/welcome_default.wav');
+    $welcomeSoundUrl = str_starts_with($welcomeSound, 'http') ? $welcomeSound : asset(ltrim($welcomeSound, '/'));
     @endphp
-    <div id="firstTimeLoaderOverlay" onmouseover="if(typeof playWelcomeSound==='function')playWelcomeSound(false)" onclick="if(typeof playWelcomeSound==='function')playWelcomeSound(true)" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); z-index: 999999; flex-direction: column; justify-content: center; align-items: center; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; opacity: 1; transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;">
+    <div id="firstTimeLoaderOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); z-index: 999999; flex-direction: column; justify-content: center; align-items: center; color: #ffffff; font-family: system-ui, -apple-system, sans-serif; opacity: 1; transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;">
         <!-- Glowing Brand Logo Icon -->
         <div style="position: relative; margin-bottom: 24px;">
             <div style="position: absolute; top: -10px; left: -10px; right: -10px; bottom: -10px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #38bdf8); filter: blur(20px); opacity: 0.6; animation: loaderPulse 2s infinite ease-in-out;"></div>
@@ -57,9 +58,9 @@
 
         <!-- Audio Welcome Interactive Pill Button -->
         <button type="button" id="welcomeAudioTriggerBtn" onclick="playWelcomeSound(true)" style="margin-top: 20px; background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%); border: none; color: #ffffff; padding: 10px 22px; border-radius: 25px; font-size: 0.9rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 6px 20px rgba(99,102,241,0.5); animation: pulseBtn 1.8s infinite ease-in-out;">
-            <i class="bi bi-volume-up-fill" style="font-size: 1.1rem; color: #ffffff;"></i> <span id="welcomeAudioBtnText">Tap Anywhere to Enable Audio 🔊</span>
+            <i class="bi bi-volume-up-fill" style="font-size: 1.1rem; color: #ffffff;"></i> <span id="welcomeAudioBtnText">Welcome Audio Playing 🔊</span>
         </button>
-        <audio id="welcomeAudioElement" src="{{ asset($welcomeSound) }}" preload="auto" playsinline style="display: none;"></audio>
+        <audio id="welcomeAudioElement" src="{{ $welcomeSoundUrl }}" preload="auto" playsinline style="display: none;"></audio>
     </div>
 
     <style>
@@ -562,39 +563,34 @@
             var hasVisited = sessionStorage.getItem('chap_first_visit_done');
 
             if (!hasVisited || isTest) {
+                var loaderOverlay = document.getElementById('firstTimeLoaderOverlay');
+                if (loaderOverlay) {
+                    loaderOverlay.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                }
+
                 document.addEventListener("DOMContentLoaded", function() {
                     var loaderOverlay = document.getElementById('firstTimeLoaderOverlay');
                     var typewriterEl = document.getElementById('typewriterText');
                     var progressBar = document.getElementById('loaderProgressBar');
+                    var audioEl = document.getElementById('welcomeAudioElement');
+                    var audioBtnText = document.getElementById('welcomeAudioBtnText');
                     if (!loaderOverlay || !typewriterEl) return;
 
-                    // Lock scrolling & show loader overlay
                     loaderOverlay.style.display = 'flex';
                     document.body.style.overflow = 'hidden';
 
                     var textToType = @json($welcomeText);
                     var charIndex = 0;
-                    var typingSpeed = {
-                        {
-                            $welcomeSpeed
-                        }
-                    };
-                    var welcomeDelay = {
-                        {
-                            $welcomeDelay
-                        }
-                    };
-                    var welcomeSoundUrl = @json($welcomeSound);
+                    var typingSpeed = {{ max(15, (int) $welcomeSpeed) }};
+                    var welcomeDelay = {{ max(0, (int) $welcomeDelay) }};
+                    var welcomeSoundUrl = @json($welcomeSoundUrl);
 
-                    var audioEl = document.getElementById('welcomeAudioElement');
-                    var welcomeAudio = audioEl || (welcomeSoundUrl ? new Audio(welcomeSoundUrl) : null);
+                    var audioInstance = audioEl || (welcomeSoundUrl ? new Audio(welcomeSoundUrl) : null);
                     var audioPlayed = false;
 
                     window.playWelcomeSound = function(userAction) {
                         if (audioPlayed && !userAction) return;
-
-                        var audioEl = document.getElementById('welcomeAudioElement');
-                        var audioInstance = audioEl || (welcomeSoundUrl ? new Audio(welcomeSoundUrl) : null);
 
                         if (audioInstance) {
                             try {
@@ -604,8 +600,7 @@
                                 if (p !== undefined) {
                                     p.then(function() {
                                         audioPlayed = true;
-                                        var btnText = document.getElementById('welcomeAudioBtnText');
-                                        if (btnText) btnText.textContent = "Welcome Audio Playing ♪";
+                                        if (audioBtnText) audioBtnText.textContent = "Welcome Audio Playing ♪";
                                     }).catch(function(e) {
                                         speakFemaleVoiceFallback();
                                     });
@@ -624,38 +619,31 @@
                                 window.speechSynthesis.cancel();
                                 var utterance = new SpeechSynthesisUtterance(textToType);
                                 utterance.rate = 0.95;
-                                utterance.pitch = 1.2;
+                                utterance.pitch = 1.15;
                                 var voices = window.speechSynthesis.getVoices();
                                 var femaleVoice = voices.find(function(v) {
-                                    return v.name.toLowerCase().includes('female') ||
-                                        v.name.toLowerCase().includes('zira') ||
-                                        v.name.toLowerCase().includes('samantha') ||
-                                        v.name.toLowerCase().includes('google us english');
+                                    var n = v.name.toLowerCase();
+                                    return n.includes('female') || n.includes('zira') || n.includes('samantha') || n.includes('google us english') || n.includes('swahili') || n.includes('sw');
                                 });
                                 if (femaleVoice) utterance.voice = femaleVoice;
                                 window.speechSynthesis.speak(utterance);
                                 audioPlayed = true;
+                                if (audioBtnText) audioBtnText.textContent = "Welcome Audio Playing ♪";
                             } catch (err) {}
                         }
                     }
 
-                    function triggerHoverSound() {
+                    function triggerUserInteractionSound() {
                         if (!audioPlayed) {
-                            playWelcomeSound(false);
+                            playWelcomeSound(true);
                         }
                     }
 
-                    ['mousemove', 'pointermove', 'mouseover', 'pointerover', 'mouseenter', 'touchstart', 'pointerdown', 'click'].forEach(function(evt) {
-                        window.addEventListener(evt, triggerHoverSound, {
-                            passive: true
-                        });
-                        document.addEventListener(evt, triggerHoverSound, {
-                            passive: true
-                        });
+                    ['mousemove', 'pointermove', 'mouseover', 'touchstart', 'pointerdown', 'click', 'keydown'].forEach(function(evt) {
+                        window.addEventListener(evt, triggerUserInteractionSound, { passive: true, once: false });
+                        document.addEventListener(evt, triggerUserInteractionSound, { passive: true, once: false });
                         if (loaderOverlay) {
-                            loaderOverlay.addEventListener(evt, triggerHoverSound, {
-                                passive: true
-                            });
+                            loaderOverlay.addEventListener(evt, triggerUserInteractionSound, { passive: true, once: false });
                         }
                     });
 
@@ -663,33 +651,38 @@
                         if (charIndex < textToType.length) {
                             typewriterEl.textContent += textToType.charAt(charIndex);
                             charIndex++;
-                            var progressPercent = Math.min(100, Math.round((charIndex / textToType.length) * 88));
+                            var progressPercent = Math.min(100, Math.round((charIndex / textToType.length) * 90));
                             if (progressBar) progressBar.style.width = progressPercent + '%';
                             setTimeout(typeNextChar, typingSpeed);
                         } else {
                             if (progressBar) progressBar.style.width = '100%';
-                            setTimeout(dismissIntroLoader, 700);
+                            setTimeout(dismissIntroLoader, 900);
                         }
                     }
 
                     function dismissIntroLoader() {
+                        if (!loaderOverlay) return;
                         loaderOverlay.style.opacity = '0';
                         document.body.style.overflow = '';
                         sessionStorage.setItem('chap_first_visit_done', 'true');
-                        if (welcomeAudio) {
-                            welcomeAudio.pause();
-                            welcomeAudio.currentTime = 0;
-                        }
                         setTimeout(function() {
                             loaderOverlay.style.display = 'none';
                         }, 600);
                     }
 
-                    // Kickoff welcome sound and typing after admin delay timeout
+                    // Kickoff welcome sound and typing after delay
                     setTimeout(function() {
-                        playWelcomeSound();
+                        playWelcomeSound(false);
                         typeNextChar();
                     }, welcomeDelay);
+
+                    // Allow clicking overlay to trigger sound immediately
+                    loaderOverlay.addEventListener('click', function(e) {
+                        if (e.target && e.target.id === 'welcomeAudioTriggerBtn') return;
+                        if (!audioPlayed) {
+                            playWelcomeSound(true);
+                        }
+                    });
                 });
             }
         })();
@@ -700,7 +693,7 @@
     <div id="pwaInstallBanner" style="display: flex; position: fixed; bottom: 25px; right: 25px; z-index: 999999; background: #0f172a; border: 1px solid rgba(16,185,129,0.5); border-radius: 30px; padding: 10px 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); color: #ffffff; align-items: center; gap: 10px; backdrop-filter: blur(10px);">
         <img src="{{ asset('logo.png') }}" alt="ChapConnect App" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'">
         <a href="#" onclick="event.preventDefault(); handlePwaInstallClick();" style="color: #ffffff; text-decoration: none; font-weight: 700; font-size: 0.86rem; display: inline-flex; align-items: center; gap: 6px;">
-            <i class="bi bi-download" style="color: #10b981; font-size: 1rem;"></i> Install ChapConnect App
+            <i class="bi bi-download" style="color: #10b981; font-size: 1rem;"></i>
         </a>
         <button type="button" onclick="dismissPwaBanner()" style="background: none; border: none; color: #94a3b8; font-size: 1.1rem; cursor: pointer; padding: 0; margin-left: 4px; display: inline-flex; align-items: center;" title="Dismiss">&times;</button>
     </div>
@@ -768,8 +761,20 @@
             const banner = document.getElementById('pwaInstallBanner');
             if (banner) {
                 banner.style.display = 'none';
+                // Remember dismissal for this browser session only (clears on browser close)
+                try { sessionStorage.setItem('pwaBannerDismissed', '1'); } catch(e) {}
             }
         }
+
+        // Hide banner immediately if already dismissed this session
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                if (sessionStorage.getItem('pwaBannerDismissed') === '1') {
+                    const banner = document.getElementById('pwaInstallBanner');
+                    if (banner) banner.style.display = 'none';
+                }
+            } catch(e) {}
+        });
 
         function closePwaGuideModal() {
             const modal = document.getElementById('pwaGuideModal');

@@ -42,15 +42,15 @@
                                     </span>
                                 </td>
                                 <td style="font-weight: 700; color: #1e293b;">TZS {{ number_format($pkg->price) }}</td>
-                                <td>{{ $pkg->duration }} {{ $pkg->duration_unit }}</td>
+                                <td>{{ ($pkg->duration_unit === 'lifetime' || $pkg->duration == -1) ? 'Life time' : $pkg->duration . ' ' . $pkg->duration_unit }}</td>
                                 <td>
                                     <span style="font-size: 0.76rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; {{ $pkg->phone_visibility === 'Yes' ? 'background: rgba(16,185,129,0.1); color: #10b981;' : 'background: rgba(239,68,68,0.1); color: #ef4444;' }}">
                                         {{ $pkg->phone_visibility === 'Yes' ? 'Visible' : 'Hidden' }}
                                     </span>
                                 </td>
-                                <td style="font-weight: 700; color: #475569; text-align: center;">{{ $pkg->max_images }}</td>
-                                <td style="font-weight: 700; color: #475569; text-align: center;">{{ $pkg->max_videos }}</td>
-                                <td style="font-weight: 700; color: #475569; text-align: center;">{{ $pkg->max_news }}</td>
+                                <td style="font-weight: 700; color: #475569; text-align: center;">{!! $pkg->max_images == -1 ? '&infin;' : $pkg->max_images !!}</td>
+                                <td style="font-weight: 700; color: #475569; text-align: center;">{!! $pkg->max_videos == -1 ? '&infin;' : $pkg->max_videos !!}</td>
+                                <td style="font-weight: 700; color: #475569; text-align: center;">{!! $pkg->max_news == -1 ? '&infin;' : $pkg->max_news !!}</td>
                                 <td>
                                     <span style="font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 20px; {{ $pkg->status === 'Active' ? 'background: rgba(16,185,129,0.1); color: #10b981;' : 'background: rgba(100,100,100,0.1); color: #64748b;' }}">
                                         {{ $pkg->status }}

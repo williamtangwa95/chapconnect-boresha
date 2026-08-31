@@ -219,7 +219,7 @@ class DashboardController extends Controller
         $user = auth()->user();
         $limits = $user->currentPackageDetails();
         $photoCount = $user->media()->where('type', 'photo')->count();
-        if ($photoCount >= $limits['max_images']) {
+        if ($limits['max_images'] >= 0 && $photoCount >= $limits['max_images']) {
             return redirect()->back()->withErrors(['photo' => "You have used {$photoCount} of {$limits['max_images']} allowed images. Upgrade your package to upload more images."]);
         }
 
@@ -379,7 +379,7 @@ class DashboardController extends Controller
         $user = auth()->user();
         $limits = $user->currentPackageDetails();
         $videoCount = $user->media()->where('type', 'video')->count();
-        if ($videoCount >= $limits['max_videos']) {
+        if ($limits['max_videos'] >= 0 && $videoCount >= $limits['max_videos']) {
             return redirect()->back()->withErrors(['video' => "You have used {$videoCount} of {$limits['max_videos']} allowed videos. Upgrade your package to upload more videos."]);
         }
 
@@ -591,7 +591,7 @@ class DashboardController extends Controller
         $user = auth()->user();
         $limits = $user->currentPackageDetails();
         $newsCount = $user->media()->where('type', 'news')->count();
-        if ($newsCount >= $limits['max_news']) {
+        if ($limits['max_news'] >= 0 && $newsCount >= $limits['max_news']) {
             return redirect()->back()->withErrors(['title' => "You have used {$newsCount} of {$limits['max_news']} allowed news articles. Upgrade your package to publish more news."]);
         }
 

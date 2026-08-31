@@ -786,12 +786,12 @@ $media->delete();
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'phone_visibility' => 'required|string|in:Yes,No',
-            'max_images' => 'required|integer|min:0',
-            'max_videos' => 'required|integer|min:0',
-            'max_news' => 'required|integer|min:0',
+            'max_images' => 'required|integer|min:-1',
+            'max_videos' => 'required|integer|min:-1',
+            'max_news' => 'required|integer|min:-1',
             'price' => 'required|numeric|min:0',
-            'duration' => 'required|integer|min:1',
-            'duration_unit' => 'required|string|in:days,months,years',
+            'duration' => 'required|integer|min:-1',
+            'duration_unit' => 'required|string|in:days,months,years,lifetime',
             'package_type' => 'required|string|in:Free,To Pay',
             'status' => 'required|string|in:Active,Inactive',
         ]);
@@ -809,12 +809,12 @@ $media->delete();
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'phone_visibility' => 'required|string|in:Yes,No',
-            'max_images' => 'required|integer|min:0',
-            'max_videos' => 'required|integer|min:0',
-            'max_news' => 'required|integer|min:0',
+            'max_images' => 'required|integer|min:-1',
+            'max_videos' => 'required|integer|min:-1',
+            'max_news' => 'required|integer|min:-1',
             'price' => 'required|numeric|min:0',
-            'duration' => 'required|integer|min:1',
-            'duration_unit' => 'required|string|in:days,months,years',
+            'duration' => 'required|integer|min:-1',
+            'duration_unit' => 'required|string|in:days,months,years,lifetime',
             'package_type' => 'required|string|in:Free,To Pay',
             'status' => 'required|string|in:Active,Inactive',
         ]);
@@ -859,15 +859,19 @@ $media->delete();
         $monthsMultiplier = intval($request->input('months', 1));
         $startDate = $request->input('start_date', now()->toDateString());
         
-        $baseDays = intval($package->duration);
-        if ($package->duration_unit === 'months') {
-            $baseDays = $baseDays * 30;
-        } elseif ($package->duration_unit === 'years') {
-            $baseDays = $baseDays * 365;
+        if ($package->duration_unit === 'lifetime') {
+            $endDate = '2099-12-31';
+        } else {
+            $baseDays = intval($package->duration);
+            if ($package->duration_unit === 'months') {
+                $baseDays = $baseDays * 30;
+            } elseif ($package->duration_unit === 'years') {
+                $baseDays = $baseDays * 365;
+            }
+            
+            $days = $baseDays * $monthsMultiplier;
+            $endDate = date('Y-m-d', strtotime($startDate . " + {$days} days"));
         }
-        
-        $days = $baseDays * $monthsMultiplier;
-        $endDate = date('Y-m-d', strtotime($startDate . " + {$days} days"));
 
         // Deactivate previous active subscriptions for this user
         \App\Models\UserPackage::where('user_id', $userId)

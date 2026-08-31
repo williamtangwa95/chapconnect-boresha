@@ -8,8 +8,8 @@ use App\Models\User;
 use App\Models\AccountBlock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\\Http\\Requests\\StoreSupportTicketRequest;
-use App\\Http\\Requests\\StaffSupportTicketRequest;
+use App\Http\Requests\StoreSupportTicketRequest;
+use App\Http\Requests\StaffSupportTicketRequest;
 
 class CustomerCareController extends Controller
 {

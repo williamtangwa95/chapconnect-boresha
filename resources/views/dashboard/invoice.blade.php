@@ -366,9 +366,9 @@
                         </div>
                         <!-- Snapshot limits representation -->
                         <div style="display: flex; flex-wrap: wrap; gap: 4px;">
-                            <span class="limit-badge"><i class="bi bi-image"></i> Images Limit: {{ $invoice->max_images }}</span>
-                            <span class="limit-badge"><i class="bi bi-camera-video"></i> Videos Limit: {{ $invoice->max_videos }}</span>
-                            <span class="limit-badge"><i class="bi bi-newspaper"></i> News Limit: {{ $invoice->max_news }}</span>
+                            <span class="limit-badge"><i class="bi bi-image"></i> Images Limit: {{ $invoice->max_images == -1 ? 'Unlimited' : $invoice->max_images }}</span>
+                            <span class="limit-badge"><i class="bi bi-camera-video"></i> Videos Limit: {{ $invoice->max_videos == -1 ? 'Unlimited' : $invoice->max_videos }}</span>
+                            <span class="limit-badge"><i class="bi bi-newspaper"></i> News Limit: {{ $invoice->max_news == -1 ? 'Unlimited' : $invoice->max_news }}</span>
                             <span class="limit-badge"><i class="bi bi-telephone"></i> Phone Visibility: {{ $invoice->phone_visibility }}</span>
                         </div>
                     </td>

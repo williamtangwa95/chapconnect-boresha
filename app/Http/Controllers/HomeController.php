@@ -58,13 +58,24 @@ class HomeController extends Controller
             return $countB <=> $countA; // descending
         });
 
+        // Fetch recent media uploads for sidebar preview (photos & videos)
+        $recentMedia = \App\Models\Media::whereHas('user', function($q) {
+            $q->where('role', 'user')
+              ->where('is_published', true);
+        })
+        ->with('user')
+        ->latest()
+        ->take(10)
+        ->get();
+
         return view('home', [
             'talents' => $talents,
             'currentCategory' => $category ?? 'all',
             'search' => $search,
             'categories' => $allCategories,
             'categoryCounts' => $categoryCounts,
-            'totalTalents' => $totalTalents
+            'totalTalents' => $totalTalents,
+            'recentMedia' => $recentMedia
         ]);
     }
 

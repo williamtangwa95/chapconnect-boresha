@@ -38,7 +38,8 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                 <div class="form-group">
                     <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Duration</label>
-                    <input type="number" name="duration" class="form-control" value="30" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <input type="number" name="duration" class="form-control" value="30" min="-1" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 3px; display: block;">Enter -1 for Lifetime.</span>
                 </div>
                 <div class="form-group">
                     <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Duration Unit</label>
@@ -46,6 +47,7 @@
                         <option value="days">Days</option>
                         <option value="months">Months</option>
                         <option value="years">Years</option>
+                        <option value="lifetime">Lifetime (No End)</option>
                     </select>
                 </div>
             </div>
@@ -60,18 +62,21 @@
                 </div>
                 <div class="form-group">
                     <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Max Images</label>
-                    <input type="number" name="max_images" class="form-control" value="5" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <input type="number" name="max_images" class="form-control" value="5" min="-1" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 3px; display: block;">Enter -1 for Unlimited.</span>
                 </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div class="form-group">
                     <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Max Videos</label>
-                    <input type="number" name="max_videos" class="form-control" value="2" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <input type="number" name="max_videos" class="form-control" value="2" min="-1" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 3px; display: block;">Enter -1 for Unlimited.</span>
                 </div>
                 <div class="form-group">
                     <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Max News Articles</label>
-                    <input type="number" name="max_news" class="form-control" value="3" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <input type="number" name="max_news" class="form-control" value="3" min="-1" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 3px; display: block;">Enter -1 for Unlimited.</span>
                 </div>
             </div>
 
@@ -133,7 +138,8 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                 <div class="form-group">
                     <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Duration</label>
-                    <input type="number" id="edit_pkg_duration" name="duration" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <input type="number" id="edit_pkg_duration" name="duration" class="form-control" min="-1" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 3px; display: block;">Enter -1 for Lifetime.</span>
                 </div>
                 <div class="form-group">
                     <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Duration Unit</label>
@@ -141,6 +147,7 @@
                         <option value="days">Days</option>
                         <option value="months">Months</option>
                         <option value="years">Years</option>
+                        <option value="lifetime">Lifetime (No End)</option>
                     </select>
                 </div>
             </div>
@@ -155,18 +162,21 @@
                 </div>
                 <div class="form-group">
                     <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Max Images</label>
-                    <input type="number" id="edit_pkg_max_images" name="max_images" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <input type="number" id="edit_pkg_max_images" name="max_images" class="form-control" min="-1" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 3px; display: block;">Enter -1 for Unlimited.</span>
                 </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
                 <div class="form-group">
                     <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Max Videos</label>
-                    <input type="number" id="edit_pkg_max_videos" name="max_videos" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <input type="number" id="edit_pkg_max_videos" name="max_videos" class="form-control" min="-1" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 3px; display: block;">Enter -1 for Unlimited.</span>
                 </div>
                 <div class="form-group">
                     <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Max News Articles</label>
-                    <input type="number" id="edit_pkg_max_news" name="max_news" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <input type="number" id="edit_pkg_max_news" name="max_news" class="form-control" min="-1" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <span style="font-size: 0.72rem; color: #64748b; margin-top: 3px; display: block;">Enter -1 for Unlimited.</span>
                 </div>
             </div>
 
