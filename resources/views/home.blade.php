@@ -115,14 +115,14 @@
             background: #ffffff;
             border-radius: 30px;
             border: 1.5px solid #e2e8f0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             overflow: hidden;
             transition: box-shadow 0.2s, border-color 0.2s;
         }
 
         .mobile-search-inner:focus-within {
             border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
         }
 
         .mobile-search-icon {
@@ -147,20 +147,33 @@
         .mobile-search-btn {
             background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
             border: none;
-            color: #fff;
+            color: #ffffff !important;
             padding: 0 16px;
             height: 42px;
+            min-width: 48px;
             cursor: pointer;
-            font-size: 15px;
-            display: flex;
+            font-size: 16px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.15s;
             flex-shrink: 0;
+            border-radius: 0 25px 25px 0;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
         .mobile-search-btn:hover {
             background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+        }
+
+        .mobile-search-btn svg,
+        .mobile-search-btn i {
+            color: #ffffff !important;
+            fill: currentColor;
+            display: inline-block;
+            vertical-align: middle;
+            line-height: 1;
         }
     }
 
@@ -325,7 +338,9 @@
         <div class="mobile-search-inner">
             <i class="bi bi-search mobile-search-icon"></i>
             <input class="mobile-search-input" type="search" name="search" value="{{ request('search') }}" placeholder="Search talents, categories...">
-            <button type="submit" class="mobile-search-btn"><i class="bi bi-arrow-right"></i></button>
+            <button type="submit" class="mobile-search-btn" aria-label="Search" title="Search">
+                <i class="bi bi-search"></i>
+            </button>
         </div>
     </form>
 
@@ -555,7 +570,9 @@
                 }
                 el = el.parentElement;
             }
-        }, { passive: true });
+        }, {
+            passive: true
+        });
 
         document.addEventListener('touchend', function(e) {
             if (!touchStartX || !touchStartY || swipeIgnored) {
@@ -592,7 +609,9 @@
             touchStartX = 0;
             touchStartY = 0;
             swipeIgnored = false;
-        }, { passive: true });
+        }, {
+            passive: true
+        });
 
         // ── Dedicated swipe-right-to-close listener on the Post View drawer ──
         // This runs even when the touch starts inside the vertically-scrollable feed list.
@@ -608,7 +627,9 @@
                 drawerTouchStartX = e.touches[0].clientX;
                 drawerTouchStartY = e.touches[0].clientY;
                 drawerSwipeActive = true;
-            }, { passive: true });
+            }, {
+                passive: true
+            });
 
             drawer.addEventListener('touchmove', function(e) {
                 if (!drawerSwipeActive) return;
@@ -618,7 +639,9 @@
                 if (Math.abs(dy) > Math.abs(dx) + 10) {
                     drawerSwipeActive = false;
                 }
-            }, { passive: true });
+            }, {
+                passive: true
+            });
 
             drawer.addEventListener('touchend', function(e) {
                 if (!drawerSwipeActive) {
@@ -638,7 +661,9 @@
                 drawerTouchStartX = 0;
                 drawerTouchStartY = 0;
                 drawerSwipeActive = false;
-            }, { passive: true });
+            }, {
+                passive: true
+            });
         })();
 
         // Fetch initial user interaction statuses for visible talent cards
