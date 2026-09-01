@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Media;
+use App\Models\Notification;
+use App\Models\User;
 use App\Services\ImageCompressor;
+use App\Services\ContentModerationService;
+use App\Helpers\PhoneHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class DashboardController extends Controller
 {
@@ -164,10 +169,27 @@ class DashboardController extends Controller
             'social_youtube.url'   => 'Please enter a valid YouTube URL including http:// or https://.',
         ]);
 
+        if ($request->filled('phone')) {
+            if (!PhoneHelper::isValidTanzanianPhone($request->phone)) {
+                throw ValidationException::withMessages([
+                    'phone' => __('Please enter a valid Tanzanian phone number starting with 06, 07, +255, or 255 (e.g. 0678429492 or +255678429492).'),
+                ]);
+            }
+
+            $possibleFormats = PhoneHelper::getPossibleFormats($request->phone);
+            if (User::where('id', '!=', $user->id)->whereIn('phone', $possibleFormats)->exists()) {
+                throw ValidationException::withMessages([
+                    'phone' => __('Phone number already taken'),
+                ]);
+            }
+        }
+
         $data = $request->only([
-            'name', 'phone', 'country', 'description',
+            'name', 'country', 'description',
             'social_instagram', 'social_facebook', 'social_tiktok', 'social_youtube'
         ]);
+
+        $data['phone'] = $request->filled('phone') ? PhoneHelper::normalizeToLocal($request->phone) : null;
 
         if ($request->filled('password')) {
             $data['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
@@ -259,6 +281,13 @@ class DashboardController extends Controller
         ]);
 
         if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            // Run Automated Content Moderation (NSFW, Nudity & Prohibited Content Detection)
+            $moderation = ContentModerationService::checkImage(
+                $request->file('photo'),
+                $request->title,
+                $request->caption
+            );
+
             // Compress portfolio photo to web-optimized WebP (1920x1920 max, 82% quality)
             $path = ImageCompressor::compressAndStore(
                 $request->file('photo'),
@@ -269,14 +298,36 @@ class DashboardController extends Controller
                 'webp'
             );
             
+            $status = $moderation['flagged'] ? 'flagged' : 'approved';
+            $isVisible = !$moderation['flagged'];
+
             auth()->user()->media()->create([
-                'type'      => 'photo',
-                'title'     => $request->title,
-                'content'   => $request->caption,
-                'file_path' => '/storage/' . $path,
+                'type'              => 'photo',
+                'title'             => $request->title,
+                'content'           => $request->caption,
+                'file_path'         => '/storage/' . $path,
+                'moderation_status' => $status,
+                'moderation_reason' => $moderation['reason'],
+                'moderation_score'  => $moderation['score'],
+                'is_visible'        => $isVisible,
             ]);
 
-            return redirect()->route('dashboard.photos')->with('success', 'Photo compressed & uploaded successfully.');
+            if ($moderation['flagged']) {
+                $staffMembers = User::whereIn('role', ['admin', 'customer_care'])->get();
+                foreach ($staffMembers as $staff) {
+                    Notification::create([
+                        'user_id' => $staff->id,
+                        'type'    => 'nsfw_media_flagged',
+                        'title'   => "⚠️ NSFW / Explicit Photo Auto-Flagged",
+                        'message' => "Talent '" . auth()->user()->name . "' uploaded a photo auto-flagged by moderation: " . $moderation['reason'],
+                        'link'    => route('admin.moderation.queue'),
+                    ]);
+                }
+
+                return redirect()->route('dashboard.photos')->with('warning', __('Photo uploaded but flagged for review by our moderation system. It will remain hidden from the public until reviewed by an administrator.'));
+            }
+
+            return redirect()->route('dashboard.photos')->with('success', __('Photo compressed & uploaded successfully.'));
         }
 
         return redirect()->back()->withInput()->withErrors(['photo' => 'Failed to upload photo. Please select a valid image file.']);
@@ -395,6 +446,12 @@ class DashboardController extends Controller
             'caption' => 'nullable|string|max:1000',
         ]);
 
+        // Moderation text check on video title & caption
+        $textMod = ContentModerationService::checkText($request->title . ' ' . $request->caption);
+        $status = $textMod['flagged'] ? 'flagged' : 'approved';
+        $reason = $textMod['flagged'] ? 'Explicit keywords detected in title/caption: ' . $textMod['matched'] : null;
+        $isVisible = !$textMod['flagged'];
+
         // 1. If Video URL is provided (must be YouTube)
         if ($request->filled('video_url')) {
             $cleaned = \App\Helpers\VideoHelper::cleanUrl($request->input('video_url'));
@@ -407,23 +464,54 @@ class DashboardController extends Controller
                     'max:500',
                     function ($attribute, $value, $fail) {
                         $host = strtolower(parse_url($value, PHP_URL_HOST) ?? '');
-                        $allowed = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be', 'www.youtu.be'];
-                        if (!in_array($host, $allowed, true)) {
-                            $fail('The video URL must be a valid YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...). No other video platform links are allowed.');
+                        $allowed = [
+                            'youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be', 'www.youtu.be',
+                            'tiktok.com', 'www.tiktok.com', 'm.tiktok.com', 'vm.tiktok.com', 'vt.tiktok.com',
+                            'instagram.com', 'www.instagram.com',
+                            'facebook.com', 'www.facebook.com', 'web.facebook.com', 'm.facebook.com', 'fb.watch',
+                            'vimeo.com', 'www.vimeo.com', 'player.vimeo.com'
+                        ];
+                        $isAllowed = false;
+                        foreach ($allowed as $domain) {
+                            if ($host === $domain || str_ends_with($host, '.' . $domain)) {
+                                $isAllowed = true;
+                                break;
+                            }
+                        }
+                        if (!$isAllowed) {
+                            $fail('The video URL must be a valid link from TikTok, YouTube, Instagram, Facebook, or Vimeo.');
                         }
                     },
                 ],
             ], [
-                'video_url.required' => 'Please enter a YouTube video URL link.',
-                'video_url.url'      => 'Please enter a valid YouTube video URL (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...).',
+                'video_url.required' => 'Please enter a video URL link from TikTok, YouTube, Instagram, Facebook, or Vimeo.',
+                'video_url.url'      => 'Please enter a valid video link (e.g. TikTok, YouTube, Instagram, Facebook, or Vimeo).',
             ]);
 
             auth()->user()->media()->create([
-                'type'      => 'video',
-                'title'     => $request->title,
-                'content'   => $request->caption,
-                'file_path' => $request->video_url,
+                'type'              => 'video',
+                'title'             => $request->title,
+                'content'           => $request->caption,
+                'file_path'         => $request->video_url,
+                'moderation_status' => $status,
+                'moderation_reason' => $reason,
+                'is_visible'        => $isVisible,
             ]);
+
+            if ($textMod['flagged']) {
+                $staffMembers = User::whereIn('role', ['admin', 'customer_care'])->get();
+                foreach ($staffMembers as $staff) {
+                    Notification::create([
+                        'user_id' => $staff->id,
+                        'type'    => 'nsfw_media_flagged',
+                        'title'   => "⚠️ Explicit Video Link Flagged",
+                        'message' => "Talent '" . auth()->user()->name . "' added a video auto-flagged by moderation: " . ($reason ?? 'Explicit content'),
+                        'link'    => route('admin.moderation.queue'),
+                    ]);
+                }
+
+                return redirect()->route('dashboard.videos')->with('warning', __('Video added but flagged for review due to potentially inappropriate content. It will remain hidden from the public until reviewed.'));
+            }
 
             return redirect()->route('dashboard.videos')->with('success', 'YouTube video link added successfully to your portfolio.');
         }
@@ -459,11 +547,29 @@ class DashboardController extends Controller
             $path = $request->file('video')->store('media/videos', 'public');
 
             auth()->user()->media()->create([
-                'type'      => 'video',
-                'title'     => $request->title,
-                'content'   => $request->caption,
-                'file_path' => '/storage/' . $path,
+                'type'              => 'video',
+                'title'             => $request->title,
+                'content'           => $request->caption,
+                'file_path'         => '/storage/' . $path,
+                'moderation_status' => $status,
+                'moderation_reason' => $reason,
+                'is_visible'        => $isVisible,
             ]);
+
+            if ($textMod['flagged']) {
+                $staffMembers = User::whereIn('role', ['admin', 'customer_care'])->get();
+                foreach ($staffMembers as $staff) {
+                    Notification::create([
+                        'user_id' => $staff->id,
+                        'type'    => 'nsfw_media_flagged',
+                        'title'   => "⚠️ NSFW / Explicit Video Auto-Flagged",
+                        'message' => "Talent '" . auth()->user()->name . "' uploaded a video auto-flagged by moderation: " . ($reason ?? 'Explicit content'),
+                        'link'    => route('admin.moderation.queue'),
+                    ]);
+                }
+
+                return redirect()->route('dashboard.videos')->with('warning', __('Video file uploaded but flagged for moderation review. It will remain hidden until approved.'));
+            }
 
             return redirect()->route('dashboard.videos')->with('success', 'Video file uploaded successfully.');
         }
@@ -504,15 +610,28 @@ class DashboardController extends Controller
                     'max:500',
                     function ($attribute, $value, $fail) {
                         $host = strtolower(parse_url($value, PHP_URL_HOST) ?? '');
-                        $allowed = ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be', 'www.youtu.be'];
-                        if (!in_array($host, $allowed, true)) {
-                            $fail('The video URL must be a valid YouTube link (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...). No other video platform links are allowed.');
+                        $allowed = [
+                            'youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com', 'youtu.be', 'www.youtu.be',
+                            'tiktok.com', 'www.tiktok.com', 'm.tiktok.com', 'vm.tiktok.com', 'vt.tiktok.com',
+                            'instagram.com', 'www.instagram.com',
+                            'facebook.com', 'www.facebook.com', 'web.facebook.com', 'm.facebook.com', 'fb.watch',
+                            'vimeo.com', 'www.vimeo.com', 'player.vimeo.com'
+                        ];
+                        $isAllowed = false;
+                        foreach ($allowed as $domain) {
+                            if ($host === $domain || str_ends_with($host, '.' . $domain)) {
+                                $isAllowed = true;
+                                break;
+                            }
+                        }
+                        if (!$isAllowed) {
+                            $fail('The video URL must be a valid link from TikTok, YouTube, Instagram, Facebook, or Vimeo.');
                         }
                     },
                 ],
             ], [
-                'video_url.required' => 'Please enter a YouTube video URL link.',
-                'video_url.url'      => 'Please enter a valid YouTube video URL (e.g. https://www.youtube.com/watch?v=... or https://youtu.be/...).',
+                'video_url.required' => 'Please enter a video URL link from TikTok, YouTube, Instagram, Facebook, or Vimeo.',
+                'video_url.url'      => 'Please enter a valid video link (e.g. TikTok, YouTube, Instagram, Facebook, or Vimeo).',
             ]);
 
             if ($video->file_path && !str_starts_with($video->file_path, 'http')) {

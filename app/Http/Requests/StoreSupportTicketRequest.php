@@ -23,8 +23,9 @@ class StoreSupportTicketRequest extends FormRequest
         return [
             'subject'   => 'required|string|max:255',
             'category'  => 'required|string|max:100',
-            'priority'  => 'required|string|in:low,medium,high,urgent',
+            'priority'    => 'required|string|in:low,medium,high,urgent',
             'description' => 'required|string',
+            'status'      => 'nullable|string|in:open,pending,in_progress,approved,resolved,cancelled,closed',
         ];
     }
 }

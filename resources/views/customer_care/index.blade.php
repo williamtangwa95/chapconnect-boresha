@@ -50,6 +50,15 @@
             </div>
 
             <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <a href="{{ route('admin.moderation') }}" style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 30px; font-weight: 700; font-size: 0.85rem; text-decoration: none; transition: all 0.2s ease;">
+                    <i class="bi bi-shield-exclamation" style="font-size: 1rem;"></i> Content Moderation & NSFW
+                    @php
+                    $flaggedCount = \App\Models\Media::where('moderation_status', 'flagged')->count();
+                    @endphp
+                    @if($flaggedCount > 0)
+                    <span style="background: #ef4444; color: #fff; font-size: 0.72rem; font-weight: 800; padding: 1px 6px; border-radius: 10px;">{{ $flaggedCount }}</span>
+                    @endif
+                </a>
                 @if(auth()->user()->role === 'admin')
                 <a href="{{ route('admin.dashboard') }}#customer-care" style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; font-weight: 600; font-size: 0.85rem; text-decoration: none; transition: all 0.2s ease;">
                     <i class="bi bi-speedometer2"></i> Admin Dashboard & Assigned Tickets
@@ -359,9 +368,19 @@
                                 @endif
                             </td>
                             <td>
-                                <span style="font-weight: 700; color: #991b1b; background: #fee2e2; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; border: 1px solid #fecaca; display: inline-flex; align-items: center; gap: 4px;">
+                                @if(!empty($b->reason))
+                                <span style="font-weight: 700; color: #991b1b; background: #fee2e2; padding: 5px 12px; border-radius: 8px; font-size: 0.8rem; border: 1px solid #fecaca; display: inline-flex; align-items: center; gap: 6px; white-space: normal; line-height: 1.3;">
+                                    <i class="bi bi-shield-x"></i> {{ $b->reason }}
+                                </span>
+                                @elseif($b->attempts_count > 0)
+                                <span style="font-weight: 700; color: #991b1b; background: #fee2e2; padding: 5px 12px; border-radius: 8px; font-size: 0.8rem; border: 1px solid #fecaca; display: inline-flex; align-items: center; gap: 6px;">
                                     <i class="bi bi-exclamation-triangle-fill"></i> {{ $b->attempts_count }} failed attempts in {{ $b->time_interval }}
                                 </span>
+                                @else
+                                <span style="font-weight: 700; color: #991b1b; background: #fee2e2; padding: 5px 12px; border-radius: 8px; font-size: 0.8rem; border: 1px solid #fecaca; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="bi bi-slash-circle-fill"></i> {{ $b->time_interval ?: 'Administrative Suspension' }}
+                                </span>
+                                @endif
                             </td>
                             <td style="font-size: 0.82rem; color: #64748b;">
                                 {{ $b->created_at->format('M d, Y H:i') }}
@@ -372,6 +391,12 @@
                                     <strong>Complaint:</strong> {{ $b->customer_complaint }}<br>
                                     <span style="font-size: 0.74rem; color: #64748b;">
                                         Req by: {{ $b->requested_by }} | Iss by: {{ $b->issued_by }}
+                                    </span>
+                                </div>
+                                @elseif(!empty($b->issued_by))
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 10px;">
+                                    <span style="font-size: 0.76rem; color: #475569;">
+                                        <strong>Issued by:</strong> {{ $b->issued_by }}
                                     </span>
                                 </div>
                                 @else
@@ -844,7 +869,7 @@
             </h3>
             <button type="button" class="admin-modal-close" onclick="$('#create-ticket-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
         </div>
-        <form action="{{ route('customer-care.tickets.store') }}" method="POST">
+        <form action="{{ route('customer-care.tickets.store') }}" method="POST" onsubmit="if(window.broadcastNotificationAlert){ window.broadcastNotificationAlert(); }">
             @csrf
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
                 <div class="form-group" style="grid-column: span 2;">
@@ -942,7 +967,7 @@
             <button type="button" class="admin-modal-close" onclick="$('#update-ticket-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
         </div>
 
-        <form id="update-ticket-form" method="POST" action="">
+        <form id="update-ticket-form" method="POST" action="" onsubmit="if(window.broadcastNotificationAlert){ window.broadcastNotificationAlert(); }">
             @csrf
 
             <!-- Reporter Banner Info -->

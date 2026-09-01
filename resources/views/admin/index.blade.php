@@ -195,6 +195,10 @@
                                 <span style="display: flex; align-items: center; gap: 8px; word-break: break-word;"><i class="bi bi-grid-fill" style="color: #8b5cf6; flex-shrink: 0;"></i> Browse Talent Directory</span>
                                 <i class="bi bi-box-arrow-up-right" style="font-size: 0.8rem; color: #94a3b8; flex-shrink: 0;"></i>
                             </a>
+                            <a href="{{ route('admin.moderation') }}" style="width: 100%; box-sizing: border-box; text-align: left; padding: 10px 14px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 10px; font-size: 0.88rem; font-weight: 700; color: #dc2626; text-decoration: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.2s ease;">
+                                <span style="display: flex; align-items: center; gap: 8px; word-break: break-word;"><i class="bi bi-shield-shaded" style="color: #ef4444; flex-shrink: 0;"></i> Content Moderation &amp; NSFW Queue <span style="font-size: 0.7rem; background: #ef4444; color: #fff; border-radius: 10px; padding: 1px 7px; font-weight: 800;">{{ \App\Models\Media::where('moderation_status', 'flagged')->orWhere('report_count', '>', 0)->count() }}</span></span>
+                                <i class="bi bi-arrow-right-short" style="font-size: 1.1rem; color: #dc2626; flex-shrink: 0;"></i>
+                            </a>
                             <a href="#requests" class="tab-link" data-tab="requests" style="width: 100%; box-sizing: border-box; text-align: left; padding: 10px 14px; background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.15); border-radius: 10px; font-size: 0.88rem; font-weight: 600; color: #4f46e5; text-decoration: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: all 0.2s ease;">
                                 <span style="display: flex; align-items: center; gap: 8px; word-break: break-word;"><i class="bi bi-person-check-fill" style="color: #6366f1; flex-shrink: 0;"></i> Contact Requests <span style="font-size: 0.7rem; background: rgba(99,102,241,0.15); color: #6366f1; border-radius: 10px; padding: 1px 7px; font-weight: 800;">{{ $contactRequests->where('status','Pending')->count() }}</span></span>
                                 <i class="bi bi-chevron-right" style="font-size: 0.8rem; color: #94a3b8; flex-shrink: 0;"></i>
@@ -854,7 +858,7 @@
                         </div>
 
                         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; background: #f8fafc; padding: 12px 14px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                            <button type="button" onclick="document.getElementById('chapconnect-notification-audio').play();" style="padding: 8px 16px; border-radius: 8px; font-weight: 700; background: #6366f1; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.82rem;">
+                            <button type="button" onclick="if(window.triggerNotificationSound){ window.triggerNotificationSound(true); } else { document.getElementById('chapconnect-notification-audio').play(); }" style="padding: 8px 16px; border-radius: 8px; font-weight: 700; background: #6366f1; border: none; color: #fff; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.82rem;">
                                 <i class="bi bi-play-fill" style="font-size: 1.1rem;"></i> Test Sound Chime
                             </button>
                             <span style="font-size: 0.8rem; color: #64748b;">Click to preview current sound chime</span>

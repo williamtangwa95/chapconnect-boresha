@@ -60,54 +60,75 @@ class VideoHelper
         $wrapper = '<div class="video-container" style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;background:#000;">';
         $wrapperEnd = '</div>';
 
-        // YouTube
+        // YouTube (enablejsapi=1 for postMessage pause control)
         if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/', $trimmedUrl, $matches)) {
             $youtubeId = $matches[1];
+            $embedSrc = 'https://www.youtube.com/embed/' . $youtubeId . '?enablejsapi=1';
             return $wrapper .
-                '<iframe src="https://www.youtube.com/embed/' . $youtubeId . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:10px;"></iframe>' .
+                '<iframe class="cc-managed-video" data-platform="youtube" data-video-src="' . $embedSrc . '" src="' . $embedSrc . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:10px;"></iframe>' .
                 $wrapperEnd;
         }
 
         // Vimeo
         if (preg_match('/vimeo\.com\/(?:.*#|.*\/)?([0-9]+)/', $trimmedUrl, $matches)) {
             $vimeoId = $matches[1];
+            $embedSrc = 'https://player.vimeo.com/video/' . $vimeoId;
             return $wrapper .
-                '<iframe src="https://player.vimeo.com/video/' . $vimeoId . '" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:10px;"></iframe>' .
+                '<iframe class="cc-managed-video" data-platform="vimeo" data-video-src="' . $embedSrc . '" src="' . $embedSrc . '" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:10px;"></iframe>' .
                 $wrapperEnd;
         }
 
-        // Instagram Reels / Posts
+        // Instagram Reels / Posts / Videos
         if (str_contains($trimmedUrl, 'instagram.com')) {
+            $igCode = null;
+            if (preg_match('/(?:p|reel|reels|tv|share\/reel)\/([A-Za-z0-9_-]+)/i', $trimmedUrl, $igMatches)) {
+                $igCode = $igMatches[1];
+            }
+
+            if (!empty($igCode)) {
+                $embedSrc = 'https://www.instagram.com/p/' . $igCode . '/embed/';
+                return '<div class="instagram-video-wrapper" style="position:relative; width:100%; height:520px; max-height:85vh; background:#000000; border-radius:10px; overflow:hidden; display:flex; justify-content:center; align-items:center;">' .
+                    '<iframe class="cc-managed-video" data-platform="instagram" data-video-src="' . $embedSrc . '" src="' . $embedSrc . '" frameborder="0" scrolling="no" allowtransparency="true" allowfullscreen="true" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" style="width:100%; height:100%; min-height:520px; border:none; border-radius:10px; background:#fff;"></iframe>' .
+                    '</div>';
+            }
+
             $cleanIg = rtrim(preg_replace('/[?#].*$/', '', $trimmedUrl), '/');
-            $embedUrl = $cleanIg . '/embed/';
-            return $wrapper .
-                '<iframe src="' . e($embedUrl) . '" frameborder="0" scrolling="no" allowtransparency="true" allowfullscreen="true" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:10px;"></iframe>' .
-                $wrapperEnd;
+            $embedSrc = $cleanIg . '/embed/';
+            return '<div class="instagram-video-wrapper" style="position:relative; width:100%; height:520px; max-height:85vh; background:#000000; border-radius:10px; overflow:hidden; display:flex; justify-content:center; align-items:center;">' .
+                '<iframe class="cc-managed-video" data-platform="instagram" data-video-src="' . e($embedSrc) . '" src="' . e($embedSrc) . '" frameborder="0" scrolling="no" allowtransparency="true" allowfullscreen="true" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" style="width:100%; height:100%; min-height:520px; border:none; border-radius:10px; background:#fff;"></iframe>' .
+                '</div>';
         }
 
         // Facebook Videos
         if (str_contains($trimmedUrl, 'facebook.com') || str_contains($trimmedUrl, 'fb.watch')) {
             $encodedUrl = urlencode($trimmedUrl);
+            $embedSrc = 'https://www.facebook.com/plugins/video.php?href=' . $encodedUrl . '&show_text=false&autoplay=false';
             return $wrapper .
-                '<iframe src="https://www.facebook.com/plugins/video.php?href=' . $encodedUrl . '&show_text=false&autoplay=false" frameborder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:10px;"></iframe>' .
+                '<iframe class="cc-managed-video" data-platform="facebook" data-video-src="' . e($embedSrc) . '" src="' . e($embedSrc) . '" frameborder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:10px;"></iframe>' .
                 $wrapperEnd;
         }
 
         // TikTok Videos
         if (str_contains($trimmedUrl, 'tiktok.com')) {
-            preg_match('/\/video\/(\d+)/', $trimmedUrl, $ttMatches);
-            if (!empty($ttMatches[1])) {
+            $ttId = null;
+            if (preg_match('/\/video\/(\d+)/', $trimmedUrl, $ttMatches)) {
                 $ttId = $ttMatches[1];
-                return $wrapper .
-                    '<iframe src="https://www.tiktok.com/embed/v2/' . $ttId . '" frameborder="0" allow="autoplay; encrypted-media; fullscreen" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:10px;"></iframe>' .
-                    $wrapperEnd;
+            } elseif (preg_match('/\/v\/(\d+)/', $trimmedUrl, $ttMatches)) {
+                $ttId = $ttMatches[1];
+            } elseif (preg_match('/item_id=(\d+)/', $trimmedUrl, $ttMatches)) {
+                $ttId = $ttMatches[1];
             }
-            return '<div style="background:#0f172a; padding:20px; text-align:center; color:#94a3b8; border-radius:10px;">
-                <i class="bi bi-tiktok" style="font-size:2rem; display:block; margin-bottom:8px; color:#69C9D0;"></i>
-                <p style="margin:0 0 10px 0; font-size:0.88rem;">TikTok video</p>
-                <a href="' . e($trimmedUrl) . '" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:#69C9D0;color:#000;font-weight:700;padding:8px 18px;border-radius:20px;text-decoration:none;font-size:0.85rem;">
-                    <i class="bi bi-box-arrow-up-right"></i> Watch on TikTok
-                </a></div>';
+
+            if (!empty($ttId)) {
+                $embedSrc = 'https://www.tiktok.com/embed/v2/' . $ttId;
+                return '<div class="tiktok-video-wrapper" style="position:relative; width:100%; height:520px; max-height:85vh; background:#000000; border-radius:10px; overflow:hidden; display:flex; justify-content:center; align-items:center;">' .
+                    '<iframe class="cc-managed-video" data-platform="tiktok" data-video-src="' . $embedSrc . '" src="' . $embedSrc . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen scrolling="no" style="width:100%; height:100%; min-height:520px; border:none; border-radius:10px; background:#000;"></iframe>' .
+                    '</div>';
+            }
+
+            return '<div class="tiktok-video-wrapper" style="position:relative; width:100%; height:520px; max-height:85vh; background:#000000; border-radius:10px; overflow:hidden; display:flex; justify-content:center; align-items:center;">' .
+                '<iframe class="cc-managed-video" data-platform="tiktok" data-video-src="' . e($trimmedUrl) . '" src="' . e($trimmedUrl) . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen scrolling="no" style="width:100%; height:100%; min-height:520px; border:none; border-radius:10px; background:#000;"></iframe>' .
+                '</div>';
         }
 
         // Local file or direct URL
@@ -117,7 +138,7 @@ class VideoHelper
         }
 
         return '<div class="video-wrapper" style="position:relative;width:100%;background:#000;border-radius:10px 10px 0 0;overflow:visible;">
-                    <video controls playsinline preload="metadata" style="width:100%; height:auto; display:block; border-radius:10px 10px 0 0; max-height:450px;">
+                    <video class="cc-managed-video" data-platform="local" controls playsinline preload="metadata" style="width:100%; height:auto; display:block; border-radius:10px 10px 0 0; max-height:450px;">
                         <source src="' . e($srcUrl) . '">
                         Your browser does not support the video tag.
                     </video>

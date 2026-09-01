@@ -51,7 +51,7 @@ class AdminController extends Controller
             'support_email' => \App\Models\SystemSetting::get('support_email', 'support@chapconnect.com'),
             'auto_publish_talents' => \App\Models\SystemSetting::get('auto_publish_talents', '1'),
             'notification_sound_enabled' => \App\Models\SystemSetting::get('notification_sound_enabled', '1'),
-            'notification_sound' => \App\Models\SystemSetting::get('notification_sound', 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'),
+            'notification_sound' => \App\Models\SystemSetting::get('notification_sound', '/sounds/notification_default.wav'),
             'welcome_text' => \App\Models\SystemSetting::get('welcome_text', 'Karibu sana ChapConnect...'),
             'welcome_typing_speed' => \App\Models\SystemSetting::get('welcome_typing_speed', '55'),
             'welcome_delay' => \App\Models\SystemSetting::get('welcome_delay', '300'),
@@ -587,6 +587,18 @@ $media->delete();
             'country' => $request->country ?? 'Tanzania',
             'is_published' => true,
         ]);
+
+        // Notify Staff of New Talent Registration
+        $staffMembers = User::whereIn('role', ['admin', 'customer_care'])->get();
+        foreach ($staffMembers as $staff) {
+            \App\Models\Notification::create([
+                'user_id' => $staff->id,
+                'type' => 'new_talent_registration',
+                'title' => "🌟 New Talent Registered: {$user->name}",
+                'message' => "Talent '{$user->name}' was registered under '{$categoryLabel}'.",
+                'link' => ($staff->role === 'admin') ? route('admin.dashboard') . '#talents' : route('customer-care.dashboard') . '#talents',
+            ]);
+        }
 
         \App\Models\UserActivityLog::log('CREATED', "Registered new talent account: {$user->name}", [
             'new' => ['name' => $user->name, 'email' => $user->email, 'role' => 'user']
@@ -1492,10 +1504,143 @@ $media->delete();
             'link' => route('dashboard'),
         ]);
 
-        \App\Models\UserActivityLog::log('UPDATED', "Rejected payout request from Talent: {$paymentRequest->user->name}", [
-            'reason' => $request->admin_notes,
-        ], null, 'TalentPaymentRequest', $paymentRequest->id);
-
         return redirect()->back()->with('success', 'Payment request rejected successfully.');
+    }
+
+    /**
+     * Display the Content Moderation Queue (Flagged and reported media items)
+     */
+    public function moderationQueue(Request $request)
+    {
+        $status = $request->input('status', 'flagged');
+
+        $mediaQuery = Media::with(['user', 'reports.reporter'])
+            ->where(function ($q) use ($status) {
+                if ($status === 'all') {
+                    $q->whereIn('moderation_status', ['flagged', 'pending_review', 'rejected'])
+                      ->orWhere('report_count', '>', 0);
+                } else {
+                    $q->where('moderation_status', $status)
+                      ->orWhere('report_count', '>', 0);
+                }
+            })
+            ->latest();
+
+        $flaggedMedia = $mediaQuery->paginate(20);
+
+        $counts = [
+            'flagged'        => Media::where('moderation_status', 'flagged')->count(),
+            'pending_review' => Media::where('moderation_status', 'pending_review')->count(),
+            'reported'       => Media::where('report_count', '>', 0)->count(),
+            'rejected'       => Media::where('moderation_status', 'rejected')->count(),
+        ];
+
+        return view('admin.moderation', [
+            'mediaItems' => $flaggedMedia,
+            'counts'     => $counts,
+            'currentStatus' => $status,
+        ]);
+    }
+
+    /**
+     * Approve a flagged media item.
+     */
+    public function approveMedia($id)
+    {
+        $media = Media::with('user')->findOrFail($id);
+
+        $media->update([
+            'moderation_status' => 'approved',
+            'is_visible'        => true,
+            'reviewed_by'       => auth()->id(),
+            'reviewed_at'       => now(),
+            'report_count'      => 0,
+        ]);
+
+        // Mark any reports as actioned/dismissed
+        \App\Models\MediaReport::where('media_id', $media->id)->update([
+            'status'      => 'dismissed',
+            'resolved_by' => auth()->id(),
+            'resolved_at' => now(),
+        ]);
+
+        \App\Models\UserActivityLog::log('MODERATION_APPROVE', "Approved {$media->type} #{$media->id} by {$media->user?->name}", [
+            'media_id' => $media->id,
+            'user'     => $media->user?->name,
+        ]);
+
+        return redirect()->back()->with('success', __('Media approved and restored to public visibility successfully.'));
+    }
+
+    /**
+     * Reject and permanently remove flagged inappropriate media.
+     */
+    public function rejectMedia(Request $request, $id)
+    {
+        $media = Media::with('user')->findOrFail($id);
+        $reason = $request->input('reason', 'Violated community standards & content policies (Explicit/Nudity)');
+
+        // Delete physical file if local
+        if (!str_starts_with($media->file_path, 'http')) {
+            $relativePath = str_replace('/storage/', '', $media->file_path);
+            Storage::disk('public')->delete($relativePath);
+        }
+
+        // Notify talent
+        if ($media->user) {
+            \App\Models\Notification::create([
+                'user_id' => $media->user_id,
+                'type'    => 'media_deleted',
+                'title'   => '⚠️ Content Removed by Moderation Team',
+                'message' => "Your uploaded {$media->type} was removed due to content policy violation: {$reason}",
+                'link'    => route('dashboard'),
+            ]);
+        }
+
+        \App\Models\UserActivityLog::log('MODERATION_DELETE', "Deleted prohibited {$media->type} #{$media->id} owned by {$media->user?->name}", [
+            'media_id' => $media->id,
+            'reason'   => $reason,
+        ]);
+
+        $media->delete();
+
+        return redirect()->back()->with('success', __('Inappropriate media removed permanently.'));
+    }
+
+    /**
+     * Ban user account for uploading illegal/NSFW media.
+     */
+    public function banMediaOwner(Request $request, $id)
+    {
+        $media = Media::with('user')->findOrFail($id);
+        $user = $media->user;
+
+        if ($user) {
+            $user->update([
+                'is_blocked'    => true,
+                'is_published'  => false,
+            ]);
+
+            \App\Models\AccountBlock::create([
+                'user_id'            => $user->id,
+                'attempts_count'     => 0,
+                'time_interval'      => 'Moderation Ban',
+                'customer_complaint' => 'Account suspended: Uploading explicit/prohibited media.',
+                'reason'             => 'Account suspended: Uploading explicit/prohibited media.',
+                'blocked_by'         => (string) auth()->id(),
+                'issued_by'          => auth()->user()?->name ?? 'Moderation Team',
+                'ip_address'         => $request->ip(),
+                'status'             => 'blocked',
+            ]);
+
+            \App\Models\UserActivityLog::log('USER_BANNED', "Banned user {$user->name} ({$user->email}) for publishing prohibited content.", [
+                'user_id' => $user->id,
+            ]);
+        }
+
+        // Also delete the offending media
+        $this->rejectMedia($request, $id);
+
+        return redirect()->back()->with('success', __('User account suspended and offending media removed.'));
     }
 }

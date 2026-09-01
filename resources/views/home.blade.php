@@ -307,8 +307,8 @@
     @if(request('category'))
     <input type="hidden" name="category" value="{{ request('category') }}">
     @endif
-    <input class="Srch" type="search" name="search" value="{{ request('search') }}" placeholder="Type to Search here">
-    <button type="submit" class="btn" title="Search"><i class="bi bi-search"></i></button>
+    <input class="Srch" type="search" name="search" value="{{ request('search') }}" placeholder="{{ __('Type to Search here') }}">
+    <button type="submit" class="btn" title="{{ __('Search') }}"><i class="bi bi-search"></i></button>
 </form>
 @endsection
 
@@ -318,13 +318,13 @@
     <!-- Mobile Select2 category picker (desktop only) -->
     <div class="menu-filter-wrap">
         <select id="menuSelect" class="menu-select">
-            <option value="">🔍 Browse Categories...</option>
+            <option value="">🔍 {{ __('Browse Categories...') }}</option>
             <option value="{{ route('home', ['search' => request('search')]) }}" {{ $currentCategory === 'all' ? 'selected' : '' }}>
-                All Talents ({{ $totalTalents }})
+                {{ __('All Talents') }} ({{ $totalTalents }})
             </option>
             @foreach($categories as $slug => $label)
             <option value="{{ route('home', ['category' => $slug, 'search' => request('search')]) }}" {{ $currentCategory === $slug ? 'selected' : '' }}>
-                {{ $label }} ({{ $categoryCounts[$slug] ?? 0 }})
+                {{ __($label) }} ({{ $categoryCounts[$slug] ?? 0 }})
             </option>
             @endforeach
         </select>
@@ -337,28 +337,40 @@
         @endif
         <div class="mobile-search-inner">
             <i class="bi bi-search mobile-search-icon"></i>
-            <input class="mobile-search-input" type="search" name="search" value="{{ request('search') }}" placeholder="Search talents, categories...">
-            <button type="submit" class="mobile-search-btn" aria-label="Search" title="Search">
+            <input class="mobile-search-input" type="search" name="search" value="{{ request('search') }}" placeholder="{{ __('Search talents, categories...') }}">
+            <button type="submit" class="mobile-search-btn" aria-label="{{ __('Search') }}" title="{{ __('Search') }}">
                 <i class="bi bi-search"></i>
             </button>
         </div>
     </form>
 
-    <!-- Category Links (horizontal scroll on all screens) -->
-    <ul id="menuList">
-        <li class="{{ $currentCategory === 'all' ? 'active' : '' }}">
-            <a href="{{ route('home', ['search' => request('search')]) }}">
-                All Talents <span class="filter-badge" style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; font-size: 11px;">{{ $totalTalents }}</span>
-            </a>
-        </li>
-        @foreach($categories as $slug => $label)
-        <li class="{{ $currentCategory === $slug ? 'active' : '' }}">
-            <a href="{{ route('home', ['category' => $slug, 'search' => request('search')]) }}">
-                {{ $label }} <span class="filter-badge" style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; font-size: 11px;">{{ $categoryCounts[$slug] ?? 0 }}</span>
-            </a>
-        </li>
-        @endforeach
-    </ul>
+    <!-- Category Links (horizontal scroll on all screens with forward/backward arrow buttons) -->
+    <div class="category-scroll-wrapper">
+        <button type="button" class="category-arrow-btn prev-arrow" id="categoryScrollPrev" aria-label="{{ __('Previous') }}" title="{{ __('Previous') }}">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+
+        <div class="category-scroll-track" id="categoryScrollTrack">
+            <ul id="menuList">
+                <li class="{{ $currentCategory === 'all' ? 'active' : '' }}">
+                    <a href="{{ route('home', ['search' => request('search')]) }}">
+                        {{ __('All Talents') }} <span class="filter-badge" style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; font-size: 11px;">{{ $totalTalents }}</span>
+                    </a>
+                </li>
+                @foreach($categories as $slug => $label)
+                <li class="{{ $currentCategory === $slug ? 'active' : '' }}">
+                    <a href="{{ route('home', ['category' => $slug, 'search' => request('search')]) }}">
+                        {{ __($label) }} <span class="filter-badge" style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; font-size: 11px;">{{ $categoryCounts[$slug] ?? 0 }}</span>
+                    </a>
+                </li>
+                @endforeach
+            </ul>
+        </div>
+
+        <button type="button" class="category-arrow-btn next-arrow" id="categoryScrollNext" aria-label="{{ __('Next') }}" title="{{ __('Next') }}">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+    </div>
 </div>
 
 <main class="main">
@@ -376,31 +388,31 @@
                         @endif
                         <div class="details">
                             <h2 title="{{ $talent->name }}">{{ $talent->name }}</h2>
-                            <h5>{{ $talent->category_label }}</h5>
+                            <h5>{{ __($talent->category_label) }}</h5>
 
                             <div class="like-container">
                                 <div class="like">
-                                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})">Like 🤍</button>
+                                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})">{{ __('Like') }} 🤍</button>
                                     <span class="like-count" id="likeCount_{{ $talent->id }}">{{ $talent->likes_received_count ?? 0 }}</span>
                                 </div>
                                 <div class="comment">
                                     <a href="{{ route('profile', $talent->id) }}#info-tab" style="text-decoration:none;">
-                                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}">Comments 💬</button>
+                                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}">{{ __('Comments') }} 💬</button>
                                     </a>
                                     <span class="comment-count {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentCount_{{ $talent->id }}">{{ $talent->comments_received_count ?? 0 }}</span>
                                 </div>
                                 <div class="follow">
-                                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})">Followers</button>
+                                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})">{{ __('Followers') }}</button>
                                     <span class="followers-count" id="followersCount_{{ $talent->id }}">{{ $talent->followers_received_count ?? 0 }}</span>
                                 </div>
                             </div>
 
-                            <a href="{{ route('profile', $talent->id) }}" class="vbtn">View Full Profile</a>
+                            <a href="{{ route('profile', $talent->id) }}" class="vbtn">{{ __('View Full Profile') }}</a>
 
                             <div class="card-quick-links">
-                                <a href="{{ route('profile', $talent->id) }}#photos-tab"><span class="bi bi-camera"></span> Photos</a>
-                                <a href="{{ route('profile', $talent->id) }}#videos-tab"><span class="bi bi-camera-video"></span> Videos</a>
-                                <a href="{{ route('profile', $talent->id) }}#news-tab"><span class="bi bi-newspaper"></span> News</a>
+                                <a href="{{ route('profile', $talent->id) }}#photos-tab"><span class="bi bi-camera"></span> {{ __('Photos') }}</a>
+                                <a href="{{ route('profile', $talent->id) }}#videos-tab"><span class="bi bi-camera-video"></span> {{ __('Videos') }}</a>
+                                <a href="{{ route('profile', $talent->id) }}#news-tab"><span class="bi bi-newspaper"></span> {{ __('News') }}</a>
                             </div>
                         </div>
                     </div>
@@ -408,8 +420,8 @@
                 @empty
                 <div class="no-results" style="grid-column: 1/-1; text-align: center; padding: 50px 20px; background: white; border-radius: 16px; box-shadow: var(--shadow);">
                     <i class="bi bi-people" style="font-size: 48px; color: var(--primary); display: block; margin-bottom: 10px;"></i>
-                    <h3 style="color: var(--text-main); margin-bottom: 5px;">No Talents Found</h3>
-                    <p style="color: var(--text-muted); font-size: 14px;">No talents registered yet under this category selection.</p>
+                    <h3 style="color: var(--text-main); margin-bottom: 5px;">{{ __('No Talents Found') }}</h3>
+                    <p style="color: var(--text-muted); font-size: 14px;">{{ __('No talents registered yet under this category selection.') }}</p>
                 </div>
                 @endforelse
             </div>
@@ -427,12 +439,12 @@
                         <button type="button" id="closeDrawerBtn" class="drawer-close-btn" style="background: none; border: none; padding: 0; margin-right: 4px; color: var(--text-main); cursor: pointer; display: none; align-items: center; justify-content: center;">
                             <i class="bi bi-arrow-left" style="font-size: 1.4rem; font-weight: bold;"></i>
                         </button>
-                        <i class="bi bi-camera-reels-fill header-icon-desktop"></i> Post View
+                        <i class="bi bi-camera-reels-fill header-icon-desktop"></i> {{ __('Post View') }}
                     </span>
                     <!-- add live search to filter the contents -->
                     <div class="media-search-container" style="position: relative; width: 170px;">
                         <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 12px;"></i>
-                        <input type="text" id="mediaSearch" placeholder="Search..." style="width: 100%; padding: 6px 10px 6px 30px; border: 1px solid #cbd5e1; border-radius: 30px; background: #f8fafc; color: var(--text-main); font-family: inherit; font-size: 12px; outline: none; transition: all 0.2s ease-in-out;">
+                        <input type="text" id="mediaSearch" placeholder="{{ __('Search...') }}" style="width: 100%; padding: 6px 10px 6px 30px; border: 1px solid #cbd5e1; border-radius: 30px; background: #f8fafc; color: var(--text-main); font-family: inherit; font-size: 12px; outline: none; transition: all 0.2s ease-in-out;">
                     </div>
                 </h3>
 
@@ -441,7 +453,7 @@
                 <div class="media-feed-list">
                     <div id="no-media-search-results" style="text-align: center; padding: 40px 10px; color: var(--text-muted); display: none;">
                         <i class="bi bi-search" style="font-size: 2.5rem; color: #cbd5e1; display: block; margin-bottom: 8px;"></i>
-                        <p style="font-size: 0.88rem; font-weight: 500; margin: 0;">No matching previews found.</p>
+                        <p style="font-size: 0.88rem; font-weight: 500; margin: 0;">{{ __('No matching previews found.') }}</p>
                     </div>
                     @forelse($recentMedia as $media)
                     <div class="media-feed-item">
@@ -512,6 +524,14 @@
 
 @section('scripts')
 <script>
+    // Translation strings passed from Blade for dynamic JS buttons
+    const i18n = {
+        liked:      "{{ __('Liked ❤️') }}",
+        like:       "{{ __('Like') }} 🤍",
+        following:  "{{ __('Following') }}",
+        followers:  "{{ __('Followers') }}"
+    };
+
     $(document).ready(function() {
         $('#menuSelect').select2({
             width: '100%',
@@ -523,6 +543,64 @@
             var url = $(this).val();
             if (url) window.location.href = url;
         });
+
+        // ── Category Horizontal Scroll Arrow Buttons ──
+        const catTrack = document.getElementById('categoryScrollTrack');
+        const prevBtn = document.getElementById('categoryScrollPrev');
+        const nextBtn = document.getElementById('categoryScrollNext');
+
+        if (catTrack && prevBtn && nextBtn) {
+            function updateArrowButtons() {
+                const maxScrollLeft = catTrack.scrollWidth - catTrack.clientWidth;
+                if (maxScrollLeft <= 5) {
+                    prevBtn.style.opacity = '0.25';
+                    prevBtn.style.pointerEvents = 'none';
+                    nextBtn.style.opacity = '0.25';
+                    nextBtn.style.pointerEvents = 'none';
+                } else {
+                    if (catTrack.scrollLeft <= 5) {
+                        prevBtn.style.opacity = '0.25';
+                        prevBtn.style.pointerEvents = 'none';
+                    } else {
+                        prevBtn.style.opacity = '1';
+                        prevBtn.style.pointerEvents = 'auto';
+                    }
+
+                    if (catTrack.scrollLeft >= maxScrollLeft - 5) {
+                        nextBtn.style.opacity = '0.25';
+                        nextBtn.style.pointerEvents = 'none';
+                    } else {
+                        nextBtn.style.opacity = '1';
+                        nextBtn.style.pointerEvents = 'auto';
+                    }
+                }
+            }
+
+            prevBtn.addEventListener('click', function() {
+                catTrack.scrollBy({ left: -240, behavior: 'smooth' });
+            });
+
+            nextBtn.addEventListener('click', function() {
+                catTrack.scrollBy({ left: 240, behavior: 'smooth' });
+            });
+
+            catTrack.addEventListener('scroll', updateArrowButtons, { passive: true });
+            window.addEventListener('resize', updateArrowButtons, { passive: true });
+
+            // Initial check & auto-scroll active category into view
+            updateArrowButtons();
+            const activeItem = catTrack.querySelector('li.active');
+            if (activeItem) {
+                const itemLeft = activeItem.offsetLeft - catTrack.offsetLeft;
+                const itemWidth = activeItem.offsetWidth;
+                const trackWidth = catTrack.clientWidth;
+                catTrack.scrollTo({
+                    left: Math.max(0, itemLeft - (trackWidth / 2) + (itemWidth / 2)),
+                    behavior: 'smooth'
+                });
+                setTimeout(updateArrowButtons, 350);
+            }
+        }
 
         // Mobile Sidebar Drawer Control Functions
         function openMediaSidebar() {
@@ -701,11 +779,11 @@
 
                         if (likeBtn && data.is_liked) {
                             likeBtn.classList.add('liked');
-                            likeBtn.textContent = 'Liked ❤️';
+                            likeBtn.textContent = i18n.liked;
                         }
                         if (followBtn && data.is_following) {
                             followBtn.classList.add('following');
-                            followBtn.textContent = 'Following';
+                            followBtn.textContent = i18n.following;
                         }
                     });
                 }
@@ -952,10 +1030,10 @@
                 if (res.success) {
                     if (res.liked) {
                         btn.classList.add('liked');
-                        btn.textContent = 'Liked ❤️';
+                        btn.textContent = i18n.liked;
                     } else {
                         btn.classList.remove('liked');
-                        btn.textContent = 'Like 🤍';
+                        btn.textContent = i18n.like;
                     }
                     count.textContent = res.count;
                 }
@@ -983,10 +1061,10 @@
                 if (res.success) {
                     if (res.following) {
                         btn.classList.add('following');
-                        btn.textContent = 'Following';
+                        btn.textContent = i18n.following;
                     } else {
                         btn.classList.remove('following');
-                        btn.textContent = 'Followers';
+                        btn.textContent = i18n.followers;
                     }
                     count.textContent = res.count;
                 }

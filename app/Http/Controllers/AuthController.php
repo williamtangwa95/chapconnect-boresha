@@ -7,6 +7,7 @@ use App\Models\FailedLoginAttempt;
 use App\Models\AccountBlock;
 use App\Models\Notification;
 use App\Mail\ResetPasswordCodeMail;
+use App\Helpers\PhoneHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -42,13 +43,28 @@ class AuthController extends Controller
             'email' => 'nullable|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
             'category' => 'required|string|in:' . implode(',', array_keys(self::categories())),
-            'phone' => 'required_without:email|nullable|string|max:30|unique:users',
+            'phone' => 'required_without:email|nullable|string|max:30',
             'security_question' => 'required|string|max:255',
             'security_answer' => 'required|string|max:255',
         ], [
-            'email.unique' => 'Email already taken',
-            'phone.unique' => 'Phone number already taken',
+            'email.unique' => __('Email already taken'),
+            'email.email' => __('Please enter a valid email address'),
         ]);
+
+        if ($request->filled('phone')) {
+            if (!PhoneHelper::isValidTanzanianPhone($request->phone)) {
+                throw ValidationException::withMessages([
+                    'phone' => __('Please enter a valid Tanzanian phone number starting with 06, 07, +255, or 255 (e.g. 0678429492 or +255678429492).'),
+                ]);
+            }
+
+            $possibleFormats = PhoneHelper::getPossibleFormats($request->phone);
+            if (User::whereIn('phone', $possibleFormats)->exists()) {
+                throw ValidationException::withMessages([
+                    'phone' => __('Phone number already taken'),
+                ]);
+            }
+        }
 
         $q = $request->input('security_question');
         $a = $request->input('security_answer');
@@ -56,12 +72,14 @@ class AuthController extends Controller
         similar_text(\Illuminate\Support\Str::lower($q), \Illuminate\Support\Str::lower($a), $percent);
         if ($percent >= 50) {
             throw ValidationException::withMessages([
-                'security_answer' => 'The security question and answer are too similar (must be less than 50% match).',
+                'security_answer' => __('The security question and answer are too similar (must be less than 50% match).'),
             ]);
         }
 
         $category = $request->input('category');
         $categoryLabel = self::categories()[$category];
+
+        $normalizedPhone = $request->filled('phone') ? PhoneHelper::normalizeToLocal($request->phone) : null;
 
         $user = User::create([
             'name' => $request->name,
@@ -69,12 +87,24 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'category' => $category,
             'category_label' => $categoryLabel,
-            'phone' => $request->phone ?: null,
+            'phone' => $normalizedPhone,
             'country' => 'East Africa Tanzania',
             'role' => 'user', // default registration role
             'security_question' => $q,
             'security_answer' => \Illuminate\Support\Facades\Crypt::encryptString(\Illuminate\Support\Str::lower($a)),
         ]);
+
+        // Notify Admin and Customer Care of New Talent Registration
+        $staffMembers = User::whereIn('role', ['admin', 'customer_care'])->get();
+        foreach ($staffMembers as $staff) {
+            Notification::create([
+                'user_id' => $staff->id,
+                'type' => 'new_talent_registration',
+                'title' => "🌟 New Talent Registered: {$user->name}",
+                'message' => "Talent '{$user->name}' registered under '{$user->category_label}'.",
+                'link' => ($staff->role === 'admin') ? route('admin.dashboard') . '#talents' : route('customer-care.dashboard') . '#talents',
+            ]);
+        }
 
         Auth::login($user);
 
@@ -98,11 +128,12 @@ class AuthController extends Controller
 
         $login = $request->input('login');
         $password = $request->input('password');
+        $phoneFormats = PhoneHelper::getPossibleFormats($login);
 
-        // Look up user by email or phone
+        // Look up user by email or any phone format (06/07..., +255..., or 255...)
         $user = User::where('email', $login)
-            ->orWhere(function($query) use ($login) {
-                $query->whereNotNull('phone')->where('phone', $login);
+            ->orWhere(function($query) use ($phoneFormats) {
+                $query->whereNotNull('phone')->whereIn('phone', $phoneFormats);
             })
             ->first();
 
@@ -114,8 +145,25 @@ class AuthController extends Controller
 
         // Check if the user is blocked
         if ($user->is_blocked) {
+            $latestBlock = \App\Models\AccountBlock::where('user_id', $user->id)
+                ->where('status', 'blocked')
+                ->latest()
+                ->first();
+
+            $msgKey = 'Your account has been blocked due to violation of content guidelines. Please contact Customer Care to unblock.';
+
+            if ($latestBlock) {
+                if (!empty($latestBlock->reason) && (str_contains(strtolower($latestBlock->reason), 'explicit') || str_contains(strtolower($latestBlock->reason), 'prohibited') || str_contains(strtolower($latestBlock->reason), 'moderation') || str_contains(strtolower($latestBlock->reason), 'nude'))) {
+                    $msgKey = 'Your account has been blocked due to violation of content guidelines. Please contact Customer Care to unblock.';
+                } elseif ($latestBlock->attempts_count > 0) {
+                    $msgKey = 'Your account has been blocked due to multiple consecutive failed login attempts. Please contact Customer Care to unblock.';
+                } else {
+                    $msgKey = 'Your account has been suspended by administration. Please contact Customer Care to unblock.';
+                }
+            }
+
             throw ValidationException::withMessages([
-                'login' => 'Your account has been blocked due to multiple consecutive failed login attempts. Please contact customer care to unblock.',
+                'login' => __($msgKey),
             ]);
         }
 
@@ -168,9 +216,9 @@ class AuthController extends Controller
                 Notification::create([
                     'user_id' => $staff->id,
                     'type' => 'account_blocked',
-                    'title' => "Account Blocked: {$user->name}",
-                    'message' => "User {$user->name} blocked due to {$failedCount} failed attempts within {$intervalMinutes} minutes.",
-                    'link' => route('customer-care.dashboard') . '#blocked-accounts',
+                    'title' => "🔒 Account Blocked: {$user->name}",
+                    'message' => "User {$user->name} was blocked due to {$failedCount} failed attempts within {$intervalMinutes} minutes.",
+                    'link' => ($staff->role === 'admin') ? route('admin.dashboard') . '#customer-care' : route('customer-care.dashboard') . '#blocked',
                 ]);
             }
 
@@ -214,24 +262,25 @@ class AuthController extends Controller
         ]);
 
         $login = $request->input('login');
+        $phoneFormats = PhoneHelper::getPossibleFormats($login);
 
-        // Look up user by email or phone
+        // Look up user by email or any phone format (06/07..., +255..., or 255...)
         $user = User::where('email', $login)
-            ->orWhere(function($query) use ($login) {
-                $query->whereNotNull('phone')->where('phone', $login);
+            ->orWhere(function($query) use ($phoneFormats) {
+                $query->whereNotNull('phone')->whereIn('phone', $phoneFormats);
             })
             ->first();
 
         if (!$user) {
             throw ValidationException::withMessages([
-                'login' => 'We could not find a user with that email address or phone number.',
+                'login' => __('We could not find a user with that email address or phone number.'),
             ]);
         }
 
         // Check if user has security question set
         if (empty($user->security_question) || empty($user->security_answer)) {
             throw ValidationException::withMessages([
-                'login' => 'This account has not configured a security recovery question. Please contact support.',
+                'login' => __('This account has not configured a security recovery question. Please contact support.'),
             ]);
         }
 
@@ -251,9 +300,11 @@ class AuthController extends Controller
             return redirect()->route('password.request')->with('error', 'Please enter your email or phone first.');
         }
 
+        $phoneFormats = PhoneHelper::getPossibleFormats($login);
+
         $user = User::where('email', $login)
-            ->orWhere(function($query) use ($login) {
-                $query->whereNotNull('phone')->where('phone', $login);
+            ->orWhere(function($query) use ($phoneFormats) {
+                $query->whereNotNull('phone')->whereIn('phone', $phoneFormats);
             })
             ->first();
 
@@ -277,16 +328,17 @@ class AuthController extends Controller
 
         $login = $request->input('login');
         $answer = $request->input('security_answer');
+        $phoneFormats = PhoneHelper::getPossibleFormats($login);
 
         $user = User::where('email', $login)
-            ->orWhere(function($query) use ($login) {
-                $query->whereNotNull('phone')->where('phone', $login);
+            ->orWhere(function($query) use ($phoneFormats) {
+                $query->whereNotNull('phone')->whereIn('phone', $phoneFormats);
             })
             ->first();
 
         if (!$user) {
             throw ValidationException::withMessages([
-                'security_answer' => 'User not found.',
+                'security_answer' => __('User not found.'),
             ]);
         }
 

@@ -28,7 +28,7 @@ class StaffSupportTicketRequest extends FormRequest
             'category'        => 'required|string|max:100',
             'priority'        => 'required|string|in:low,medium,high,urgent',
             'description'     => 'required|string',
-            'status'          => "required|string|in:open,pending,in_progress,approved,resolved,cancelled,closed",
+            'status'          => 'nullable|string|in:open,pending,in_progress,approved,resolved,cancelled,closed',
             'assigned_to'     => 'nullable|exists:users,id',
             'resolution_notes'=> 'nullable|string',
             'recommendations' => 'nullable|string',

@@ -9,18 +9,18 @@
             <div class="form-box active" id="login-form">
                 <form action="{{ route('login') }}" method="POST">
                     @csrf
-                    <h2>Login</h2>
+                    <h2>{{ __('Login') }}</h2>
 
                     <div class="form-group">
-                        <label for="login-email">Username</label>
-                        <input id="login-email" type="text" name="login" value="{{ old('login') }}" placeholder="Enter your email or phone number" required autofocus>
+                        <label for="login-email">{{ __('Username') }}</label>
+                        <input id="login-email" type="text" name="login" value="{{ old('login') }}" placeholder="{{ __('Enter your email or phone number') }}" required autofocus>
                     </div>
 
                     <div class="form-group">
-                        <label for="login-password">Password</label>
+                        <label for="login-password">{{ __('Password') }}</label>
                         <div class="password-wrapper">
-                            <input id="login-password" type="password" name="password" placeholder="Enter password" required>
-                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this)" title="Toggle password visibility">
+                            <input id="login-password" type="password" name="password" placeholder="{{ __('Enter password') }}" required>
+                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this)" title="{{ __('Toggle password visibility') }}">
                                 <i class="bi bi-eye"></i>
                             </button>
                         </div>
@@ -28,15 +28,15 @@
 
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; font-size: 13px;">
                         <label style="display: flex; align-items: center; gap: 6px; margin: 0; cursor: pointer;">
-                            <input type="checkbox" name="remember" style="width: auto;"> Remember Me
+                            <input type="checkbox" name="remember" style="width: auto;"> {{ __('Remember Me') }}
                         </label>
-                        <a href="{{ route('password.request') }}" style="color: var(--primary); text-decoration: none; font-weight: 500;">Forgot Password?</a>
+                        <a href="{{ route('password.request') }}" style="color: var(--primary); text-decoration: none; font-weight: 500;">{{ __('Forgot Password?') }}</a>
                     </div>
 
-                    <button type="submit">Login</button>
-                    <p>Don't have an account? <a href="{{ route('register') }}">Register</a></p>
+                    <button type="submit">{{ __('Login') }}</button>
+                    <p>{{ __("Don't have an account?") }} <a href="{{ route('register') }}">{{ __('Register') }}</a></p>
                 </form>
-                <a href="{{ route('home') }}" class="back-link">← Back to ChapConnect</a>
+                <a href="{{ route('home') }}" class="back-link">← {{ __('Back to ChapConnect') }}</a>
             </div>
         </div>
     </div>

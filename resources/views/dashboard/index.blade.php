@@ -18,17 +18,17 @@
                     @endif
                 </div>
                 <div class="dashboard-welcome-text">
-                    <h2 style="color: #ffffff; margin: 0 0 4px 0; font-size: 1.5rem; font-weight: 800;">Welcome, {{ $user->name }}</h2>
-                    <p style="color: #94a3b8; margin: 0; font-size: 0.92rem;">Staff Account Settings (Role: {{ $user->role === 'admin' ? 'Super Administrator' : 'Customer Care' }}). Update your profile details and security credentials.</p>
+                    <h2 style="color: #ffffff; margin: 0 0 4px 0; font-size: 1.5rem; font-weight: 800;">{{ __('Welcome') }}, {{ $user->name }}</h2>
+                    <p style="color: #94a3b8; margin: 0; font-size: 0.92rem;">{{ __('Dashboard Overview') }} ({{ __('Role') }}: {{ $user->role === 'admin' ? __('Administration') : __('Customer Care') }}). {{ __('Manage your profile settings and security credentials.') }}</p>
                 </div>
             </div>
             <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                 <button type="button" onclick="$('#user-support-modal').fadeIn(200);" class="nav-btn" style="border-radius: 20px; font-weight: 700; padding: 10px 18px; background: rgba(99,102,241,0.12); color: #6366f1; border: 1px solid rgba(99,102,241,0.3); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;">
-                    <i class="bi bi-headset"></i> Need Help / Support
+                    <i class="bi bi-headset"></i> {{ __('Need Help / Support') }}
                 </button>
                 @if(in_array($user->role, ['admin']))
                 <a href="{{ route('admin.dashboard') }}" class="nav-btn nav-btn-login" style="border-radius: 20px; font-weight: 700; padding: 10px 22px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.4); text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                    <i class="bi bi-speedometer2"></i> Admin Panel
+                    <i class="bi bi-speedometer2"></i> {{ __('Admin Panel') }}
                 </a>
                 @endif
             </div>
@@ -37,7 +37,7 @@
         <!-- Staff Profile Form -->
         <div class="dashboard-panel" style="background: #ffffff; border-radius: 16px; padding: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
             <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.2rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                <i class="bi bi-person-gear" style="color: var(--primary);"></i> Staff Account Profile & Security Credentials
+                <i class="bi bi-person-gear" style="color: var(--primary);"></i> {{ __('Staff Account Profile & Security Credentials') }}
             </h3>
 
             <form action="{{ route('dashboard.update') }}" method="POST" enctype="multipart/form-data">
@@ -45,30 +45,30 @@
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 20px;">
                     <div class="form-group">
-                        <label for="name" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Full Name</label>
+                        <label for="name" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">{{ __('Full Name') }}</label>
                         <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $user->name) }}" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
                     </div>
 
                     <div class="form-group">
-                        <label for="email" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Account Email Address</label>
+                        <label for="email" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">{{ __('Account Email Address') }}</label>
                         <input type="email" id="email" class="form-control" value="{{ $user->email }}" disabled style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
                     </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 20px;">
                     <div class="form-group">
-                        <label for="phone" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Phone Number (WhatsApp)</label>
+                        <label for="phone" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">{{ __('Phone Number (WhatsApp)') }}</label>
                         <input type="text" id="phone" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
                     </div>
 
                     <div class="form-group">
-                        <label for="country" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Country Location</label>
+                        <label for="country" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">{{ __('Country Location') }}</label>
                         <input type="text" id="country" name="country" class="form-control" value="{{ old('country', $user->country ?? 'Tanzania') }}" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
                     </div>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 25px;">
-                    <label for="profile_image" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Update Profile Avatar Photo</label>
+                    <label for="profile_image" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">{{ __('Update Profile Avatar Photo') }}</label>
                     <input type="file" id="profile_image" name="profile_image" class="form-control" accept="image/*" style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 10px;" onchange="previewProfileImage(event)">
 
                     <div id="image-preview-container" style="margin-top: 12px; display: none; align-items: center; gap: 15px; background: #f8fafc; padding: 12px 16px; border-radius: 12px; border: 1px dashed var(--primary);">
@@ -83,12 +83,12 @@
                 </div>
 
                 <h4 style="font-size: 1rem; font-weight: 700; color: #0f172a; margin-top: 30px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-                    <i class="bi bi-key-fill" style="color: #d97706;"></i> Update Security Password Credentials (Optional)
+                    <i class="bi bi-key-fill" style="color: #d97706;"></i> {{ __('Update Security Password Credentials') }} ({{ __('Optional') }})
                 </h4>
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 25px;">
                     <div class="form-group">
-                        <label for="current_password" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Current Password</label>
+                        <label for="current_password" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">{{ __('Current Password') }}</label>
                         <div style="position: relative;">
                             <input type="password" id="current_password" name="current_password" class="form-control" placeholder="Enter current password" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 42px 10px 14px;">
                             <button type="button" class="toggle-password-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; font-size: 1.1rem; padding: 0; display: flex; align-items: center; justify-content: center;">
@@ -98,7 +98,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="password" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">New Password</label>
+                        <label for="password" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">{{ __('New Password') }}</label>
                         <div style="position: relative;">
                             <input type="password" id="password" name="password" class="form-control" placeholder="Leave blank to keep current password" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 42px 10px 14px;">
                             <button type="button" class="toggle-password-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; font-size: 1.1rem; padding: 0; display: flex; align-items: center; justify-content: center;">
@@ -108,7 +108,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="password_confirmation" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Confirm New Password</label>
+                        <label for="password_confirmation" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">{{ __('Confirm New Password') }}</label>
                         <div style="position: relative;">
                             <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="Re-type new password" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 42px 10px 14px;">
                             <button type="button" class="toggle-password-btn" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #64748b; cursor: pointer; font-size: 1.1rem; padding: 0; display: flex; align-items: center; justify-content: center;">
@@ -120,7 +120,7 @@
 
                 <div style="display: flex; justify-content: flex-end;">
                     <button type="submit" style="padding: 12px 28px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.35); cursor: pointer;">
-                        Save Staff Account Updates
+                        {{ __('Save Changes') }}
                     </button>
                 </div>
             </form>
@@ -139,23 +139,23 @@
                     @endif
                 </div>
                 <div class="dashboard-welcome-text">
-                    <h2>Welcome, {{ $user->name }}</h2>
-                    <p>Glad to have you back! Manage your portfolio, profile details, and public visibility.</p>
+                    <h2>{{ __('Welcome') }}, {{ $user->name }}</h2>
+                    <p>{{ __('Glad to have you back! Manage your portfolio, profile details, and public visibility.') }}</p>
                 </div>
             </div>
 
             <div style="display: flex; gap: 10px; align-items: center;">
                 @if($user->is_published)
                 <span style="padding: 6px 14px; border-radius: 20px; background: rgba(16,185,129,0.15); color: #10b981; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
-                    <span style="width:8px;height:8px;background:#10b981;border-radius:50%;"></span> LIVE &amp; PUBLIC
+                    <span style="width:8px;height:8px;background:#10b981;border-radius:50%;"></span> {{ __('LIVE & PUBLIC') }}
                 </span>
                 @else
                 <span style="padding: 6px 14px; border-radius: 20px; background: rgba(239,68,68,0.15); color: #ef4444; font-weight: 700; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
-                    <span style="width:8px;height:8px;background:#ef4444;border-radius:50%;"></span> HIDDEN (Draft)
+                    <span style="width:8px;height:8px;background:#ef4444;border-radius:50%;"></span> {{ __('HIDDEN (Draft)') }}
                 </span>
                 @endif
                 <a href="{{ route('profile', $user->id) }}" target="_blank" class="vbtn" style="width: auto; padding: 8px 16px; background: var(--primary); color: white; display: inline-flex; align-items: center; gap: 6px;">
-                    <i class="bi bi-box-arrow-up-right"></i> Preview Profile
+                    <i class="bi bi-box-arrow-up-right"></i> {{ __('Preview Profile') }}
                 </a>
             </div>
         </div>
@@ -171,7 +171,7 @@
                 </div>
                 <div class="stat-info">
                     <div class="stat-value">{{ $user->likes_received_count ?? 0 }}</div>
-                    <div class="stat-label">Likes</div>
+                    <div class="stat-label">{{ __('Likes') }}</div>
                 </div>
             </div>
             <div class="stat-card">
@@ -180,7 +180,7 @@
                 </div>
                 <div class="stat-info">
                     <div class="stat-value">{{ $user->followers_received_count ?? 0 }}</div>
-                    <div class="stat-label">Followers</div>
+                    <div class="stat-label">{{ __('Followers') }}</div>
                 </div>
             </div>
             <div class="stat-card">
@@ -189,7 +189,7 @@
                 </div>
                 <div class="stat-info">
                     <div class="stat-value">{{ $user->comments_received_count ?? 0 }}</div>
-                    <div class="stat-label">Comments</div>
+                    <div class="stat-label">{{ __('Comments') }}</div>
                 </div>
             </div>
             <div class="stat-card">
@@ -198,7 +198,7 @@
                 </div>
                 <div class="stat-info">
                     <div class="stat-value">{{ number_format($user->views_count ?? 0) }}</div>
-                    <div class="stat-label">Profile Views</div>
+                    <div class="stat-label">{{ __('Profile Views') }}</div>
                 </div>
             </div>
             <div class="stat-card">
@@ -207,7 +207,7 @@
                 </div>
                 <div class="stat-info">
                     <div class="stat-value">{{ $user->media()->count() }}</div>
-                    <div class="stat-label">Portfolio Items</div>
+                    <div class="stat-label">{{ __('Portfolio Items') }}</div>
                 </div>
             </div>
             <div class="stat-card">
@@ -216,7 +216,7 @@
                 </div>
                 <div class="stat-info">
                     <div class="stat-value">{{ $completion }}%</div>
-                    <div class="stat-label">Profile Completion</div>
+                    <div class="stat-label">{{ __('Profile Completion') }}</div>
                 </div>
             </div>
         </div>
@@ -225,42 +225,42 @@
         <div class="dashboard-grid" style="margin-top: 25px;">
             <!-- Quick Actions Panel -->
             <div class="dashboard-panel">
-                <h3><i class="bi bi-sliders2-vertical" style="color: var(--primary);"></i> Quick Actions</h3>
+                <h3><i class="bi bi-sliders2-vertical" style="color: var(--primary);"></i> {{ __('Quick Actions') }}</h3>
                 <div class="action-grid">
                     <a href="{{ route('home') }}" class="action-card">
                         <i class="bi bi-grid-fill"></i>
-                        <span>Browse Talent Feed</span>
+                        <span>{{ __('All Talents') }}</span>
                     </a>
                     <a href="{{ route('dashboard.photos') }}" class="action-card">
                         <i class="bi bi-camera-fill"></i>
-                        <span>Manage Photos</span>
+                        <span>{{ __('Manage Photos') }}</span>
                     </a>
                     <a href="{{ route('dashboard.videos') }}" class="action-card">
                         <i class="bi bi-camera-video-fill"></i>
-                        <span>Manage Videos</span>
+                        <span>{{ __('Manage Videos') }}</span>
                     </a>
                     <a href="{{ route('dashboard.news') }}" class="action-card">
                         <i class="bi bi-newspaper"></i>
-                        <span>Manage News</span>
+                        <span>{{ __('Manage News') }}</span>
                     </a>
                     <a href="{{ route('dashboard.comments') }}" class="action-card">
                         <i class="bi bi-chat-left-text-fill"></i>
-                        <span>Manage Comments</span>
+                        <span>{{ __('Manage Comments') }}</span>
                     </a>
                     <a href="{{ route('profile', $user->id) }}" target="_blank" class="action-card">
                         <i class="bi bi-person-badge-fill"></i>
-                        <span>Public Profile</span>
+                        <span>{{ __('View Full Profile') }}</span>
                     </a>
                 </div>
             </div>
 
             <!-- Profile Completion & Publish Control Panel -->
             <div class="dashboard-panel">
-                <h3><i class="bi bi-shield-lock-fill" style="color: #10b981;"></i> Publishing Control</h3>
+                <h3><i class="bi bi-shield-lock-fill" style="color: #10b981;"></i> {{ __('Publishing Control') }}</h3>
 
                 <div style="margin-bottom: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                        <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">Profile Score</span>
+                        <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">{{ __('Profile Completion') }}</span>
                         <span style="font-size: 16px; font-weight: 800; color: {{ $completion >= 60 ? '#10b981' : 'var(--primary)' }};">{{ $completion }}%</span>
                     </div>
                     <div style="background: rgba(0,0,0,0.06); border-radius: 999px; height: 8px; overflow: hidden;">
@@ -272,22 +272,22 @@
                 <form action="{{ route('dashboard.unpublish') }}" method="POST">
                     @csrf
                     <button type="submit" style="width: 100%; padding: 10px; background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s;">
-                        🔒 Unpublish Profile (Draft)
+                        🔒 {{ __('HIDDEN (Draft)') }}
                     </button>
                 </form>
                 @else
                 <form action="{{ route('dashboard.publish') }}" method="POST">
                     @csrf
                     <button type="submit"
-                        @if($completion < 60) disabled title="Complete at least 60% of your profile to publish" @endif
+                        @if($completion < 60) disabled title="{{ __('Complete at least 60% of your profile to publish') }}" @endif
                         style="width: 100%; padding: 10px; background: {{ $completion >= 60 ? 'var(--primary)' : 'rgba(100,100,100,0.2)' }}; color: {{ $completion >= 60 ? '#fff' : '#888' }}; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: {{ $completion >= 60 ? 'pointer' : 'not-allowed' }}; transition: all 0.2s;">
-                        🌐 Publish Profile Live
+                        🌐 {{ __('LIVE & PUBLIC') }}
                     </button>
                 </form>
                 @endif
 
                 @if($completion < 60)
-                <p style="font-size: 12px; color: #888; margin-top: 10px; text-align: center;">Complete at least 60% of your profile to enable live publishing.</p>
+                <p style="font-size: 12px; color: #888; margin-top: 10px; text-align: center;">{{ __('Complete at least 60% of your profile to enable live publishing.') }}</p>
                 @endif
             </div>
         </div>
@@ -297,13 +297,13 @@
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
                 <div>
                     <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                        <i class="bi bi-wallet2" style="color: var(--primary);"></i> Talent Performance Payout Section
+                        <i class="bi bi-wallet2" style="color: var(--primary);"></i> {{ __('Talent Performance Payout Section') }}
                     </h3>
-                    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.88rem;">Track your progress towards unlocking cash payouts from the platform.</p>
+                    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.88rem;">{{ __('Track your progress towards unlocking cash payouts from the platform.') }}</p>
                 </div>
                 <div>
                     <span style="font-weight: 800; color: #10b981; font-size: 1.1rem; background: rgba(16,185,129,0.1); padding: 6px 14px; border-radius: 10px; display: inline-block;">
-                        Payout Amount: {{ number_format($paymentSettings['payment_amount'], 2) }} TZS
+                        {{ __('Payout Amount') }}: {{ number_format($paymentSettings['payment_amount'], 2) }} TZS
                     </span>
                 </div>
             </div>
@@ -318,7 +318,7 @@
                 @endphp
                 <div style="background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid {{ $likesMet ? '#bbf7d0' : '#e2e8f0' }}; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
                     <div>
-                        <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Likes Milestone</span>
+                        <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase;">{{ __('Likes') }}</span>
                         <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-top: 4px;">{{ $likesCount }} / {{ $likesRequired }}</div>
                     </div>
                     <div style="font-size: 1.5rem; color: {{ $likesMet ? '#10b981' : '#cbd5e1' }}">
@@ -334,7 +334,7 @@
                 @endphp
                 <div style="background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid {{ $followersMet ? '#bbf7d0' : '#e2e8f0' }}; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
                     <div>
-                        <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Followers Milestone</span>
+                        <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase;">{{ __('Followers') }}</span>
                         <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-top: 4px;">{{ $followersCount }} / {{ $followersRequired }}</div>
                     </div>
                     <div style="font-size: 1.5rem; color: {{ $followersMet ? '#10b981' : '#cbd5e1' }}">
@@ -350,7 +350,7 @@
                 @endphp
                 <div style="background: #f8fafc; border-radius: 12px; padding: 16px; border: 1px solid {{ $commentsMet ? '#bbf7d0' : '#e2e8f0' }}; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
                     <div>
-                        <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase;">Comments Milestone</span>
+                        <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; text-transform: uppercase;">{{ __('Comments') }}</span>
                         <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-top: 4px;">{{ $commentsCount }} / {{ $commentsRequired }}</div>
                     </div>
                     <div style="font-size: 1.5rem; color: {{ $commentsMet ? '#10b981' : '#cbd5e1' }}">

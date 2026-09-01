@@ -22,33 +22,33 @@
                 @endif
             </div>
             <h2>{{ $talent->name }}</h2>
-            <p style="color: var(--text-muted); font-size: 14px; font-weight: 500; margin-bottom: 12px;">{{ $talent->category_label }}</p>
+            <p style="color: var(--text-muted); font-size: 14px; font-weight: 500; margin-bottom: 12px;">{{ __($talent->category_label) }}</p>
 
             <div class="like-container" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 18px; gap: 4px; flex-wrap: nowrap; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; padding: 12px 0;">
                 <div class="like" style="text-align: center; flex: 1;">
-                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;">Liked ❤️</button>
+                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;">{{ __('Like') }} 🤍</button>
                     <span class="like-count" id="likeCount_{{ $talent->id }}" style="display: block; font-size: 0.95rem; font-weight: 800; margin-top: 2px;">{{ $talent->likes_received_count ?? 0 }}</span>
                 </div>
                 <div class="comment" style="text-align: center; flex: 1;">
                     <a href="#comments-tab" style="text-decoration:none;" onclick="$('.menu a[href=\'#comments-tab\']').click();">
-                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;">Comments 💬</button>
+                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;">{{ __('Comments 💬') }}</button>
                     </a>
                     <span class="comment-count {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentCount_{{ $talent->id }}" style="display: block; font-size: 0.95rem; font-weight: 800; margin-top: 2px;">{{ $talent->comments_received_count ?? 0 }}</span>
                 </div>
                 <div class="follow" style="text-align: center; flex: 1;">
-                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;">Following</button>
+                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;">{{ __('Followers') }}</button>
                     <span class="followers-count" id="followersCount_{{ $talent->id }}" style="display: block; font-size: 0.95rem; font-weight: 800; margin-top: 2px;">{{ $talent->followers_received_count ?? 0 }}</span>
                 </div>
             </div>
 
             <div class="menu">
                 <ul>
-                    <li><a href="#info-tab" class="active">Information</a></li>
-                    <li><a href="#photos-tab">Photos</a></li>
-                    <li><a href="#videos-tab">Videos</a></li>
-                    <li><a href="#news-tab">News</a></li>
-                    <li><a href="#comments-tab">Comments</a></li>
-                    <li><a href="{{ route('home') }}"><i class="bi bi-arrow-left"></i> Back to Home</a></li>
+                    <li><a href="#info-tab" class="active">{{ __('Information') }}</a></li>
+                    <li><a href="#photos-tab">{{ __('Photos') }}</a></li>
+                    <li><a href="#videos-tab">{{ __('Videos') }}</a></li>
+                    <li><a href="#news-tab">{{ __('News') }}</a></li>
+                    <li><a href="#comments-tab">{{ __('Comments') }}</a></li>
+                    <li><a href="{{ route('home') }}"><i class="bi bi-arrow-left"></i> {{ __('Back to Home') }}</a></li>
                 </ul>
             </div>
         </div>
@@ -63,12 +63,12 @@
                     <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; padding: 18px 22px; border-radius: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(15,23,42,0.12);">
                         <div>
                             <h2 style="margin: 0 0 4px 0; font-size: 1.25rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 10px;">
-                                <i class="bi bi-person-badge-fill" style="color: #6366f1;"></i> Profile Overview &amp; Key Details
+                                <i class="bi bi-person-badge-fill" style="color: #6366f1;"></i> {{ __('Profile Overview & Key Details') }}
                             </h2>
-                            <p style="margin: 0; color: #94a3b8; font-size: 0.84rem;">Official verified contact credentials, professional biography, and media channels for {{ $talent->name }}.</p>
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.84rem;">{{ __('Official verified contact credentials, professional biography, and media channels for') }} {{ $talent->name }}.</p>
                         </div>
                         <div style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.35); padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.78rem; color: #34d399; display: flex; align-items: center; gap: 6px;">
-                            <i class="bi bi-patch-check-fill" style="color: #34d399; font-size: 0.9rem;"></i> Verified Talent Profile
+                            <i class="bi bi-patch-check-fill" style="color: #34d399; font-size: 0.9rem;"></i> {{ __('Verified Talent Profile') }}
                         </div>
                     </div>
 
@@ -81,8 +81,8 @@
                                 <i class="bi bi-briefcase-fill"></i>
                             </div>
                             <div>
-                                <span style="display: block; font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Primary Occupation</span>
-                                <strong style="font-size: 0.95rem; font-weight: 800; color: #0f172a;">{{ $talent->category_label }}</strong>
+                                <span style="display: block; font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">{{ __('Primary Occupation') }}</span>
+                                <strong style="font-size: 0.95rem; font-weight: 800; color: #0f172a;">{{ __($talent->category_label) }}</strong>
                             </div>
                         </div>
 
@@ -92,7 +92,7 @@
                                 <i class="bi bi-geo-alt-fill"></i>
                             </div>
                             <div>
-                                <span style="display: block; font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Country / Region</span>
+                                <span style="display: block; font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">{{ __('Country / Region') }}</span>
                                 <strong style="font-size: 0.95rem; font-weight: 800; color: #0f172a;">{{ $talent->country }}</strong>
                             </div>
                         </div>
@@ -103,7 +103,7 @@
                                 <i class="bi bi-telephone-fill"></i>
                             </div>
                             <div style="flex: 1; min-width: 0;">
-                                <span style="display: block; font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Direct Phone / Line</span>
+                                <span style="display: block; font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">{{ __('Direct Phone / Line') }}</span>
                                 @if($talent->phone)
                                 {{-- Phone is public — show it directly --}}
                                 <a href="tel:{{ $talent->phone }}" style="font-size: 0.95rem; font-weight: 800; color: #0f172a; text-decoration: none; display: flex; align-items: center; gap: 4px;">
@@ -113,11 +113,11 @@
                                 {{-- Phone is private — show Ask to Connect CTA. The number is NEVER rendered in HTML. --}}
                                 <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
                                     <span style="font-size: 0.82rem; color: #94a3b8; font-weight: 600; display: flex; align-items: center; gap: 5px;">
-                                        <i class="bi bi-lock-fill" style="color: #cbd5e1; font-size: 0.75rem;"></i> Contact Private
+                                        <i class="bi bi-lock-fill" style="color: #cbd5e1; font-size: 0.75rem;"></i> {{ __('Contact Private') }}
                                     </span>
                                     <button type="button" id="askToConnectBtn" onclick="document.getElementById('ask-to-connect-modal').style.display='flex'"
                                         style="padding: 5px 13px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; border: none; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 3px 10px rgba(99,102,241,0.35); transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-                                        <i class="bi bi-person-plus-fill" style="font-size: 0.7rem;"></i> Ask to Connect
+                                        <i class="bi bi-person-plus-fill" style="font-size: 0.7rem;"></i> {{ __('Ask to Connect') }}
                                     </button>
                                 </div>
                                 @endif
@@ -129,11 +129,11 @@
                     <!-- Biography Section Card -->
                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 20px;">
                         <h3 style="margin: 0 0 12px 0; font-size: 1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                            <i class="bi bi-card-text" style="color: #6366f1;"></i> About &amp; Professional Biography
+                            <i class="bi bi-card-text" style="color: #6366f1;"></i> {{ __('About & Professional Biography') }}
                         </h3>
                         <div style="background: #f8fafc; border-left: 4px solid #6366f1; border-radius: 0 10px 10px 0; padding: 16px 18px;">
                             <p style="color: #334155; font-size: 0.93rem; line-height: 1.7; margin: 0; white-space: pre-line;">
-                                {{ $talent->description ?: 'No bio biography has been provided by the user yet.' }}
+                                {{ $talent->description ?: __('No bio biography has been provided by the user yet.') }}
                             </p>
                         </div>
                     </div>
@@ -141,33 +141,33 @@
                     <!-- Social & Web Media Channels Box -->
                     <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 24px;">
                         <h3 style="margin: 0 0 14px 0; font-size: 1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                            <i class="bi bi-share-fill" style="color: #6366f1;"></i> Official Media &amp; Social Channels
+                            <i class="bi bi-share-fill" style="color: #6366f1;"></i> {{ __('Official Media & Social Channels') }}
                         </h3>
                         <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                             @if($talent->social_instagram)
                             <a href="{{ $talent->social_instagram }}" target="_blank" style="padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(220,39,67,0.25); transition: transform 0.2s ease;">
-                                <i class="bi bi-instagram" style="font-size: 1.05rem;"></i> Instagram Channel
+                                <i class="bi bi-instagram" style="font-size: 1.05rem;"></i> {{ __('Instagram Channel') }}
                             </a>
                             @endif
                             @if($talent->social_facebook)
                             <a href="{{ $talent->social_facebook }}" target="_blank" style="padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; background: #1877f2; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(24,119,242,0.25); transition: transform 0.2s ease;">
-                                <i class="bi bi-facebook" style="font-size: 1.05rem;"></i> Facebook Page
+                                <i class="bi bi-facebook" style="font-size: 1.05rem;"></i> {{ __('Facebook Page') }}
                             </a>
                             @endif
                             @if($talent->social_tiktok)
                             <a href="{{ $talent->social_tiktok }}" target="_blank" style="padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; background: #000000; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); transition: transform 0.2s ease;">
-                                <i class="bi bi-tiktok" style="font-size: 1.05rem;"></i> TikTok Feed
+                                <i class="bi bi-tiktok" style="font-size: 1.05rem;"></i> {{ __('TikTok Feed') }}
                             </a>
                             @endif
                             @if($talent->social_youtube)
                             <a href="{{ $talent->social_youtube }}" target="_blank" style="padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; background: #ff0000; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(255,0,0,0.25); transition: transform 0.2s ease;">
-                                <i class="bi bi-youtube" style="font-size: 1.05rem;"></i> YouTube Channel
+                                <i class="bi bi-youtube" style="font-size: 1.05rem;"></i> {{ __('YouTube Channel') }}
                             </a>
                             @endif
 
                             @if(!$talent->social_instagram && !$talent->social_facebook && !$talent->social_tiktok && !$talent->social_youtube)
                             <div style="padding: 14px 18px; background: #f8fafc; border-radius: 10px; border: 1px dashed #cbd5e1; color: #64748b; font-size: 0.86rem; font-weight: 600; width: 100%;">
-                                <i class="bi bi-info-circle"></i> No social media channels linked yet by {{ $talent->name }}.
+                                <i class="bi bi-info-circle"></i> {{ __('No social media channels linked yet by') }} {{ $talent->name }}.
                             </div>
                             @endif
                         </div>
@@ -184,12 +184,12 @@
                     <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; padding: 18px 22px; border-radius: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(15,23,42,0.12);">
                         <div>
                             <h2 style="margin: 0 0 4px 0; font-size: 1.25rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 10px;">
-                                <i class="bi bi-images" style="color: #6366f1;"></i> Official Photo Gallery &amp; Portfolio
+                                <i class="bi bi-images" style="color: #6366f1;"></i> {{ __('Official Photo Gallery & Portfolio') }}
                             </h2>
-                            <p style="margin: 0; color: #94a3b8; font-size: 0.84rem;">High-resolution photography, event highlights, and press shots of {{ $talent->name }}.</p>
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.84rem;">{{ __('High-resolution photography, event highlights, and press shots of') }} {{ $talent->name }}.</p>
                         </div>
                         <div style="background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); padding: 5px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; color: #a5b4fc;">
-                            {{ $miniPhotos->count() }} {{ Str::plural('Photo', $miniPhotos->count()) }}
+                            {{ $miniPhotos->count() }} {{ __('Photos') }}
                         </div>
                     </div>
 
@@ -199,12 +199,17 @@
                         <div class="profile-photo-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; transition: transform 0.2s ease, box-shadow 0.2s ease;">
                             <div style="width: 100%; aspect-ratio: 4/3; overflow: hidden; position: relative; background: #0f172a; cursor: pointer;" onclick="openPhotoViewer('{{ asset($photo->file_path) }}', '{{ addslashes($photo->title ?: 'Portfolio Asset') }}', '{{ addslashes($photo->content ?: '') }}')">
                                 <img src="{{ asset($photo->file_path) }}" alt="{{ $photo->title ?: $talent->name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;">
-                                <div style="position: absolute; top: 10px; right: 10px; background: rgba(15,23,42,0.7); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; color: #ffffff;">
-                                    <i class="bi bi-arrows-angle-expand"></i> View
+                                <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 6px;">
+                                    <button type="button" onclick="event.stopPropagation(); openReportModal({{ $photo->id }});" title="{{ __('Report Inappropriate Content') }}" style="background: rgba(239, 68, 68, 0.85); backdrop-filter: blur(4px); padding: 4px 8px; border: none; border-radius: 12px; font-size: 0.72rem; font-weight: 700; color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;">
+                                        <i class="bi bi-flag"></i>
+                                    </button>
+                                    <div style="background: rgba(15,23,42,0.7); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; color: #ffffff;">
+                                        <i class="bi bi-arrows-angle-expand"></i> {{ __('View') }}
+                                    </div>
                                 </div>
                             </div>
                             <div style="padding: 12px 14px; background: #ffffff;">
-                                <h4 style="margin: 0 0 4px 0; font-size: 0.92rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $photo->title ?: 'Portfolio Asset' }}</h4>
+                                <h4 style="margin: 0 0 4px 0; font-size: 0.92rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $photo->title ?: __('Portfolio Asset') }}</h4>
                                 @if(!empty($photo->content))
                                 <p style="margin: 0 0 6px 0; font-size: 0.8rem; color: #475569; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;" title="{{ $photo->content }}">{{ $photo->content }}</p>
                                 @endif
@@ -214,7 +219,7 @@
                         @empty
                         <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px; background: #ffffff; border-radius: 14px; border: 1px dashed #cbd5e1;">
                             <i class="bi bi-camera" style="font-size: 2.5rem; color: #94a3b8; display: block; margin-bottom: 10px;"></i>
-                            <p style="margin: 0; color: #64748b; font-weight: 600; font-size: 0.92rem;">No portfolio photos uploaded yet for {{ $talent->name }}.</p>
+                            <p style="margin: 0; color: #64748b; font-weight: 600; font-size: 0.92rem;">{{ __('No portfolio photos uploaded yet for') }} {{ $talent->name }}.</p>
                         </div>
                         @endforelse
                     </div>
@@ -230,15 +235,15 @@
                     <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; padding: 18px 22px; border-radius: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(15,23,42,0.12);">
                         <div>
                             <h2 style="margin: 0 0 4px 0; font-size: 1.25rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 10px;">
-                                <i class="bi bi-camera-reels-fill" style="color: #ec4899;"></i> Official Video Showcase &amp; Reels
+                                <i class="bi bi-camera-reels-fill" style="color: #ec4899;"></i> {{ __('Official Video Showcase & Reels') }}
                             </h2>
-                            <p style="margin: 0; color: #94a3b8; font-size: 0.84rem;">Official music videos, interviews, live performances, and video clips from {{ $talent->name }}.</p>
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.84rem;">{{ __('Official music videos, interviews, live performances, and video clips from') }} {{ $talent->name }}.</p>
                         </div>
                         @php
                         $videos = $talent->media()->where('type', 'video')->latest()->get();
                         @endphp
                         <div style="background: rgba(236,72,153,0.2); border: 1px solid rgba(236,72,153,0.4); padding: 5px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; color: #f472b6;">
-                            {{ $videos->count() }} {{ Str::plural('Video', $videos->count()) }}
+                            {{ $videos->count() }} {{ __('Videos') }}
                         </div>
                     </div>
 
@@ -252,7 +257,7 @@
                             <div style="padding: 16px; background: #ffffff; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 10px;">
                                 <div>
                                     <h4 style="margin: 0 0 6px 0; color: #0f172a; font-size: 0.98rem; font-weight: 800; display: flex; align-items: center; gap: 6px;">
-                                        <i class="bi bi-play-btn-fill" style="color: #ec4899;"></i> {{ $video->title ?: 'Portfolio Video Showcase' }}
+                                        <i class="bi bi-play-btn-fill" style="color: #ec4899;"></i> {{ $video->title ?: __('Portfolio Video Showcase') }}
                                     </h4>
                                     @if($video->content)
                                     <p style="margin: 0 0 8px 0; color: #475569; font-size: 0.84rem; line-height: 1.5; white-space: pre-line;">{{ $video->content }}</p>
@@ -260,14 +265,14 @@
                                 </div>
                                 <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.76rem; color: #94a3b8; font-weight: 600; border-top: 1px solid #f1f5f9; padding-top: 10px;">
                                     <span><i class="bi bi-clock-history" style="color: #ec4899;"></i> {{ $video->created_at->diffForHumans() }}</span>
-                                    <span style="background: #f1f5f9; padding: 3px 10px; border-radius: 10px; color: #475569;"><i class="bi bi-film"></i> HD Video</span>
+                                    <span style="background: #f1f5f9; padding: 3px 10px; border-radius: 10px; color: #475569;"><i class="bi bi-film"></i> {{ __('HD Video') }}</span>
                                 </div>
                             </div>
                         </div>
                         @empty
                         <div style="grid-column: 1/-1; text-align: center; padding: 50px 20px; background: #ffffff; border-radius: 14px; border: 1px dashed #cbd5e1;">
                             <i class="bi bi-film" style="font-size: 2.5rem; color: #94a3b8; display: block; margin-bottom: 10px;"></i>
-                            <p style="margin: 0; color: #64748b; font-weight: 600; font-size: 0.92rem;">No video showcases uploaded yet for {{ $talent->name }}.</p>
+                            <p style="margin: 0; color: #64748b; font-weight: 600; font-size: 0.92rem;">{{ __('No video showcases uploaded yet for') }} {{ $talent->name }}.</p>
                         </div>
                         @endforelse
                     </div>
@@ -282,15 +287,15 @@
                     <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; padding: 12px 18px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                         <div>
                             <h2 style="margin: 0 0 2px 0; font-size: 1.05rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 8px;">
-                                <i class="bi bi-newspaper" style="color: #6366f1;"></i> Official News &amp; Press Bulletins
+                                <i class="bi bi-newspaper" style="color: #6366f1;"></i> {{ __('Official News & Press Bulletins') }}
                             </h2>
-                            <p style="margin: 0; color: #94a3b8; font-size: 0.78rem;">Latest announcements, tour dates, press releases, and media updates from {{ $talent->name }}.</p>
+                            <p style="margin: 0; color: #94a3b8; font-size: 0.78rem;">{{ __('Latest announcements, tour dates, press releases, and media updates from') }} {{ $talent->name }}.</p>
                         </div>
                         @php
                         $newsItems = $talent->media()->where('type', 'news')->latest()->get();
                         @endphp
                         <div style="background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; color: #a5b4fc;">
-                            {{ $newsItems->count() }} {{ Str::plural('Article', $newsItems->count()) }}
+                            {{ $newsItems->count() }} {{ __('Articles') }}
                         </div>
                     </div>
 
@@ -510,6 +515,14 @@
         }
     };
 
+    // Translation strings passed from Blade — must be declared before DOMContentLoaded
+    const profileI18n = {
+        liked:      "{{ __('Liked ❤️') }}",
+        like:       "{{ __('Like') }} 🤍",
+        following:  "{{ __('Following') }}",
+        followers:  "{{ __('Followers') }}"
+    };
+
     document.addEventListener("DOMContentLoaded", function() {
         if (typeof initProfileTabs === "function") {
             initProfileTabs();
@@ -526,15 +539,17 @@
 
                 if (likeBtn && data.is_liked) {
                     likeBtn.classList.add('liked');
-                    likeBtn.textContent = 'Liked ❤️';
+                    likeBtn.textContent = profileI18n.liked;
                 }
                 if (followBtn && data.is_following) {
                     followBtn.classList.add('following');
-                    followBtn.textContent = 'Following';
+                    followBtn.textContent = profileI18n.following;
                 }
             }
         });
     });
+
+
 
     function toggleCardLike(id) {
         const btn = document.getElementById('likeBtn_' + id);
@@ -557,10 +572,10 @@
                 if (res.success) {
                     if (res.liked) {
                         btn.classList.add('liked');
-                        btn.textContent = 'Liked ❤️';
+                        btn.textContent = profileI18n.liked;
                     } else {
                         btn.classList.remove('liked');
-                        btn.textContent = 'Like 🤍';
+                        btn.textContent = profileI18n.like;
                     }
                     count.textContent = res.count;
                 }
@@ -592,10 +607,10 @@
                 if (res.success) {
                     if (res.following) {
                         btn.classList.add('following');
-                        btn.textContent = 'Following';
+                        btn.textContent = profileI18n.following;
                     } else {
                         btn.classList.remove('following');
-                        btn.textContent = 'Followers';
+                        btn.textContent = profileI18n.followers;
                     }
                     count.textContent = res.count;
                 }
@@ -630,8 +645,8 @@
             <div style="width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 12px;">
                 <i class="bi bi-person-plus-fill"></i>
             </div>
-            <h3 style="margin: 0 0 4px 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">Ask to Connect</h3>
-            <p style="margin: 0; color: #64748b; font-size: 0.85rem;">Leave your contact info — <strong>{{ $talent->name }}</strong> will review your request.</p>
+            <h3 style="margin: 0 0 4px 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">{{ __('Ask to Connect') }}</h3>
+            <p style="margin: 0; color: #64748b; font-size: 0.85rem;">{{ __('Leave your contact info —') }} <strong>{{ $talent->name }}</strong>.</p>
         </div>
 
         @if(session('success') && str_contains(session('success'), 'connect'))
@@ -650,32 +665,32 @@
             @csrf
 
             <div style="margin-bottom: 14px;">
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Full Name <span style="color: #ef4444;">*</span></label>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">{{ __('Full Name') }} <span style="color: #ef4444;">*</span></label>
                 <input type="text" name="requester_full_name" required maxlength="255"
                     value="{{ old('requester_full_name') }}"
-                    placeholder="Your full name"
+                    placeholder="{{ __('Enter your full name') }}"
                     style="width: 100%; padding: 10px 14px; border: 1.5px solid {{ $errors->has('requester_full_name') ? '#ef4444' : '#e2e8f0' }}; border-radius: 10px; font-size: 0.9rem; color: #1e293b; box-sizing: border-box; outline: none; transition: border 0.2s;"
                     onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
                 @error('requester_full_name')<div style="font-size: 0.78rem; color: #ef4444; margin-top: 4px;">{{ $message }}</div>@enderror
             </div>
 
             <div style="margin-bottom: 14px;">
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">How should they reach you? <span style="color: #ef4444;">*</span></label>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">{{ __('How should they reach you?') }} <span style="color: #ef4444;">*</span></label>
                 <select name="contact_type" id="connectContactType" required onchange="updateConnectPlaceholder()"
                     style="width: 100%; padding: 10px 14px; border: 1.5px solid {{ $errors->has('contact_type') ? '#ef4444' : '#e2e8f0' }}; border-radius: 10px; font-size: 0.9rem; color: #1e293b; box-sizing: border-box; background: #fff; outline: none;">
-                    <option value="">-- Select Contact Type --</option>
-                    <option value="whatsapp" {{ old('contact_type') === 'whatsapp' ? 'selected' : '' }}><span class="bi bi-whatsapp" style="color: #6366f1"></span> WhatsApp Number</option>
-                    <option value="phone" {{ old('contact_type') === 'phone' ? 'selected' : '' }}><span class="bi bi-phone" style="color: #6366f1"></span> Phone Number</option>
-                    <option value="email" {{ old('contact_type') === 'email' ? 'selected' : '' }}><span class="bi bi-email" style="color: #6366f1"></span> Email Address</option>
+                    <option value="">-- {{ __('Select Contact Type') }} --</option>
+                    <option value="whatsapp" {{ old('contact_type') === 'whatsapp' ? 'selected' : '' }}><span class="bi bi-whatsapp" style="color: #6366f1"></span> {{ __('WhatsApp Number') }}</option>
+                    <option value="phone" {{ old('contact_type') === 'phone' ? 'selected' : '' }}><span class="bi bi-phone" style="color: #6366f1"></span> {{ __('Phone Number') }}</option>
+                    <option value="email" {{ old('contact_type') === 'email' ? 'selected' : '' }}><span class="bi bi-email" style="color: #6366f1"></span> {{ __('Email Address') }}</option>
                 </select>
                 @error('contact_type')<div style="font-size: 0.78rem; color: #ef4444; margin-top: 4px;">{{ $message }}</div>@enderror
             </div>
 
             <div style="margin-bottom: 14px;">
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Your Contact <span style="color: #ef4444;">*</span></label>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">{{ __('Your Contact') }} <span style="color: #ef4444;">*</span></label>
                 <input type="text" name="contact_value" id="connectContactValue" required maxlength="255"
                     value="{{ old('contact_value') }}"
-                    placeholder="Enter your contact details"
+                    placeholder="{{ __('Enter your contact details') }}"
                     style="width: 100%; padding: 10px 14px; border: 1.5px solid {{ $errors->has('contact_value') ? '#ef4444' : '#e2e8f0' }}; border-radius: 10px; font-size: 0.9rem; color: #1e293b; box-sizing: border-box; outline: none; transition: border 0.2s;"
                     onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
                 @error('contact_value')<div style="font-size: 0.78rem; color: #ef4444; margin-top: 4px;">{{ $message }}</div>@enderror
@@ -683,28 +698,27 @@
 
             <div style="margin-bottom: 14px;">
                 <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">
-                    <i class="bi bi-geo-alt-fill" style="color: #f59e0b; font-size: 0.8rem;"></i> Region / Location
-                    <span style="font-size: 0.75rem; font-weight: 500; color: #94a3b8;">(Optional)</span>
+                    <i class="bi bi-geo-alt-fill" style="color: #f59e0b; font-size: 0.8rem;"></i> {{ __('Region / Location') }}
+                    <span style="font-size: 0.75rem; font-weight: 500; color: #94a3b8;">({{ __('Optional') }})</span>
                 </label>
                 <input type="text" name="region" maxlength="255"
                     value="{{ old('region') }}"
-                    placeholder="e.g. Dar es Salaam, Arusha, Nairobi..."
+                    placeholder="e.g. Dar es Salaam, Arusha, Mwanza, Dodoma..."
                     style="width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.9rem; color: #1e293b; box-sizing: border-box; outline: none; transition: border 0.2s;"
                     onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e2e8f0'">
             </div>
 
             <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Message <span style="font-size: 0.75rem; font-weight: 500; color: #94a3b8;">(Optional)</span></label>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">{{ __('Message') }} <span style="font-size: 0.75rem; font-weight: 500; color: #94a3b8;">({{ __('Optional') }})</span></label>
                 <textarea name="message" rows="2" maxlength="1000"
-                    placeholder='e.g. "I would like to contact you regarding your business."'
+                    placeholder="{{ __('Write a comment...') }}"
                     style="width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.88rem; color: #1e293b; box-sizing: border-box; resize: vertical; outline: none; transition: border 0.2s; font-family: inherit;"
                     onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">{{ old('message') }}</textarea>
             </div>
 
             <button type="submit" style="width: 100%; padding: 12px; border-radius: 12px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; border: none; font-weight: 800; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 15px rgba(99,102,241,0.4); display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <i class="bi bi-send-fill"></i> Send Connection Request
+                <i class="bi bi-send-fill"></i> {{ __('Send Connection Request') }}
             </button>
-            <p style="text-align: center; margin: 10px 0 0 0; font-size: 0.75rem; color: #94a3b8;">No account needed. Your request is reviewed by {{ $talent->name }}.</p>
         </form>
     </div>
 </div>
@@ -714,10 +728,10 @@
         const type = document.getElementById('connectContactType').value;
         const input = document.getElementById('connectContactValue');
         const placeholders = {
-            'whatsapp': '+255712345678 (WhatsApp number with country code)',
-            'phone': '+255712345678 (Phone number with country code)',
-            'email': 'your@email.com',
-            '': 'Enter your contact details'
+            'whatsapp': '+255712345678 (WhatsApp)',
+            'phone': '+255712345678 (Phone)',
+            'email': 'email@example.com',
+            '': '{{ __("Enter your contact details") }}'
         };
         input.placeholder = placeholders[type] || placeholders[''];
     }
@@ -740,8 +754,8 @@
             <div style="width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 10px; box-shadow: 0 4px 15px rgba(99,102,241,0.3);">
                 <i class="bi bi-reply-fill"></i>
             </div>
-            <h3 style="margin: 0 0 4px 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">Post a Reply</h3>
-            <p id="reply-modal-target-text" style="margin: 0; color: #6366f1; font-size: 0.85rem; font-weight: 700;">Replying to comment...</p>
+            <h3 style="margin: 0 0 4px 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">{{ __('Post a Reply') }}</h3>
+            <p id="reply-modal-target-text" style="margin: 0; color: #6366f1; font-size: 0.85rem; font-weight: 700;">{{ __('Replying to comment...') }}</p>
         </div>
 
         <form action="{{ route('talent.comment', $talent->id) }}" method="POST">
@@ -750,9 +764,9 @@
 
             @guest
             <div style="margin-bottom: 14px;">
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Your Name <span style="color: #ef4444;">*</span></label>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">{{ __('Your Name') }} <span style="color: #ef4444;">*</span></label>
                 <input type="text" name="author_name" required maxlength="255"
-                    placeholder="Enter your full name..."
+                    placeholder="{{ __('Enter your full name') }}..."
                     style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.88rem; color: #1e293b; box-sizing: border-box; outline: none; transition: border 0.2s;"
                     onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#cbd5e1'">
             </div>
@@ -764,15 +778,15 @@
             @endguest
 
             <div style="margin-bottom: 20px;">
-                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">Official Response / Reply Content <span style="color: #ef4444;">*</span></label>
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 6px;">{{ __('Write a comment...') }} <span style="color: #ef4444;">*</span></label>
                 <textarea name="comment" rows="3" required maxlength="1000"
-                    placeholder="Write your response or reply here..."
+                    placeholder="{{ __('Write a comment...') }}"
                     style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.88rem; color: #1e293b; box-sizing: border-box; resize: vertical; outline: none; transition: border 0.2s; font-family: inherit;"
                     onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#cbd5e1'"></textarea>
             </div>
 
             <button type="submit" style="width: 100%; padding: 12px; border-radius: 12px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; border: none; font-weight: 800; font-size: 0.92rem; cursor: pointer; box-shadow: 0 4px 15px rgba(99,102,241,0.4); display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <i class="bi bi-send-fill"></i> Send Reply
+                <i class="bi bi-send-fill"></i> {{ __('Send Reply') }}
             </button>
         </form>
     </div>

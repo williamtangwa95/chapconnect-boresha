@@ -9,76 +9,79 @@
             <div class="form-box active" id="register-form">
                 <form action="{{ route('register') }}" method="POST">
                     @csrf
-                    <h2>Register Account</h2>
+                    <h2>{{ __('Register Account') }}</h2>
                     <p style="color: var(--text-muted); text-align: center; margin-bottom: 20px; font-size: 14px;">
-                        Create your profile and start showcasing your talent
+                        {{ __('Create your profile and start showcasing your talent') }}
                     </p>
 
                     <div class="form-group">
-                        <label for="reg-name">Full Name / Stage Name <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
-                        <input id="reg-name" type="text" name="name" value="{{ old('name') }}" placeholder="Enter your full name" required autofocus>
+                        <label for="reg-name">{{ __('Full Name / Stage Name') }} <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
+                        <input id="reg-name" type="text" name="name" value="{{ old('name') }}" placeholder="{{ __('Enter your full name') }}" required autofocus>
                     </div>
 
                     <div class="form-group">
-                        <label for="reg-email">Email Address <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">(Optional)</span></label>
-                        <input id="reg-email" type="email" name="email" value="{{ old('email') }}" placeholder="Enter your email address">
+                        <label for="reg-email">{{ __('Email Address') }} <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">({{ __('Optional') }})</span></label>
+                        <input id="reg-email" type="email" name="email" value="{{ old('email') }}" placeholder="{{ __('Enter your email address') }}">
                     </div>
 
                     <div class="form-group">
-                        <label for="reg-phone">Phone Number <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
-                        <input id="reg-phone" type="text" name="phone" value="{{ old('phone') }}" placeholder="+255 ...">
+                        <label for="reg-phone">{{ __('Phone Number') }} <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
+                        <input id="reg-phone" type="tel" name="phone" value="{{ old('phone') }}" placeholder="e.g. 0678429492 / +255678429492" required>
+                        <small style="display: block; margin-top: 4px; font-size: 0.76rem; color: var(--text-muted);">
+                            {{ __('Allowed formats: 06XXXXXXXX, 07XXXXXXXX, +255..., or 255...') }}
+                        </small>
                     </div>
 
                     <div class="form-group">
-                        <label for="categories">Talent Category <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
+                        <label for="categories">{{ __('Talent Category') }} <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
                         <select name="category" id="categories" required>
-                            <option value="" selected disabled>-- Select Category --</option>
+                            <option value="" selected disabled>-- {{ __('Select Category') }} --</option>
                             @foreach($categories as $slug => $label)
                             <option value="{{ $slug }}" {{ old('category') === $slug ? 'selected' : '' }}>
-                                {{ $label }}
+                                {{ __($label) }}
                             </option>
                             @endforeach
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label for="reg-password">Password <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
+                        <label for="reg-password">{{ __('Password') }} <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
                         <div class="password-wrapper">
-                            <input id="reg-password" type="password" name="password" placeholder="Enter password (min. 6 characters)" required>
-                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this)" title="Toggle password visibility">
+                            <input id="reg-password" type="password" name="password" placeholder="{{ __('Enter password (min. 6 characters)') }}" required>
+                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this)" title="{{ __('Toggle password visibility') }}">
                                 <i class="bi bi-eye"></i>
                             </button>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="reg-password-confirm">Confirm Password <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
+                        <label for="reg-password-confirm">{{ __('Confirm Password') }} <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
                         <div class="password-wrapper">
-                            <input id="reg-password-confirm" type="password" name="password_confirmation" placeholder="Confirm password" required>
-                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this)" title="Toggle password visibility">
+                            <input id="reg-password-confirm" type="password" name="password_confirmation" placeholder="{{ __('Confirm password') }}" required>
+                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this)" title="{{ __('Toggle password visibility') }}">
                                 <i class="bi bi-eye"></i>
                             </button>
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="security-question">Security Question <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
-                        <input id="security-question" type="text" name="security_question" value="{{ old('security_question') }}" placeholder="e.g. What is the name of your first school?" required>
+                        <label for="security-question">{{ __('Security Question') }} <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
+                        <input id="security-question" type="text" name="security_question" value="{{ old('security_question') }}" placeholder="{{ __('e.g. What is the name of your first school?') }}" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="security-answer">Security Answer <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
-                        <input id="security-answer" type="text" name="security_answer" value="{{ old('security_answer') }}" placeholder="Enter security answer" required>
+                        <label for="security-answer">{{ __('Security Answer') }} <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
+                        <input id="security-answer" type="text" name="security_answer" value="{{ old('security_answer') }}" placeholder="{{ __('Enter security answer') }}" required>
                     </div>
 
                     <div id="similarity-error" style="color: #ef4444; font-size: 0.82rem; font-weight: 600; margin-top: 10px; display: none; padding: 10px 14px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px;">
-                        <i class="bi bi-exclamation-triangle-fill" style="margin-right: 4px;"></i> Question and Answer are too similar (must be less than 50% match).
+                        <i class="bi bi-exclamation-triangle-fill" style="margin-right: 4px;"></i> {{ __('Question and Answer are too similar (must be less than 50% match).') }}
                     </div>
 
-                    <button type="submit">Register</button>
-                    <p>Already have an account? <a href="{{ route('login') }}">Sign In</a></p>
+                    <button type="submit">{{ __('Register') }}</button>
+                    <p>{{ __('Already have an account?') }} <a href="{{ route('login') }}">{{ __('Sign In') }}</a></p>
                 </form>
-                <a href="{{ route('home') }}" class="back-link">← Back to ChapConnect</a>
+                <a href="{{ route('home') }}" class="back-link">← {{ __('Back to ChapConnect') }}</a>
             </div>
         </div>
     </div>
@@ -90,7 +93,7 @@
     $(document).ready(function() {
         $('#categories').select2({
             width: '100%',
-            placeholder: '-- Select Category --',
+            placeholder: '-- {{ __("Select Category") }} --',
             minimumResultsForSearch: 0
         });
 

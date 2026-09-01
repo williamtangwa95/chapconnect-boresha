@@ -103,8 +103,8 @@ class ContactRequestController extends Controller
             Notification::create([
                 'user_id' => $staff->id,
                 'type' => 'ContactRequestNotification',
-                'title' => 'New Guest Contact Request',
-                'message' => "Guest {$contactRequest->requester_full_name} requested to connect with {$targetUser->name}.",
+                'title' => "📬 New Guest Contact Request",
+                'message' => "Guest '{$contactRequest->requester_full_name}' requested connection with talent '{$targetUser->name}' ({$contactRequest->contact_type}).",
                 'link' => ($staff->role === 'admin') 
                     ? route('admin.dashboard') . '#requests' 
                     : route('customer-care.dashboard') . '#requests',

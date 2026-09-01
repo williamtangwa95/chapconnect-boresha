@@ -90,7 +90,7 @@ class CustomerCareController extends Controller
             'subject' => $request->subject,
             'category' => $request->category,
             'priority' => $request->priority,
-            'status' => 'open',
+            'status' => $request->input('status', 'pending'),
             'description' => $request->description,
             'user_id' => Auth::check() ? Auth::id() : null,
         ]);
@@ -118,8 +118,6 @@ class CustomerCareController extends Controller
      */
     public function userSubmit(StoreSupportTicketRequest $request)
     {
-        
-
         $user = Auth::user();
 
         $ticket = SupportTicket::create([
@@ -130,7 +128,7 @@ class CustomerCareController extends Controller
             'subject' => $request->subject,
             'category' => $request->category,
             'priority' => $request->priority,
-            'status' => 'open',
+            'status' => $request->input('status', 'pending'),
             'description' => $request->description,
         ]);
 
@@ -274,6 +272,18 @@ class CustomerCareController extends Controller
         if ($user) {
             $user->update(['is_blocked' => false]);
             $user->failedLoginAttempts()->delete();
+
+            // Notify Admin & Customer Care staff of Account Unblock
+            $adminStaff = User::whereIn('role', ['admin', 'customer_care'])->get();
+            foreach ($adminStaff as $staff) {
+                Notification::create([
+                    'user_id' => $staff->id,
+                    'type' => 'account_unblocked',
+                    'title' => "🔓 Account Unblocked: {$user->name}",
+                    'message' => "Account {$user->name} was unblocked by " . auth()->user()->name . ".",
+                    'link' => ($staff->role === 'admin') ? route('admin.dashboard') . '#customer-care' : route('customer-care.dashboard') . '#blocked',
+                ]);
+            }
         }
 
         return redirect()->back()->with('success', "User account '" . ($user ? $user->name : 'Unknown') . "' unblocked successfully.");

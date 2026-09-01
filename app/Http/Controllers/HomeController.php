@@ -58,8 +58,8 @@ class HomeController extends Controller
             return $countB <=> $countA; // descending
         });
 
-        // Fetch recent media uploads for sidebar preview (photos & videos)
-        $recentMedia = \App\Models\Media::whereHas('user', function($q) {
+        // Fetch recent media uploads for sidebar preview (photos & videos, approved & visible only)
+        $recentMedia = \App\Models\Media::publiclyVisible()->whereHas('user', function($q) {
             $q->where('role', 'user')
               ->where('is_published', true);
         })
@@ -151,8 +151,8 @@ class HomeController extends Controller
             $talent->refresh();
         }
 
-        // Load first 4 photos for mini-gallery
-        $miniPhotos = $talent->media()->where('type', 'photo')->latest()->take(4)->get();
+        // Load first 4 photos for mini-gallery (approved & visible only)
+        $miniPhotos = $talent->media()->publiclyVisible()->where('type', 'photo')->latest()->take(4)->get();
         // Load top-level comments for talent with eager loaded replies
         $comments = $talent->commentsReceived()
             ->whereNull('parent_id')
@@ -194,7 +194,7 @@ class HomeController extends Controller
                 $talent->phone = null;
             }
         }
-        $photos = $talent->media()->where('type', 'photo')->latest()->get();
+        $photos = $talent->media()->publiclyVisible()->where('type', 'photo')->latest()->get();
 
         return view('profile-photos', [
             'talent' => $talent,
@@ -212,7 +212,7 @@ class HomeController extends Controller
                 $talent->phone = null;
             }
         }
-        $videos = $talent->media()->where('type', 'video')->latest()->get();
+        $videos = $talent->media()->publiclyVisible()->where('type', 'video')->latest()->get();
 
         return view('profile-videos', [
             'talent' => $talent,

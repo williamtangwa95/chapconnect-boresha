@@ -4,6 +4,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\LanguageController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,6 +17,7 @@ use App\Http\Controllers\InteractionController;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 Route::get('/category/{category}', [HomeController::class, 'category'])->name('category');
 Route::get('/profile/{id}', [HomeController::class, 'profile'])->name('profile');
 Route::get('/profile/{id}/photos', [HomeController::class, 'photos'])->name('profile.photos');
@@ -148,3 +150,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/payment-requests/{id}/pay', [AdminController::class, 'payRequest'])->name('admin.payment-requests.pay');
     Route::post('/admin/payment-requests/{id}/reject', [AdminController::class, 'rejectRequest'])->name('admin.payment-requests.reject');
 });
+
+// Automated Content Moderation & NSFW Review Routes (Accessible to both Super Admin and Customer Care)
+Route::middleware(['auth', 'customer_care'])->group(function () {
+    Route::get('/admin/moderation', [AdminController::class, 'moderationQueue'])->name('admin.moderation');
+    Route::post('/admin/moderation/{id}/approve', [AdminController::class, 'approveMedia'])->name('admin.moderation.approve');
+    Route::post('/admin/moderation/{id}/reject', [AdminController::class, 'rejectMedia'])->name('admin.moderation.reject');
+    Route::post('/admin/moderation/{id}/ban', [AdminController::class, 'banMediaOwner'])->name('admin.moderation.ban');
+});
+
+// Public Community Content Reporting Route
+Route::post('/media/{id}/report', [\App\Http\Controllers\MediaReportController::class, 'report'])->name('media.report');
+

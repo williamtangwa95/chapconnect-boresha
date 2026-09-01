@@ -20,11 +20,11 @@ class NotificationController extends Controller
         $notifications = Notification::where('user_id', Auth::id())
             ->where('is_read', false)
             ->latest()
-            ->take(10)
+            ->take(15)
             ->get();
 
         return response()->json([
-            'count' => Notification::where('user_id', Auth::id())->where('is_read', false)->count(),
+            'count' => $notifications->count(),
             'notifications' => $notifications
         ]);
     }

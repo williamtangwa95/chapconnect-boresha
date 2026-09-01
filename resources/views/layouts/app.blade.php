@@ -113,7 +113,7 @@
                 </a>
                 <div style="display: flex; gap: 4px; margin-top: 3px;">
                     <a href="#" onclick="openGlobalSupportModal(); return false;" style="font-weight: 600; color: #ffffff; text-decoration: none; padding: 2px 7px; background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); border-radius: 12px; font-size: 10px; letter-spacing: 0.2px; box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3); border: 1px solid rgba(255, 255, 255, 0.3); transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 3px;"><i
-                            class="bi bi-headset" style="font-size: 11px; color: #ffffff;"></i>Help desk & Support</a>
+                            class="bi bi-headset" style="font-size: 11px; color: #ffffff;"></i>{{ __('Help desk & Support') }}</a>
                 </div>
             </div>
         </div>
@@ -124,10 +124,21 @@
 
         <div class="icon" id="navIconMenu">
             <div class="nav-mobile-list">
+                <!-- Mobile Language Switcher Row -->
+                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; margin: 6px 0 10px 0; background: rgba(99, 102, 241, 0.08); border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.15);">
+                    <span style="font-size: 0.82rem; font-weight: 700; color: #475569; display: flex; align-items: center; gap: 6px;">
+                        <i class="bi bi-translate" style="color: #6366f1; font-size: 1.05rem;"></i> {{ __('Language') }}:
+                    </span>
+                    <div style="display: flex; gap: 6px;">
+                        <a href="{{ route('lang.switch', 'sw') }}" style="padding: 4px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none; {{ app()->getLocale() === 'sw' ? 'background: #6366f1; color: #ffffff;' : 'background: #ffffff; color: #475569; border: 1px solid #cbd5e1;' }}">🇹🇿 SW</a>
+                        <a href="{{ route('lang.switch', 'en') }}" style="padding: 4px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none; {{ app()->getLocale() === 'en' ? 'background: #6366f1; color: #ffffff;' : 'background: #ffffff; color: #475569; border: 1px solid #cbd5e1;' }}">🇬🇧 EN</a>
+                    </div>
+                </div>
+
                 @auth
                 @if(in_array(auth()->user()->role, ['admin', 'customer_care']))
                 @if(Request::is('admin*'))
-                <a href="#dashboard" class="tab-link nav-mobile-link" data-tab="dashboard"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> Dashboard Overview</a>
+                <a href="#dashboard" class="tab-link nav-mobile-link" data-tab="dashboard"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> {{ __('Dashboard Overview') }}</a>
                 <a href="#talents" class="tab-link nav-mobile-link" data-tab="talents"><i class="bi bi-people-fill" style="color: var(--primary);"></i> Registered Talents</a>
                 <a href="#categories" class="tab-link nav-mobile-link" data-tab="categories"><i class="bi bi-tags-fill" style="color: var(--accent);"></i> Manage Categories</a>
                 <a href="#packages" class="tab-link nav-mobile-link" data-tab="packages"><i class="bi bi-box-seam-fill" style="color: #f59e0b;"></i> Membership Packages</a>
@@ -141,7 +152,7 @@
                 <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link"><i class="bi bi-shield-slash-fill" style="color: #dc2626;"></i> Blocked Accounts & Login Control</a>
                 <a href="{{ route('customer-care.dashboard') }}#requests" class="nav-mobile-link"><i class="bi bi-person-check-fill" style="color: #6366f1;"></i> Guest Contact Requests</a>
                 <a href="{{ route('customer-care.dashboard') }}#payments" class="nav-mobile-link"><i class="bi bi-wallet2" style="color: #6366f1;"></i> Talent Payment Requests</a>
-                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> Public Directory</a>
+                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> {{ __('Home') }}</a>
                 @elseif(Request::is('customer-care*'))
                 <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link cc-tab-link" data-cctab="tickets"><i class="bi bi-life-preserver" style="color: #6366f1;"></i> Support Issues & Tickets Roster</a>
                 <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link cc-tab-link" data-cctab="blocked"><i class="bi bi-shield-slash-fill" style="color: #dc2626;"></i> Blocked Accounts & Login Control</a>
@@ -151,33 +162,52 @@
                 @if(auth()->user()->role === 'admin')
                 <a href="{{ route('admin.dashboard') }}" class="nav-mobile-link"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> Super Admin Panel</a>
                 @endif
-                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> Public Directory</a>
+                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> {{ __('Home') }}</a>
                 @else
-                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> Home</a>
+                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> {{ __('Home') }}</a>
                 <a href="{{ route('customer-care.dashboard') }}" class="nav-mobile-link"><i class="bi bi-headset" style="color: #6366f1;"></i> Support Portal</a>
                 @if(auth()->user()->role === 'admin')
                 <a href="{{ route('admin.dashboard') }}" class="nav-mobile-link"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> Admin Dashboard</a>
                 @endif
                 @endif
                 @else
-                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> Home</a>
-                <a href="{{ route('dashboard') }}" class="nav-mobile-link"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> Dashboard Overview</a>
-                <a href="{{ route('dashboard.photos') }}" class="nav-mobile-link"><i class="bi bi-camera-fill" style="color: var(--primary);"></i> Manage Photos</a>
-                <a href="{{ route('dashboard.videos') }}" class="nav-mobile-link"><i class="bi bi-camera-video-fill" style="color: var(--primary);"></i> Manage Videos</a>
+                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> {{ __('Home') }}</a>
+                <a href="{{ route('dashboard') }}" class="nav-mobile-link"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> {{ __('Dashboard') }}</a>
+                <a href="{{ route('dashboard.photos') }}" class="nav-mobile-link"><i class="bi bi-camera-fill" style="color: var(--primary);"></i> {{ __('Photos') }}</a>
+                <a href="{{ route('dashboard.videos') }}" class="nav-mobile-link"><i class="bi bi-camera-video-fill" style="color: var(--primary);"></i> {{ __('Videos') }}</a>
                 <a href="{{ route('dashboard.news') }}" class="nav-mobile-link"><i class="bi bi-newspaper" style="color: var(--primary);"></i> Manage News</a>
-                <a href="{{ route('dashboard.comments') }}" class="nav-mobile-link"><i class="bi bi-chat-left-text-fill" style="color: var(--primary);"></i> Manage Comments</a>
+                <a href="{{ route('dashboard.comments') }}" class="nav-mobile-link"><i class="bi bi-chat-left-text-fill" style="color: var(--primary);"></i> {{ __('Comments') }}</a>
                 @endif
-                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-mobile-link"><i class="bi bi-box-arrow-right" style="color: #ef4444;"></i> Logout</a>
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-mobile-link"><i class="bi bi-box-arrow-right" style="color: #ef4444;"></i> {{ __('Logout') }}</a>
                 @else
-                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door-fill" style="color: var(--primary);"></i> Home</a>
-                <a href="#" onclick="event.preventDefault(); handlePwaInstallClick();" class="nav-mobile-link" style="background: rgba(16,185,129,0.08); color: #059669 !important; font-weight: 700;"><i class="bi bi-download" style="color: #10b981;"></i> Install ChapConnect App</a>
-                <a href="{{ route('login') }}" class="nav-mobile-link"><i class="bi bi-box-arrow-in-right" style="color: var(--primary);"></i> Login</a>
-                <a href="{{ route('register') }}" class="nav-mobile-link"><i class="bi bi-person-plus" style="color: var(--primary);"></i> Register</a>
+                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door-fill" style="color: var(--primary);"></i> {{ __('Home') }}</a>
+                <a href="#" onclick="event.preventDefault(); handlePwaInstallClick();" class="nav-mobile-link" style="background: rgba(16,185,129,0.08); color: #059669 !important; font-weight: 700;"><i class="bi bi-download" style="color: #10b981;"></i> {{ __('Download App') }}</a>
+                <a href="{{ route('login') }}" class="nav-mobile-link"><i class="bi bi-box-arrow-in-right" style="color: var(--primary);"></i> {{ __('Login') }}</a>
+                <a href="{{ route('register') }}" class="nav-mobile-link"><i class="bi bi-person-plus" style="color: var(--primary);"></i> {{ __('Register') }}</a>
                 @endauth
                 <a href="tel:0710383352" class="nav-mobile-link"><i class="bi bi-telephone-fill" style="color: #2563eb;"></i> Call: 0710383352</a>
                 <a href="https://wa.me/255710383352" target="_blank" class="nav-mobile-link"><i class="bi bi-whatsapp" style="color: #10b981;"></i> WhatsApp: 0710383352</a>
             </div>
-            <div class="nav-auth">
+            <div class="nav-auth" style="display: flex; align-items: center; gap: 8px;">
+                <!-- Desktop Language Switcher -->
+                <div class="lang-switcher" style="position: relative; display: inline-block;">
+                    <button type="button" id="langSwitchBtn" onclick="$('#langDropdown').fadeToggle(150);" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; border-radius: 20px; font-weight: 700; padding: 6px 12px; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+                        <span style="font-size: 0.95rem;">{{ app()->getLocale() === 'sw' ? '🇹🇿' : '🇬🇧' }}</span>
+                        <span>{{ app()->getLocale() === 'sw' ? 'SW' : 'EN' }}</span>
+                        <i class="bi bi-chevron-down" style="font-size: 0.7rem; opacity: 0.8;"></i>
+                    </button>
+                    <div id="langDropdown" style="display: none; position: absolute; right: 0; top: 44px; width: 145px; background: #ffffff; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.18); border: 1px solid #e2e8f0; z-index: 10000; overflow: hidden; padding: 5px;">
+                        <a href="{{ route('lang.switch', 'sw') }}" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 0.82rem; font-weight: 700; color: {{ app()->getLocale() === 'sw' ? '#6366f1' : '#1e293b' }}; background: {{ app()->getLocale() === 'sw' ? '#f1f5f9' : 'transparent' }}; border-radius: 8px; text-decoration: none; transition: background 0.2s;">
+                            <span>🇹🇿</span> Kiswahili
+                            @if(app()->getLocale() === 'sw') <i class="bi bi-check-lg" style="margin-left: auto; color: #6366f1; font-weight: 900;"></i> @endif
+                        </a>
+                        <a href="{{ route('lang.switch', 'en') }}" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; font-size: 0.82rem; font-weight: 700; color: {{ app()->getLocale() === 'en' ? '#6366f1' : '#1e293b' }}; background: {{ app()->getLocale() === 'en' ? '#f1f5f9' : 'transparent' }}; border-radius: 8px; text-decoration: none; transition: background 0.2s;">
+                            <span>🇬🇧</span> English
+                            @if(app()->getLocale() === 'en') <i class="bi bi-check-lg" style="margin-left: auto; color: #6366f1; font-weight: 900;"></i> @endif
+                        </a>
+                    </div>
+                </div>
+
                 @auth
                 <!-- Sidebar Toggle Button for Mobile -->
                 <button type="button" onclick="$('#adminSidebar').toggleClass('mobile-open');" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; border-radius: 20px; font-weight: 700; padding: 6px 14px; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-right: 6px;">
@@ -211,14 +241,14 @@
                     </div>
                 </div>
 
-                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-btn nav-btn-logout"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-btn nav-btn-logout"><i class="bi bi-box-arrow-right"></i> {{ __('Logout') }}</a>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                     @csrf
                 </form>
                 @else
-                <a href="{{ route('home') }}" class="nav-btn nav-btn-home"><i class="bi bi-house-door-fill" style="color: #6366f1;"></i> Home</a>
-                <a href="{{ route('login') }}" class="nav-btn nav-btn-login"><i class="bi bi-box-arrow-in-right"></i> Login</a>
-                <a href="{{ route('register') }}" class="nav-btn nav-btn-register"><i class="bi bi-person-plus-fill"></i> Register</a>
+                <a href="{{ route('home') }}" class="nav-btn nav-btn-home"><i class="bi bi-house-door-fill" style="color: #6366f1;"></i> {{ __('Home') }}</a>
+                <a href="{{ route('login') }}" class="nav-btn nav-btn-login"><i class="bi bi-box-arrow-in-right"></i> {{ __('Login') }}</a>
+                <a href="{{ route('register') }}" class="nav-btn nav-btn-register"><i class="bi bi-person-plus-fill"></i> {{ __('Register') }}</a>
                 @endauth
             </div>
             @yield('search_bar')
@@ -310,6 +340,15 @@
                 <a href="{{ route('customer-care.dashboard') }}#blocked" class="sidebar-link cc-tab-link" data-cctab="blocked">
                     <i class="bi bi-shield-slash-fill" style="color:#dc2626;"></i> <span>Blocked Accounts & Login Control</span>
                 </a>
+                <a href="{{ route('admin.moderation') }}" class="sidebar-link {{ Request::is('admin/moderation*') ? 'active' : '' }}">
+                    <i class="bi bi-shield-exclamation" style="color:#f59e0b;"></i> <span>Content Moderation & NSFW</span>
+                    @php
+                    $flaggedCount = \App\Models\Media::where('moderation_status', 'flagged')->count();
+                    @endphp
+                    @if($flaggedCount > 0)
+                    <span style="margin-left: auto; background: #ef4444; color: #fff; font-size: 0.72rem; font-weight: 800; padding: 2px 7px; border-radius: 10px;">{{ $flaggedCount }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('customer-care.dashboard') }}#talents" class="sidebar-link cc-tab-link" data-cctab="talents">
                     <i class="bi bi-people-fill" style="color:var(--primary);"></i> <span>Talents Directory & Q&A</span>
                 </a>
@@ -361,6 +400,15 @@
                 </a>
 
                 <div class="sidebar-group-label">OPERATIONS & SUPPORT</div>
+                <a href="{{ route('admin.moderation') }}" class="sidebar-link {{ Request::is('admin/moderation*') ? 'active' : '' }}">
+                    <i class="bi bi-shield-exclamation" style="color:#f59e0b;"></i> <span>Content Moderation & NSFW</span>
+                    @php
+                    $flaggedCount = \App\Models\Media::where('moderation_status', 'flagged')->count();
+                    @endphp
+                    @if($flaggedCount > 0)
+                    <span style="margin-left: auto; background: #ef4444; color: #fff; font-size: 0.72rem; font-weight: 800; padding: 2px 7px; border-radius: 10px;">{{ $flaggedCount }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('customer-care.dashboard') }}#tickets" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="tickets">
                     <i class="bi bi-life-preserver"></i> <span>Support Issues & Tickets Roster</span>
                 </a>
@@ -462,53 +510,349 @@
         document.addEventListener('DOMContentLoaded', function() {
             const autoToasts = document.querySelectorAll('.auto-toast-item');
             autoToasts.forEach(function(toast) {
-                setTimeout(function() {
-                    dismissToast(toast);
-                }, 4000); // Automatically disappears after 4 seconds
+                let timer = null;
+                const duration = 10000; // 10 seconds (smooth, readable pace)
+
+                function startTimer() {
+                    timer = setTimeout(function() {
+                        dismissToast(toast);
+                    }, duration);
+                }
+
+                // Pause timer & progress bar on hover so customer can read comfortably
+                toast.addEventListener('mouseenter', function() {
+                    if (timer) clearTimeout(timer);
+                    const progress = toast.querySelector('.toast-progress');
+                    if (progress) progress.style.animationPlayState = 'paused';
+                });
+
+                toast.addEventListener('mouseleave', function() {
+                    const progress = toast.querySelector('.toast-progress');
+                    if (progress) progress.style.animationPlayState = 'running';
+                    startTimer();
+                });
+
+                startTimer();
             });
         });
     </script>
+    <!-- Floating Real-Time In-App Alert Toasts Container -->
+    <div id="liveInstantAlertContainer" style="position: fixed; top: 20px; right: 20px; z-index: 999999; display: flex; flex-direction: column; gap: 12px; max-width: 380px; width: calc(100% - 40px); pointer-events: none;"></div>
+
+    <style>
+        .live-instant-toast {
+            pointer-events: auto;
+            background: #ffffff;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-left: 4px solid #6366f1;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18), 0 4px 8px rgba(0, 0, 0, 0.05);
+            padding: 14px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+            animation: slideInNotif 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .live-instant-toast:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 35px rgba(15, 23, 42, 0.22);
+        }
+        .live-toast-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(99, 102, 241, 0.12);
+            color: #6366f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            animation: notifPulse 1.8s infinite ease-in-out;
+        }
+        @keyframes slideInNotif {
+            from { opacity: 0; transform: translateX(50px) scale(0.95); }
+            to { opacity: 1; transform: translateX(0) scale(1); }
+        }
+        @keyframes notifPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+
     <!-- Notification Sound Chime Player -->
-    <audio id="chapconnect-notification-audio" src="{{ \App\Models\SystemSetting::get('notification_sound', 'https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3') }}" preload="auto"></audio>
+    @php
+    $rawSound = \App\Models\SystemSetting::get('notification_sound', '/sounds/notification_default.wav');
+    $notifSoundUrl = str_starts_with($rawSound, 'http') ? $rawSound : '/' . ltrim($rawSound, '/');
+    $soundEnabled = \App\Models\SystemSetting::get('notification_sound_enabled', '1') == '1';
+    @endphp
+    <audio id="chapconnect-notification-audio" src="{{ $notifSoundUrl }}" preload="auto"></audio>
+
+    <script>
+        const isNotificationSoundEnabled = {{ $soundEnabled ? 'true' : 'false' }};
+        let audioContext = null;
+        let audioUnlocked = false;
+
+        // Auto-unlock AudioContext on user interaction
+        function unlockAudioEngine() {
+            try {
+                if (!audioContext) {
+                    const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtxClass) {
+                        audioContext = new AudioCtxClass();
+                    }
+                }
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                const audio = document.getElementById('chapconnect-notification-audio');
+                if (audio && !audioUnlocked) {
+                    audio.muted = true;
+                    const p = audio.play();
+                    if (p !== undefined) {
+                        p.then(() => {
+                            audio.pause();
+                            audio.currentTime = 0;
+                            audio.muted = false;
+                            console.log('[Notification Engine] Audio tag unlocked successfully.');
+                        }).catch(() => {
+                            audio.muted = false;
+                        });
+                    }
+                }
+                audioUnlocked = true;
+            } catch (e) {
+                console.warn('[Notification Engine] Audio unlock warning:', e);
+            }
+        }
+
+        // Global event listeners to prime audio on any interaction
+        $(window).on('mousemove scroll focus keydown touchstart pointerdown mousedown click', function() {
+            unlockAudioEngine();
+        });
+
+        // Web Audio API Synthesizer fallback
+        function doSynthesize(ctx) {
+            try {
+                const now = ctx.currentTime;
+                const masterGain = ctx.createGain();
+                masterGain.gain.setValueAtTime(0.8, now);
+                masterGain.connect(ctx.destination);
+
+                // High chime tone 1 (E6 - 1318.5 Hz)
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(1318.5, now);
+                gain1.gain.setValueAtTime(0.7, now);
+                gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+                osc1.connect(gain1);
+                gain1.connect(masterGain);
+                osc1.start(now);
+                osc1.stop(now + 0.45);
+
+                // High chime tone 2 (A6 - 1760 Hz)
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(1760.0, now + 0.1);
+                gain2.gain.setValueAtTime(0.8, now + 0.1);
+                gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
+                osc2.connect(gain2);
+                gain2.connect(masterGain);
+                osc2.start(now + 0.1);
+                osc2.stop(now + 0.75);
+                console.log('[Notification Engine] WebAudio synthesizer chime played.');
+            } catch(e) {
+                console.warn('[Notification Engine] Synthesis play error:', e);
+            }
+        }
+
+        window.playSynthesizedBell = function() {
+            try {
+                const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtxClass) return;
+                
+                const ctx = audioContext || new AudioCtxClass();
+                audioContext = ctx;
+
+                if (ctx.state === 'suspended') {
+                    ctx.resume().then(() => doSynthesize(ctx)).catch(() => doSynthesize(ctx));
+                } else {
+                    doSynthesize(ctx);
+                }
+            } catch (err) {
+                console.warn('[Notification Engine] Web Audio synthesis unavailable:', err);
+            }
+        };
+
+        window.triggerNotificationSound = function(force = false) {
+            if (!force && !isNotificationSoundEnabled) {
+                console.log('[Notification Engine] Sound is disabled in settings.');
+                return;
+            }
+
+            unlockAudioEngine();
+
+            const audio = document.getElementById('chapconnect-notification-audio');
+            if (audio) {
+                audio.muted = false;
+                audio.currentTime = 0;
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(function() {
+                        console.log('[Notification Engine] HTML5 Audio chime played successfully.');
+                    }).catch(function(error) {
+                        console.warn('[Notification Engine] HTML5 audio blocked/failed, playing WebAudio synthesizer:', error);
+                        window.playSynthesizedBell();
+                    });
+                }
+            } else {
+                window.playSynthesizedBell();
+            }
+        };
+
+        // Self-diagnostic test function available in browser console
+        window.debugNotificationSound = function() {
+            console.log('=== [Notification Engine Diagnostics] ===');
+            console.log('1. Sound enabled in settings:', isNotificationSoundEnabled);
+            console.log('2. Audio element src:', document.getElementById('chapconnect-notification-audio')?.src);
+            console.log('3. Audio unlocked:', audioUnlocked);
+            console.log('4. AudioContext state:', audioContext?.state);
+            console.log('5. Triggering test sound now...');
+            window.triggerNotificationSound(true);
+            window.showInstantNotificationToast('Test Notification Alert', 'If you heard the chime and see this toast, notifications are working 100%!', '#');
+        };
+
+        // Display Live Floating Toast on screen for new alerts
+        window.showInstantNotificationToast = function(title, message, link) {
+            const toastId = 'toast_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+            const targetLink = link || '#';
+            const toastHtml = `
+                <div class="live-instant-toast" id="${toastId}" onclick="window.location.href='${targetLink}'">
+                    <div class="live-toast-icon">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                            <strong style="font-size: 0.88rem; color: #0f172a; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${title}</strong>
+                            <span style="font-size: 0.7rem; color: #6366f1; font-weight: 700; background: rgba(99,102,241,0.1); padding: 1px 6px; border-radius: 10px;">New</span>
+                        </div>
+                        <p style="margin: 0; font-size: 0.8rem; color: #475569; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${message}</p>
+                    </div>
+                    <button type="button" onclick="event.stopPropagation(); $('#${toastId}').fadeOut(200, function(){ $(this).remove(); });" style="background: none; border: none; font-size: 1.1rem; color: #94a3b8; cursor: pointer; padding: 0 4px; line-height: 1;">&times;</button>
+                </div>
+            `;
+
+            $('#liveInstantAlertContainer').append(toastHtml);
+
+            setTimeout(function() {
+                $('#' + toastId).fadeOut(300, function() {
+                    $(this).remove();
+                });
+            }, 7000);
+        };
+    </script>
 
     @auth
-    @php
-    $soundEnabled = \App\Models\SystemSetting::get('notification_sound_enabled', '1') === '1';
-    @endphp
     <script>
-        let lastUnreadCount = 0;
-        let isInitialFetch = true;
+        // Track alerted notification IDs in sessionStorage so sound plays immediately on login
+        function getAlertedNotifIds() {
+            try {
+                const stored = sessionStorage.getItem('chapconnect_alerted_notifs');
+                return stored ? new Set(JSON.parse(stored)) : new Set();
+            } catch(e) {
+                return new Set();
+            }
+        }
+
+        function persistAlertedNotifIds(setObj) {
+            try {
+                sessionStorage.setItem('chapconnect_alerted_notifs', JSON.stringify(Array.from(setObj)));
+            } catch(e) {}
+        }
+
+        let knownNotifIds = getAlertedNotifIds();
+        let isPollingInProgress = false;
+        let notificationChannel = null;
+
+        // Setup BroadcastChannel for 0ms instant sync across tabs
+        if ('BroadcastChannel' in window) {
+            try {
+                notificationChannel = new BroadcastChannel('chapconnect_live_alerts');
+                notificationChannel.onmessage = function(event) {
+                    if (event.data && event.data.type === 'REFRESH_NOTIFICATIONS') {
+                        console.log('[Notification Engine] ⚡ Instant Broadcast received from another tab. Fetching immediately...');
+                        fetchNotifications();
+                    }
+                };
+            } catch(e) {}
+        }
+
+        // Global helper to trigger instant 0ms alert in all open tabs
+        window.broadcastNotificationAlert = function() {
+            try {
+                if (notificationChannel) {
+                    notificationChannel.postMessage({ type: 'REFRESH_NOTIFICATIONS', time: Date.now() });
+                }
+                localStorage.setItem('chapconnect_alert_broadcast', Date.now());
+            } catch(e) {}
+        };
+
+        // Also listen to localStorage changes across browser windows
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'chapconnect_alert_broadcast') {
+                console.log('[Notification Engine] ⚡ Storage event received. Fetching notifications instantly...');
+                fetchNotifications();
+            }
+        });
 
         function fetchNotifications() {
+            if (isPollingInProgress) return;
+            isPollingInProgress = true;
+
             $.ajax({
                 url: "{{ route('notifications.unread') }}",
                 type: "GET",
                 dataType: "json",
+                timeout: 4000,
                 success: function(data) {
                     const count = data.count || 0;
                     const $badge = $('#notifBadge');
                     const $list = $('#notifList');
+                    const notifs = data.notifications || [];
+                    const currentIds = notifs.map(n => n.id);
+
+                    // Brand new notifications not yet alerted in this session
+                    const brandNewItems = notifs.filter(n => !knownNotifIds.has(n.id));
 
                     if (count > 0) {
                         $badge.text(count).show();
-                        if (count > lastUnreadCount && !isInitialFetch) {
-                            @if($soundEnabled)
-                            const audio = document.getElementById('chapconnect-notification-audio');
-                            if (audio) {
-                                audio.play().catch(e => console.log('Audio playback policy', e));
-                            }
-                            @endif
+                        if (brandNewItems.length > 0) {
+                            console.log('[Notification Engine] 🔔 ALERT TRIGGERED! Playing sound & toast instantly for:', brandNewItems);
+                            
+                            // 1. Play sound immediately (including on login)
+                            window.triggerNotificationSound();
+
+                            // 2. Show floating instant alert toast
+                            brandNewItems.forEach(function(item) {
+                                window.showInstantNotificationToast(item.title, item.message, item.link);
+                            });
+
+                            // Add to known IDs and persist in sessionStorage
+                            brandNewItems.forEach(item => knownNotifIds.add(item.id));
+                            persistAlertedNotifIds(knownNotifIds);
                         }
                     } else {
                         $badge.hide();
                     }
 
-                    lastUnreadCount = count;
-                    isInitialFetch = false;
-
-                    if (data.notifications && data.notifications.length > 0) {
+                    if (notifs.length > 0) {
                         let html = '';
-                        data.notifications.forEach(function(n) {
+                        notifs.forEach(function(n) {
                             html += `
                                 <div style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='#fff';">
                                     <a href="${n.link || '#'}" style="text-decoration: none; color: inherit; display: block;">
@@ -521,8 +865,11 @@
                         });
                         $list.html(html);
                     } else {
-                        $list.html('<div style="padding: 20px; text-align: center; color: #94a3b8; font-size: 0.85rem;"><i class="bi bi-check-circle" style="font-size: 1.2rem; display: block; margin-bottom: 4px;"></i> No new notifications</div>');
+                        $list.html('<div style="padding: 20px; text-align: center; color: #94a3b8; font-size: 0.85rem;"><i class="bi bi-check-circle" style="font-size: 1.2rem; display: block; margin-bottom: 4px;"></i> {{ __("No new notifications") }}</div>');
                     }
+                },
+                complete: function() {
+                    isPollingInProgress = false;
                 }
             });
         }
@@ -544,8 +891,18 @@
         }
 
         $(document).ready(function() {
+            // Immediate fetch on page load / login
             fetchNotifications();
-            setInterval(fetchNotifications, 15000);
+
+            // Real-time polling every 1 second for instant 0-delay notification delivery
+            setInterval(fetchNotifications, 1000);
+
+            // Trigger immediate fetch whenever window/tab becomes active
+            $(window).on('focus visibilitychange', function() {
+                if (document.visibilityState === 'visible') {
+                    fetchNotifications();
+                }
+            });
 
             $(document).on('click', function(e) {
                 if (!$(e.target).closest('.notification-wrapper').length) {
@@ -810,13 +1167,13 @@
 
             <div style="text-align: center; margin-bottom: 20px;">
                 <img src="{{ asset(\App\Models\SystemSetting::get('site_logo', 'logo.png')) }}" alt="{{ \App\Models\SystemSetting::get('site_title', 'ChapConnect') }} Logo" style="width: 64px; height: 64px; border-radius: 16px; object-fit: cover; box-shadow: 0 6px 18px rgba(99,102,241,0.2); margin-bottom: 10px;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'">
-                <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; font-weight: 800; color: #0f172a;">{{ \App\Models\SystemSetting::get('site_title', 'ChapConnect') }} Support</h3>
-                <p style="margin: 0; color: #64748b; font-size: 0.86rem;">We are here to help you. Reach out to us through any of our channels below.</p>
+                <h3 style="margin: 0 0 4px 0; font-size: 1.3rem; font-weight: 800; color: #0f172a;">{{ \App\Models\SystemSetting::get('site_title', 'ChapConnect') }} {{ __('Customer Support') }}</h3>
+                <p style="margin: 0; color: #64748b; font-size: 0.86rem;">{{ __('Help desk & Support') }}</p>
             </div>
 
             <!-- Short Summary about ChapConnect -->
             <div style="background: #f8fafc; border-radius: 12px; padding: 14px 16px; border: 1px solid #cbd5e1; margin-bottom: 20px; font-size: 0.85rem; color: #334155; line-height: 1.5; text-align: center;">
-                {{ \App\Models\SystemSetting::get('site_summary', 'ChapConnect connects talented artists with opportunities. Discover photos, videos, bullet bulletins and book your next favorite talent.') }}
+                {{ __('Connecting Talent & Opportunities across Tanzania') }}
             </div>
 
             <!-- Contact Channels -->
@@ -826,7 +1183,7 @@
                 <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', \App\Models\SystemSetting::get('whatsapp_number')) }}" target="_blank" style="display: flex; align-items: center; gap: 12px; padding: 10px 15px; border-radius: 12px; background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: #ffffff; text-decoration: none; font-weight: 700; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(37,211,102,0.2);">
                     <i class="bi bi-whatsapp" style="font-size: 1.3rem;"></i>
                     <div style="text-align: left;">
-                        <span style="font-size: 0.72rem; display: block; opacity: 0.85; font-weight: 500;">Chat on WhatsApp</span>
+                        <span style="font-size: 0.72rem; display: block; opacity: 0.85; font-weight: 500;">{{ __('WhatsApp Number') }}</span>
                         <span>{{ \App\Models\SystemSetting::get('whatsapp_number') }}</span>
                     </div>
                 </a>
@@ -837,7 +1194,7 @@
                 <a href="tel:{{ preg_replace('/[^0-9+]/', '', \App\Models\SystemSetting::get('support_phone')) }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 15px; border-radius: 12px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: #ffffff; text-decoration: none; font-weight: 700; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(59,130,246,0.2);">
                     <i class="bi bi-telephone-fill" style="font-size: 1.2rem;"></i>
                     <div style="text-align: left;">
-                        <span style="font-size: 0.72rem; display: block; opacity: 0.85; font-weight: 500;">Call Phone Support</span>
+                        <span style="font-size: 0.72rem; display: block; opacity: 0.85; font-weight: 500;">{{ __('Phone Number') }}</span>
                         <span>{{ \App\Models\SystemSetting::get('support_phone') }}</span>
                     </div>
                 </a>
@@ -848,7 +1205,7 @@
                 <a href="mailto:{{ \App\Models\SystemSetting::get('support_email') }}" style="display: flex; align-items: center; gap: 12px; padding: 10px 15px; border-radius: 12px; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: #ffffff; text-decoration: none; font-weight: 700; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(239,68,68,0.2);">
                     <i class="bi bi-envelope-fill" style="font-size: 1.2rem;"></i>
                     <div style="text-align: left;">
-                        <span style="font-size: 0.72rem; display: block; opacity: 0.85; font-weight: 500;">Send Support Email</span>
+                        <span style="font-size: 0.72rem; display: block; opacity: 0.85; font-weight: 500;">{{ __('Email Address') }}</span>
                         <span>{{ \App\Models\SystemSetting::get('support_email') }}</span>
                     </div>
                 </a>
@@ -857,7 +1214,7 @@
 
             <!-- Social Media Channels Links -->
             <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; text-align: center;">
-                <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Follow our official pages</span>
+                <span style="font-size: 0.78rem; font-weight: 700; color: #64748b; display: block; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{{ __('Official Media & Social Channels') }}</span>
                 <div style="display: flex; justify-content: center; gap: 12px;">
                     @if(\App\Models\SystemSetting::get('site_facebook'))
                     <a href="{{ \App\Models\SystemSetting::get('site_facebook') }}" target="_blank" style="width: 36px; height: 36px; border-radius: 50%; background: #3b5998; color: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.15rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"><i class="bi bi-facebook"></i></a>
@@ -882,52 +1239,294 @@
         <div class="admin-modal-content" style="border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-width: 520px; width: 90%; margin: auto;">
             <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
                 <h3 style="margin: 0; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
-                    <i class="bi bi-headset" style="color: var(--primary);"></i> Submit Support Ticket to Customer Care
+                    <i class="bi bi-headset" style="color: var(--primary);"></i> {{ __('Submit Support Ticket to Customer Care') }}
                 </h3>
                 <button type="button" class="admin-modal-close" onclick="$('#user-support-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
             </div>
             <form action="{{ route('dashboard.support.submit') }}" method="POST">
                 @csrf
                 <div class="form-group" style="margin-bottom: 15px;">
-                    <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Issue Category</label>
+                    <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">{{ __('Issue Category') }}</label>
                     <select name="category" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
-                        <option value="Account Access & Credentials">Account Access & Credentials</option>
-                        <option value="Profile Verification">Profile Verification</option>
-                        <option value="Media Uploads (Photos/Videos)">Media Uploads (Photos/Videos)</option>
-                        <option value="Billing & Subscription">Billing & Subscription</option>
-                        <option value="Report Abuse / Content Guidelines">Report Abuse / Content Guidelines</option>
-                        <option value="General Inquiry" selected>General Inquiry</option>
+                        <option value="Account Access & Credentials">{{ __('Account Access & Credentials') }}</option>
+                        <option value="Profile Verification">{{ __('Profile Verification') }}</option>
+                        <option value="Media Uploads (Photos/Videos)">{{ __('Media Uploads (Photos/Videos)') }}</option>
+                        <option value="Billing & Subscription">{{ __('Billing & Subscription') }}</option>
+                        <option value="Report Abuse / Content Guidelines">{{ __('Report Abuse / Content Guidelines') }}</option>
+                        <option value="General Inquiry" selected>{{ __('General Inquiry') }}</option>
                     </select>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 15px;">
-                    <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Subject Title</label>
-                    <input type="text" name="subject" class="form-control" placeholder="Brief summary of what you need help with..." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">{{ __('Subject Title') }}</label>
+                    <input type="text" name="subject" class="form-control" placeholder="{{ __('Subject Title') }}..." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
                 </div>
 
                 <div class="form-group" style="margin-bottom: 15px;">
-                    <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Priority Level</label>
+                    <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">{{ __('Priority Level') }}</label>
                     <select name="priority" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
-                        <option value="low">Low Priority</option>
-                        <option value="medium" selected>Medium Priority</option>
-                        <option value="high">High Priority</option>
-                        <option value="urgent">Urgent Priority</option>
+                        <option value="low">{{ __('Low Priority') }}</option>
+                        <option value="medium" selected>{{ __('Medium Priority') }}</option>
+                        <option value="high">{{ __('High Priority') }}</option>
+                        <option value="urgent">{{ __('Urgent Priority') }}</option>
                     </select>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 20px;">
-                    <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Detailed Explanation</label>
-                    <textarea name="description" rows="4" class="form-control" placeholder="Explain your issue or question in detail..." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;"></textarea>
+                    <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">{{ __('Detailed Explanation') }}</label>
+                    <textarea name="description" rows="4" class="form-control" placeholder="{{ __('Detailed Explanation') }}..." required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;"></textarea>
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
-                    <button type="button" onclick="$('#user-support-modal').fadeOut(200);" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; font-weight: 600; cursor: pointer;">Cancel</button>
-                    <button type="submit" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.35); cursor: pointer;">Submit Support Ticket</button>
+                    <button type="button" onclick="$('#user-support-modal').fadeOut(200);" style="padding: 10px 18px; border-radius: 10px; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; font-weight: 600; cursor: pointer;">{{ __('Cancel') }}</button>
+                    <button type="submit" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.35); cursor: pointer;">{{ __('Submit Support Ticket') }}</button>
                 </div>
             </form>
         </div>
     </div>
     @endauth
+
+    <!-- Global Community Media Report Modal (Report Inappropriate / Nudity / Explicit Media) -->
+    <div id="community-report-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 100000; align-items: center; justify-content: center; padding: 20px;">
+        <div style="background: #ffffff; border-radius: 18px; max-width: 480px; width: 100%; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); border: 1px solid #e2e8f0; animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="width: 34px; height: 34px; border-radius: 10px; background: #fee2e2; color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                        <i class="bi bi-shield-exclamation"></i>
+                    </span>
+                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #0f172a;">{{ __('Report Inappropriate Content') }}</h3>
+                </div>
+                <button type="button" onclick="closeReportModal()" style="background: none; border: none; font-size: 1.3rem; color: #94a3b8; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
+            </div>
+
+            <form id="communityReportForm" onsubmit="submitMediaReport(event)">
+                <input type="hidden" id="reportMediaId" name="media_id" value="">
+
+                <p style="font-size: 0.86rem; color: #64748b; margin-top: 0; margin-bottom: 16px;">
+                    {{ __('Help us keep ChapConnect safe. Please select why this photo/video violates our community standards:') }}
+                </p>
+
+                <div class="form-group" style="margin-bottom: 14px;">
+                    <label style="color: #334155; font-size: 0.82rem; font-weight: 700; display: block; margin-bottom: 6px;">{{ __('Violation Category') }} *</label>
+                    <select id="reportReason" name="reason" required style="width: 100%; background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; font-size: 0.88rem;">
+                        <option value="nudity_nsfw" selected>🔞 {{ __('Nudity, Sexual or Adult Content') }}</option>
+                        <option value="violence">🩸 {{ __('Violence, Gore or Physical Harm') }}</option>
+                        <option value="harassment">⚠️ {{ __('Harassment, Hate Speech or Bullying') }}</option>
+                        <option value="copyright">©️ {{ __('Copyright / Intellectual Property Infringement') }}</option>
+                        <option value="spam">🚫 {{ __('Spam, Scam or Misleading Content') }}</option>
+                        <option value="other">📝 {{ __('Other Policy Violation') }}</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="color: #334155; font-size: 0.82rem; font-weight: 700; display: block; margin-bottom: 6px;">{{ __('Additional Details (Optional)') }}</label>
+                    <textarea id="reportDetails" name="details" rows="3" placeholder="{{ __('Provide any additional context to help our moderation team...') }}" style="width: 100%; box-sizing: border-box; background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 12px; font-size: 0.88rem; resize: vertical;"></textarea>
+                </div>
+
+                <div id="reportAlertBox" style="display: none; padding: 10px 14px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85rem; font-weight: 600;"></div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #f1f5f9; padding-top: 14px;">
+                    <button type="button" onclick="closeReportModal()" style="padding: 9px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; color: #475569; font-weight: 600; font-size: 0.85rem; cursor: pointer;">{{ __('Cancel') }}</button>
+                    <button type="submit" id="submitReportBtn" style="padding: 9px 20px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; background: #ef4444; border: none; color: #fff; box-shadow: 0 4px 12px rgba(239,68,68,0.3); cursor: pointer;">{{ __('Submit Report') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        window.openReportModal = function(mediaId) {
+            $('#reportMediaId').val(mediaId);
+            $('#reportDetails').val('');
+            $('#reportAlertBox').hide();
+            $('#community-report-modal').css('display', 'flex').hide().fadeIn(180);
+        };
+
+        window.closeReportModal = function() {
+            $('#community-report-modal').fadeOut(150);
+        };
+
+        window.submitMediaReport = function(e) {
+            e.preventDefault();
+            const mediaId = $('#reportMediaId').val();
+            const reason = $('#reportReason').val();
+            const details = $('#reportDetails').val();
+            const btn = $('#submitReportBtn');
+
+            btn.prop('disabled', true).text('Submitting...');
+
+            $.ajax({
+                url: '/media/' + mediaId + '/report',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    reason: reason,
+                    details: details
+                },
+                success: function(res) {
+                    btn.prop('disabled', false).text('{{ __("Submit Report") }}');
+                    $('#reportAlertBox').css({
+                        'background': 'rgba(16,185,129,0.12)',
+                        'border': '1px solid rgba(16,185,129,0.3)',
+                        'color': '#065f46'
+                    }).text(res.message || 'Report received. Thank you.').fadeIn(200);
+
+                    setTimeout(function() {
+                        closeReportModal();
+                    }, 1800);
+                },
+                error: function(xhr) {
+                    btn.prop('disabled', false).text('{{ __("Submit Report") }}');
+                    const msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Failed to submit report. Please try again.';
+                    $('#reportAlertBox').css({
+                        'background': 'rgba(239,68,68,0.12)',
+                        'border': '1px solid rgba(239,68,68,0.3)',
+                        'color': '#be123c'
+                    }).text(msg).fadeIn(200);
+                }
+            });
+        };
+
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.lang-switcher').length) {
+                $('#langDropdown').fadeOut(120);
+            }
+        });
+    </script>
+    <script async src="//www.instagram.com/embed.js"></script>
+
+    {{-- Global Video Playback Controller: Single video at a time + auto-pause on scroll --}}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let activeVideoElement = null;
+
+        /**
+         * Pause a managed video element (iframe or HTML5 video).
+         */
+        function pauseVideo(el) {
+            if (!el) return;
+            const platform = el.getAttribute('data-platform');
+
+            if (platform === 'local' && el.tagName === 'VIDEO') {
+                el.pause();
+            } else if (platform === 'youtube' && el.tagName === 'IFRAME') {
+                try {
+                    el.contentWindow.postMessage(JSON.stringify({event: 'command', func: 'pauseVideo', args: []}), '*');
+                } catch(e) {}
+            } else if (platform === 'vimeo' && el.tagName === 'IFRAME') {
+                try {
+                    el.contentWindow.postMessage(JSON.stringify({method: 'pause'}), '*');
+                } catch(e) {}
+            } else if (el.tagName === 'IFRAME') {
+                // For TikTok, Instagram, Facebook: reload iframe src to stop playback
+                const src = el.getAttribute('data-video-src') || el.src;
+                if (src && el.src !== '') {
+                    el.setAttribute('data-was-playing', 'true');
+                    el.src = '';
+                }
+            }
+        }
+
+        /**
+         * Resume a managed iframe by restoring its src.
+         */
+        function resumeIframe(el) {
+            if (!el || el.tagName !== 'IFRAME') return;
+            if (el.getAttribute('data-was-playing') === 'true') {
+                const originalSrc = el.getAttribute('data-video-src');
+                if (originalSrc && el.src !== originalSrc) {
+                    el.src = originalSrc;
+                }
+                el.removeAttribute('data-was-playing');
+            }
+        }
+
+        /**
+         * Pause ALL other managed videos except the given element.
+         */
+        function pauseAllExcept(activeEl) {
+            document.querySelectorAll('.cc-managed-video').forEach(function(el) {
+                if (el !== activeEl) {
+                    pauseVideo(el);
+                }
+            });
+        }
+
+        // ── HTML5 <video> elements: single-play enforcement ──
+        document.querySelectorAll('video.cc-managed-video').forEach(function(video) {
+            video.addEventListener('play', function() {
+                pauseAllExcept(video);
+                activeVideoElement = video;
+            });
+        });
+
+        // ── Iframes: detect click to play (user interaction) ──
+        document.querySelectorAll('iframe.cc-managed-video').forEach(function(iframe) {
+            // Wrap each iframe in a click-detection overlay
+            const parent = iframe.parentElement;
+            if (!parent) return;
+
+            // Use a focus-based detection: when user clicks into iframe, it gains focus
+            iframe.addEventListener('mouseenter', function() {
+                // Mark this iframe as the one the user is interacting with
+                window.__ccHoveredIframe = iframe;
+            });
+            iframe.addEventListener('mouseleave', function() {
+                if (window.__ccHoveredIframe === iframe) {
+                    window.__ccHoveredIframe = null;
+                }
+            });
+        });
+
+        // Detect when an iframe gains focus (user clicked play inside it)
+        window.addEventListener('blur', function() {
+            setTimeout(function() {
+                if (window.__ccHoveredIframe && document.activeElement === document.body) {
+                    // An iframe just stole focus — this means user clicked play
+                    const clickedIframe = window.__ccHoveredIframe;
+                    pauseAllExcept(clickedIframe);
+                    activeVideoElement = clickedIframe;
+                }
+            }, 100);
+        });
+
+        // ── IntersectionObserver: auto-pause videos when scrolled out of view ──
+        if ('IntersectionObserver' in window) {
+            const videoObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    const el = entry.target;
+                    if (!entry.isIntersecting) {
+                        // Video scrolled out of view — pause it
+                        pauseVideo(el);
+                        if (activeVideoElement === el) {
+                            activeVideoElement = null;
+                        }
+                    } else {
+                        // Video scrolled back into view — restore iframe src if it was playing
+                        if (el.tagName === 'IFRAME') {
+                            resumeIframe(el);
+                        }
+                    }
+                });
+            }, {
+                threshold: 0.15  // At least 15% visible to be considered "in view"
+            });
+
+            document.querySelectorAll('.cc-managed-video').forEach(function(el) {
+                videoObserver.observe(el);
+            });
+        }
+
+        // ── Page visibility: pause all when tab is hidden ──
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                document.querySelectorAll('.cc-managed-video').forEach(function(el) {
+                    pauseVideo(el);
+                });
+                activeVideoElement = null;
+            }
+        });
+    });
+    </script>
 
     @yield('scripts')
 </body>
