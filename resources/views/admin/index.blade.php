@@ -126,9 +126,9 @@
                                     <td style="font-weight: 700; color: #0f172a; font-size: 0.9rem;">
                                         <div style="display: flex; align-items: center; gap: 10px;">
                                             @if($u->profile_image)
-                                            <img src="{{ asset($u->profile_image) }}" alt="{{ $u->name }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop';">
+                                            <img src="{{ asset($u->profile_image) }}" alt="{{ $u->name }}" class="zoomable-profile-img" data-full-src="{{ asset($u->profile_image) }}" data-name="{{ $u->name }}" data-category="{{ $u->category_label }}" title="Click to zoom profile picture" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); cursor: pointer;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop';">
                                             @else
-                                            <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem;">
+                                            <div class="zoomable-profile-img" data-full-src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop" data-name="{{ $u->name }}" data-category="{{ $u->category_label }}" title="Click to view full size" style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; cursor: pointer;">
                                                 {{ strtoupper(substr($u->name, 0, 1)) }}
                                             </div>
                                             @endif
@@ -395,9 +395,9 @@
                                     <td style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">
                                         <div style="display: flex; align-items: center; gap: 10px;">
                                             @if($u->profile_image)
-                                            <img src="{{ $u->profile_image }}" alt="{{ $u->name }}" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop';">
+                                            <img src="{{ $u->profile_image }}" alt="{{ $u->name }}" class="zoomable-profile-img" data-full-src="{{ asset($u->profile_image) }}" data-name="{{ $u->name }}" data-category="{{ $u->category_label }}" title="Click to zoom profile picture" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); cursor: pointer;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop';">
                                             @else
-                                            <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem;">
+                                            <div class="zoomable-profile-img" data-full-src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop" data-name="{{ $u->name }}" data-category="{{ $u->category_label }}" title="Click to view full size" style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; cursor: pointer;">
                                                 {{ strtoupper(substr($u->name, 0, 1)) }}
                                             </div>
                                             @endif
@@ -1819,12 +1819,19 @@
 
         // Auto-close mobile navigation menu when a link is clicked
         $(document).on('click', '.nav-mobile-link', function() {
-            const navMenu = document.getElementById("navIconMenu");
-            const toggleBtn = document.getElementById("navToggleBtn");
-            if (navMenu) navMenu.classList.remove("open");
-            if (toggleBtn) {
-                const icon = toggleBtn.querySelector("i");
-                if (icon) icon.className = "bi bi-list";
+            if (typeof closeMobileNav === 'function') {
+                closeMobileNav();
+            } else {
+                const navMenu = document.getElementById("navIconMenu");
+                const backdrop = document.getElementById("drawerBackdrop");
+                const toggleBtn = document.getElementById("navToggleBtn");
+                if (navMenu) navMenu.classList.remove("open");
+                if (backdrop) backdrop.classList.remove("open");
+                document.body.style.overflow = "";
+                if (toggleBtn) {
+                    const icon = toggleBtn.querySelector("i");
+                    if (icon) icon.className = "bi bi-list";
+                }
             }
         });
 
@@ -1939,6 +1946,33 @@
                 'bulk-delete-ids',
                 'WARNING: Are you sure you want to permanently delete all selected talent accounts and their uploaded media?'
             );
+        });
+
+        // Profile Picture Lightbox Zoom Handler
+        $(document).on('click', '.zoomable-profile-img', function() {
+            const src = $(this).attr('data-full-src') || $(this).attr('src');
+            const name = $(this).attr('data-name') || 'Talent Profile';
+            const category = $(this).attr('data-category') || 'Talent';
+
+            $('#zoomModalImg').attr('src', src);
+            $('#zoomModalName').text(name);
+            $('#zoomModalCategory').text(category);
+            $('#zoomModalLink').attr('href', src);
+
+            $('#profileZoomModal').addClass('show');
+            $('body').css('overflow', 'hidden');
+        });
+
+        window.closeProfileZoomModal = function(e) {
+            if (e && e.target !== e.currentTarget && !$(e.target).hasClass('profile-zoom-close')) return;
+            $('#profileZoomModal').removeClass('show');
+            $('body').css('overflow', '');
+        };
+
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape' && $('#profileZoomModal').hasClass('show')) {
+                window.closeProfileZoomModal();
+            }
         });
 
         // Initialize Custom Searchable Select Dropdowns in Admin
@@ -2409,6 +2443,25 @@
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Profile Picture Lightbox Zoom Modal -->
+<div id="profileZoomModal" class="profile-zoom-modal" onclick="closeProfileZoomModal(event)">
+    <div class="profile-zoom-content" onclick="event.stopPropagation()">
+        <button type="button" class="profile-zoom-close" onclick="closeProfileZoomModal()">&times;</button>
+        <div class="profile-zoom-img-wrapper">
+            <img id="zoomModalImg" src="" alt="Profile Image">
+        </div>
+        <div class="profile-zoom-footer">
+            <div class="profile-zoom-meta">
+                <h4 id="zoomModalName">Talent Profile</h4>
+                <span id="zoomModalCategory" class="profile-zoom-badge">Category</span>
+            </div>
+            <a id="zoomModalLink" href="#" target="_blank" class="profile-zoom-btn">
+                <i class="bi bi-box-arrow-up-right"></i> Open Full Size Image
+            </a>
+        </div>
     </div>
 </div>
 @endsection

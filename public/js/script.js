@@ -25,22 +25,50 @@ function filterMenu(query) {
     });
 }
 
-// Mobile Navbar Toggle
+// Off-Canvas Left Side Navigation Drawer Controls
 function toggleMobileNav() {
     const navMenu = document.getElementById("navIconMenu");
+    const backdrop = document.getElementById("drawerBackdrop");
     const toggleBtn = document.getElementById("navToggleBtn");
-    if (!navMenu || !toggleBtn) return;
+    if (!navMenu) return;
     
-    navMenu.classList.toggle("open");
-    const icon = toggleBtn.querySelector("i");
-    if (icon) {
-        if (navMenu.classList.contains("open")) {
-            icon.className = "bi bi-x-lg";
-        } else {
-            icon.className = "bi bi-list";
+    const isOpen = navMenu.classList.toggle("open");
+    if (backdrop) {
+        backdrop.classList.toggle("open", isOpen);
+    }
+    
+    // Lock background scroll when drawer is open
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    
+    if (toggleBtn) {
+        const icon = toggleBtn.querySelector("i");
+        if (icon) {
+            icon.className = isOpen ? "bi bi-x-lg" : "bi bi-list";
         }
     }
 }
+
+function closeMobileNav() {
+    const navMenu = document.getElementById("navIconMenu");
+    const backdrop = document.getElementById("drawerBackdrop");
+    const toggleBtn = document.getElementById("navToggleBtn");
+    
+    if (navMenu) navMenu.classList.remove("open");
+    if (backdrop) backdrop.classList.remove("open");
+    document.body.style.overflow = "";
+    
+    if (toggleBtn) {
+        const icon = toggleBtn.querySelector("i");
+        if (icon) icon.className = "bi bi-list";
+    }
+}
+
+// Close navigation drawer when Escape key is pressed
+document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape") {
+        closeMobileNav();
+    }
+});
 
 // Password visibility toggler
 function togglePasswordVisibility(button) {

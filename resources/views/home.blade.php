@@ -382,9 +382,9 @@
                 <div class="container">
                     <div class="imagea">
                         @if($talent->profile_image)
-                        <img src="{{ asset($talent->profile_image) }}" alt="{{ $talent->name }}">
+                        <img src="{{ asset($talent->profile_image) }}" alt="{{ $talent->name }}" loading="lazy">
                         @else
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80" alt="{{ $talent->name }}">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80" alt="{{ $talent->name }}" loading="lazy">
                         @endif
                         <div class="details">
                             <h2 title="{{ $talent->name }}">{{ $talent->name }}</h2>
@@ -425,6 +425,13 @@
                 </div>
                 @endforelse
             </div>
+
+            <!-- Server-Side Pagination Links -->
+            @if($talents->hasPages())
+            <div class="pagination-wrapper" style="margin-top: 25px; margin-bottom: 25px; display: flex; justify-content: center; width: 100%;">
+                {{ $talents->links('pagination::bootstrap-5') }}
+            </div>
+            @endif
         </div>
 
         <!-- Backdrop overlay for mobile drawer -->
@@ -460,9 +467,9 @@
                         <!-- User Info Header -->
                         <div class="media-feed-user">
                             @if($media->user->profile_image)
-                            <img class="media-feed-avatar" src="{{ asset($media->user->profile_image) }}" alt="{{ $media->user->name }}">
+                            <img class="media-feed-avatar" src="{{ asset($media->user->profile_image) }}" alt="{{ $media->user->name }}" loading="lazy">
                             @else
-                            <img class="media-feed-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80" alt="{{ $media->user->name }}">
+                            <img class="media-feed-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80" alt="{{ $media->user->name }}" loading="lazy">
                             @endif
                             <div class="media-feed-user-info">
                                 <a class="media-feed-username" href="{{ route('profile', $media->user->id) }}">
@@ -476,7 +483,7 @@
                         <div class="media-feed-content">
                             @if($media->type === 'photo')
                             <a href="{{ route('profile', $media->user->id) }}#photos-tab">
-                                <img class="media-feed-image" src="{{ asset($media->file_path) }}" alt="{{ $media->title ?: 'Portfolio image' }}">
+                                <img class="media-feed-image" src="{{ asset($media->file_path) }}" alt="{{ $media->title ?: 'Portfolio image' }}" loading="lazy">
                             </a>
                             @elseif($media->type === 'video')
                             <div class="media-feed-video">

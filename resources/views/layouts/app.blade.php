@@ -104,6 +104,9 @@
             }
         }
     </style>
+    <!-- Off-Canvas Drawer Backdrop -->
+    <div class="nav-backdrop" id="drawerBackdrop" onclick="toggleMobileNav()"></div>
+
     <nav class="nav">
         <div class="logo">
             <a href="{{ route('home') }}"><img src="{{ asset(\App\Models\SystemSetting::get('site_logo', 'logo.png')) }}" alt="{{ \App\Models\SystemSetting::get('site_title', 'ChapConnect') }} Logo" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'"></a>
@@ -117,77 +120,13 @@
                 </div>
             </div>
         </div>
-        <!-- Bootstrap Toggle Button for mobile -->
+        <!-- Toggle Button for mobile/sidebar -->
         <button class="nav-toggle" id="navToggleBtn" onclick="toggleMobileNav()" aria-label="Toggle navigation">
             <i class="bi bi-list"></i>
         </button>
 
-        <div class="icon" id="navIconMenu">
-            <div class="nav-mobile-list">
-                <!-- Mobile Language Switcher Row -->
-                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; margin: 6px 0 10px 0; background: rgba(99, 102, 241, 0.08); border-radius: 12px; border: 1px solid rgba(99, 102, 241, 0.15);">
-                    <span style="font-size: 0.82rem; font-weight: 700; color: #475569; display: flex; align-items: center; gap: 6px;">
-                        <i class="bi bi-translate" style="color: #6366f1; font-size: 1.05rem;"></i> {{ __('Language') }}:
-                    </span>
-                    <div style="display: flex; gap: 6px;">
-                        <a href="{{ route('lang.switch', 'sw') }}" style="padding: 4px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none; {{ app()->getLocale() === 'sw' ? 'background: #6366f1; color: #ffffff;' : 'background: #ffffff; color: #475569; border: 1px solid #cbd5e1;' }}">🇹🇿 SW</a>
-                        <a href="{{ route('lang.switch', 'en') }}" style="padding: 4px 10px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none; {{ app()->getLocale() === 'en' ? 'background: #6366f1; color: #ffffff;' : 'background: #ffffff; color: #475569; border: 1px solid #cbd5e1;' }}">🇬🇧 EN</a>
-                    </div>
-                </div>
-
-                @auth
-                @if(in_array(auth()->user()->role, ['admin', 'customer_care']))
-                @if(Request::is('admin*'))
-                <a href="#dashboard" class="tab-link nav-mobile-link" data-tab="dashboard"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> {{ __('Dashboard Overview') }}</a>
-                <a href="#talents" class="tab-link nav-mobile-link" data-tab="talents"><i class="bi bi-people-fill" style="color: var(--primary);"></i> Registered Talents</a>
-                <a href="#categories" class="tab-link nav-mobile-link" data-tab="categories"><i class="bi bi-tags-fill" style="color: var(--accent);"></i> Manage Categories</a>
-                <a href="#packages" class="tab-link nav-mobile-link" data-tab="packages"><i class="bi bi-box-seam-fill" style="color: #f59e0b;"></i> Membership Packages</a>
-                <a href="#invoices" class="tab-link nav-mobile-link" data-tab="invoices"><i class="bi bi-receipt-cutoff" style="color: #ef4444;"></i> Invoices & Billing</a>
-                <a href="#payments" class="tab-link nav-mobile-link" data-tab="payments"><i class="bi bi-wallet2" style="color: #10b981;"></i> Talent Payments</a>
-                <a href="#settings" class="tab-link nav-mobile-link" data-tab="settings"><i class="bi bi-person-gear" style="color: #0284c7;"></i> User Profile</a>
-                <a href="#staff" class="tab-link nav-mobile-link" data-tab="staff"><i class="bi bi-person-plus-fill" style="color: #6366f1;"></i> Registered Staff</a>
-                <a href="#analytics" class="tab-link nav-mobile-link" data-tab="analytics"><i class="bi bi-graph-up-arrow" style="color: #10b981;"></i> Visitor Analytics</a>
-                <a href="#activity-logs" class="tab-link nav-mobile-link" data-tab="activity-logs"><i class="bi bi-journal-text" style="color: #6366f1;"></i> User Activity Logs</a>
-                <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link"><i class="bi bi-life-preserver" style="color: #6366f1;"></i> Support Issues & Tickets Roster</a>
-                <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link"><i class="bi bi-shield-slash-fill" style="color: #dc2626;"></i> Blocked Accounts & Login Control</a>
-                <a href="{{ route('customer-care.dashboard') }}#requests" class="nav-mobile-link"><i class="bi bi-person-check-fill" style="color: #6366f1;"></i> Guest Contact Requests</a>
-                <a href="{{ route('customer-care.dashboard') }}#payments" class="nav-mobile-link"><i class="bi bi-wallet2" style="color: #6366f1;"></i> Talent Payment Requests</a>
-                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> {{ __('Home') }}</a>
-                @elseif(Request::is('customer-care*'))
-                <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link cc-tab-link" data-cctab="tickets"><i class="bi bi-life-preserver" style="color: #6366f1;"></i> Support Issues & Tickets Roster</a>
-                <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link cc-tab-link" data-cctab="blocked"><i class="bi bi-shield-slash-fill" style="color: #dc2626;"></i> Blocked Accounts & Login Control</a>
-                <a href="{{ route('customer-care.dashboard') }}#talents" class="nav-mobile-link cc-tab-link" data-cctab="talents"><i class="bi bi-people-fill" style="color: var(--primary);"></i> Talents Directory & Q&A</a>
-                <a href="{{ route('customer-care.dashboard') }}#requests" class="nav-mobile-link cc-tab-link" data-cctab="requests"><i class="bi bi-person-check-fill" style="color: #6366f1;"></i> Guest Contact Requests</a>
-                <a href="{{ route('customer-care.dashboard') }}#payments" class="nav-mobile-link cc-tab-link" data-cctab="payments"><i class="bi bi-wallet2" style="color: #6366f1;"></i> Talent Payment Requests</a>
-                @if(auth()->user()->role === 'admin')
-                <a href="{{ route('admin.dashboard') }}" class="nav-mobile-link"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> Super Admin Panel</a>
-                @endif
-                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> {{ __('Home') }}</a>
-                @else
-                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> {{ __('Home') }}</a>
-                <a href="{{ route('customer-care.dashboard') }}" class="nav-mobile-link"><i class="bi bi-headset" style="color: #6366f1;"></i> Support Portal</a>
-                @if(auth()->user()->role === 'admin')
-                <a href="{{ route('admin.dashboard') }}" class="nav-mobile-link"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> Admin Dashboard</a>
-                @endif
-                @endif
-                @else
-                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door" style="color: var(--primary);"></i> {{ __('Home') }}</a>
-                <a href="{{ route('dashboard') }}" class="nav-mobile-link"><i class="bi bi-speedometer2" style="color: var(--secondary);"></i> {{ __('Dashboard') }}</a>
-                <a href="{{ route('dashboard.photos') }}" class="nav-mobile-link"><i class="bi bi-camera-fill" style="color: var(--primary);"></i> {{ __('Photos') }}</a>
-                <a href="{{ route('dashboard.videos') }}" class="nav-mobile-link"><i class="bi bi-camera-video-fill" style="color: var(--primary);"></i> {{ __('Videos') }}</a>
-                <a href="{{ route('dashboard.news') }}" class="nav-mobile-link"><i class="bi bi-newspaper" style="color: var(--primary);"></i> Manage News</a>
-                <a href="{{ route('dashboard.comments') }}" class="nav-mobile-link"><i class="bi bi-chat-left-text-fill" style="color: var(--primary);"></i> {{ __('Comments') }}</a>
-                @endif
-                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-mobile-link"><i class="bi bi-box-arrow-right" style="color: #ef4444;"></i> {{ __('Logout') }}</a>
-                @else
-                <a href="{{ route('home') }}" class="nav-mobile-link"><i class="bi bi-house-door-fill" style="color: var(--primary);"></i> {{ __('Home') }}</a>
-                <a href="#" onclick="event.preventDefault(); handlePwaInstallClick();" class="nav-mobile-link" style="background: rgba(16,185,129,0.08); color: #059669 !important; font-weight: 700;"><i class="bi bi-download" style="color: #10b981;"></i> {{ __('Download App') }}</a>
-                <a href="{{ route('login') }}" class="nav-mobile-link"><i class="bi bi-box-arrow-in-right" style="color: var(--primary);"></i> {{ __('Login') }}</a>
-                <a href="{{ route('register') }}" class="nav-mobile-link"><i class="bi bi-person-plus" style="color: var(--primary);"></i> {{ __('Register') }}</a>
-                @endauth
-                <a href="tel:0710383352" class="nav-mobile-link"><i class="bi bi-telephone-fill" style="color: #2563eb;"></i> Call: 0710383352</a>
-                <a href="https://wa.me/255710383352" target="_blank" class="nav-mobile-link"><i class="bi bi-whatsapp" style="color: #10b981;"></i> WhatsApp: 0710383352</a>
-            </div>
+        <!-- Right Side Desktop Actions (Buttons & Search Bar) -->
+        <div class="nav-actions-wrapper" style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
             <div class="nav-auth" style="display: flex; align-items: center; gap: 8px;">
                 <!-- Desktop Language Switcher -->
                 <div class="lang-switcher" style="position: relative; display: inline-block;">
@@ -209,10 +148,6 @@
                 </div>
 
                 @auth
-                <!-- Sidebar Toggle Button for Mobile -->
-                <button type="button" onclick="$('#adminSidebar').toggleClass('mobile-open');" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; border-radius: 20px; font-weight: 700; padding: 6px 14px; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin-right: 6px;">
-                    <i class="bi bi-layout-sidebar"></i> Menu
-                </button>
                 <span style="font-weight: 700; font-size: 0.84rem; color: #fff; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;">
                     <i class="bi bi-person-circle" style="color: #38bdf8;"></i> {{ auth()->user()->name }}
                 </span>
@@ -253,6 +188,240 @@
             </div>
             @yield('search_bar')
         </div>
+
+        <!-- Left Side Navigation Off-Canvas Drawer (Picture 1 style) -->
+        <div class="icon" id="navIconMenu">
+            <!-- Drawer Header -->
+            <div class="drawer-header">
+                <div class="drawer-brand">
+                    <div class="drawer-logo-box">
+                        <img src="{{ asset(\App\Models\SystemSetting::get('site_logo', 'logo.png')) }}" alt="Logo" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'">
+                    </div>
+                    <div class="drawer-title-box">
+                        <h2>{{ \App\Models\SystemSetting::get('site_title', 'ChapConnect') }}</h2>
+                    </div>
+                </div>
+                <button type="button" class="drawer-close-btn" onclick="toggleMobileNav()" aria-label="Close menu">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Language Switcher Row -->
+            <div class="drawer-lang-row">
+                <span class="drawer-lang-label">
+                    <i class="bi bi-translate" style="color: #38bdf8; font-size: 1.05rem;"></i> {{ __('Language') }}:
+                </span>
+                <div class="drawer-lang-btns">
+                    <a href="{{ route('lang.switch', 'sw') }}" class="drawer-lang-btn {{ app()->getLocale() === 'sw' ? 'active' : 'inactive' }}">🇹🇿 SW</a>
+                    <a href="{{ route('lang.switch', 'en') }}" class="drawer-lang-btn {{ app()->getLocale() === 'en' ? 'active' : 'inactive' }}">🇬🇧 EN</a>
+                </div>
+            </div>
+
+            <!-- Drawer Body -->
+            <div class="drawer-body">
+                <div class="nav-mobile-list">
+                    @auth
+                    @if(in_array(auth()->user()->role, ['admin', 'customer_care']))
+                    @if(Request::is('admin*'))
+                    <div class="drawer-section-label">MAIN CONTROL</div>
+                    <a href="#dashboard" class="tab-link nav-mobile-link active" data-tab="dashboard">
+                        <i class="bi bi-speedometer2"></i> {{ __('Dashboard Overview') }}
+                        <i class="bi bi-chevron-right chevron-arrow"></i>
+                    </a>
+                    <a href="#talents" class="tab-link nav-mobile-link" data-tab="talents">
+                        <i class="bi bi-people-fill"></i> Registered Talents
+                        <i class="bi bi-chevron-right chevron-arrow"></i>
+                    </a>
+                    <a href="#categories" class="tab-link nav-mobile-link" data-tab="categories">
+                        <i class="bi bi-tags-fill"></i> Manage Categories
+                        <i class="bi bi-chevron-right chevron-arrow"></i>
+                    </a>
+                    <a href="#packages" class="tab-link nav-mobile-link" data-tab="packages">
+                        <i class="bi bi-box-seam-fill"></i> Membership Packages
+                        <i class="bi bi-chevron-right chevron-arrow"></i>
+                    </a>
+                    <a href="#invoices" class="tab-link nav-mobile-link" data-tab="invoices">
+                        <i class="bi bi-receipt-cutoff"></i> Invoices & Billing
+                        <i class="bi bi-chevron-right chevron-arrow"></i>
+                    </a>
+                    <a href="#payments" class="tab-link nav-mobile-link" data-tab="payments">
+                        <i class="bi bi-wallet2"></i> Talent Payments
+                        <i class="bi bi-chevron-right chevron-arrow"></i>
+                    </a>
+
+                    <div class="drawer-section-label">MANAGEMENT & SYSTEM</div>
+                    <a href="#settings" class="tab-link nav-mobile-link" data-tab="settings">
+                        <i class="bi bi-person-gear"></i> User Profile
+                        <i class="bi bi-chevron-right chevron-arrow"></i>
+                    </a>
+                    <a href="#staff" class="tab-link nav-mobile-link" data-tab="staff">
+                        <i class="bi bi-person-plus-fill"></i> Registered Staff
+                        <i class="bi bi-chevron-right chevron-arrow"></i>
+                    </a>
+                    <a href="#analytics" class="tab-link nav-mobile-link" data-tab="analytics">
+                        <i class="bi bi-graph-up-arrow"></i> Visitor Analytics
+                        <i class="bi bi-chevron-right chevron-arrow"></i>
+                    </a>
+                    <a href="#activity-logs" class="tab-link nav-mobile-link" data-tab="activity-logs">
+                        <i class="bi bi-journal-text"></i> User Activity Logs
+                        <i class="bi bi-chevron-right chevron-arrow"></i>
+                    </a>
+
+                    <div class="drawer-section-label">SUPPORT & DIRECTORY</div>
+                    <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link">
+                        <i class="bi bi-life-preserver"></i> Support Issues & Tickets
+                    </a>
+                    <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link">
+                        <i class="bi bi-shield-slash-fill"></i> Blocked Accounts
+                    </a>
+                    <a href="{{ route('customer-care.dashboard') }}#requests" class="nav-mobile-link">
+                        <i class="bi bi-person-check-fill"></i> Contact Requests
+                    </a>
+                    <a href="{{ route('customer-care.dashboard') }}#payments" class="nav-mobile-link">
+                        <i class="bi bi-wallet2"></i> Talent Payment Requests
+                    </a>
+                    <a href="{{ route('home') }}" class="nav-mobile-link">
+                        <i class="bi bi-house-door-fill"></i> {{ __('Home Directory') }}
+                    </a>
+                    @elseif(Request::is('customer-care*'))
+                    <div class="drawer-section-label">OPERATIONS & SUPPORT</div>
+                    <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link cc-tab-link active" data-cctab="tickets">
+                        <i class="bi bi-life-preserver"></i> Support Issues & Tickets
+                    </a>
+                    <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link cc-tab-link" data-cctab="blocked">
+                        <i class="bi bi-shield-slash-fill"></i> Blocked Accounts & Login
+                    </a>
+                    <a href="{{ route('customer-care.dashboard') }}#talents" class="nav-mobile-link cc-tab-link" data-cctab="talents">
+                        <i class="bi bi-people-fill"></i> Talents Directory & Q&A
+                    </a>
+                    <a href="{{ route('customer-care.dashboard') }}#requests" class="nav-mobile-link cc-tab-link" data-cctab="requests">
+                        <i class="bi bi-person-check-fill"></i> Guest Contact Requests
+                    </a>
+                    <a href="{{ route('customer-care.dashboard') }}#payments" class="nav-mobile-link cc-tab-link" data-cctab="payments">
+                        <i class="bi bi-wallet2"></i> Talent Payment Requests
+                    </a>
+
+                    <div class="drawer-section-label">NAVIGATION</div>
+                    @if(auth()->user()->role === 'admin')
+                    <a href="{{ route('admin.dashboard') }}" class="nav-mobile-link">
+                        <i class="bi bi-speedometer2"></i> Super Admin Panel
+                    </a>
+                    @endif
+                    <a href="{{ route('home') }}" class="nav-mobile-link">
+                        <i class="bi bi-house-door-fill"></i> {{ __('Home Directory') }}
+                    </a>
+                    @else
+                    <div class="drawer-section-label">MAIN CONTROL</div>
+                    <a href="{{ route('home') }}" class="nav-mobile-link">
+                        <i class="bi bi-house-door-fill"></i> {{ __('Home') }}
+                    </a>
+                    <a href="{{ route('customer-care.dashboard') }}" class="nav-mobile-link">
+                        <i class="bi bi-headset"></i> Support Portal
+                    </a>
+                    @if(auth()->user()->role === 'admin')
+                    <a href="{{ route('admin.dashboard') }}" class="nav-mobile-link">
+                        <i class="bi bi-speedometer2"></i> Admin Dashboard
+                    </a>
+                    @endif
+                    @endif
+                    @else
+                    <!-- REGULAR USER / TALENT SIDEBAR LINKS -->
+                    <div class="drawer-section-label">MAIN NAVIGATION</div>
+                    <a href="{{ route('home') }}" class="nav-mobile-link {{ Request::routeIs('home') ? 'active' : '' }}">
+                        <i class="bi bi-house-door-fill"></i> {{ __('Home') }}
+                    </a>
+                    <a href="{{ route('dashboard') }}" class="nav-mobile-link {{ Request::routeIs('dashboard') ? 'active' : '' }}">
+                        <i class="bi bi-speedometer2"></i> {{ __('Dashboard') }}
+                    </a>
+
+                    <div class="drawer-section-label">PORTFOLIO CONTENT</div>
+                    <a href="{{ route('dashboard.photos') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.photos') ? 'active' : '' }}">
+                        <i class="bi bi-camera-fill"></i> {{ __('Photos') }}
+                    </a>
+                    <a href="{{ route('dashboard.videos') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.videos') ? 'active' : '' }}">
+                        <i class="bi bi-camera-video-fill"></i> {{ __('Videos') }}
+                    </a>
+                    <a href="{{ route('dashboard.news') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.news') ? 'active' : '' }}">
+                        <i class="bi bi-newspaper"></i> Manage News
+                    </a>
+                    <a href="{{ route('dashboard.comments') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.comments') ? 'active' : '' }}">
+                        <i class="bi bi-chat-left-text-fill"></i> {{ __('Comments') }}
+                    </a>
+                    @endif
+
+                    <div class="drawer-section-label">ACCOUNT</div>
+                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-mobile-link" style="color: #fca5a5 !important;">
+                        <i class="bi bi-box-arrow-right" style="color: #ef4444;"></i> {{ __('Logout') }}
+                    </a>
+                    @else
+                    <!-- GUEST USER NAVIGATION -->
+                    <div class="drawer-section-label">MAIN MENU</div>
+                    <a href="{{ route('home') }}" class="nav-mobile-link {{ Request::routeIs('home') ? 'active' : '' }}">
+                        <i class="bi bi-house-door-fill"></i> {{ __('Home') }}
+                    </a>
+
+                    <div class="drawer-section-label">ACCOUNT ACCESS</div>
+                    <a href="{{ route('login') }}" class="nav-mobile-link {{ Request::routeIs('login') ? 'active' : '' }}">
+                        <i class="bi bi-box-arrow-in-right"></i> {{ __('Login') }}
+                    </a>
+                    <a href="{{ route('register') }}" class="nav-mobile-link {{ Request::routeIs('register') ? 'active' : '' }}">
+                        <i class="bi bi-person-plus-fill"></i> {{ __('Register') }}
+                    </a>
+                    @endauth
+
+                    <div class="drawer-section-label">CONTACT US</div>
+                    <a href="tel:0710383352" class="nav-mobile-link">
+                        <i class="bi bi-telephone-fill" style="color: #38bdf8;"></i> Call: 0710383352
+                    </a>
+                    <a href="https://wa.me/255710383352" target="_blank" class="nav-mobile-link">
+                        <i class="bi bi-whatsapp" style="color: #34d399;"></i> WhatsApp: 0710383352
+                    </a>
+                </div>
+            </div>
+
+            <!-- Drawer Footer (User Profile & Quick Actions as in Picture 1) -->
+            <div class="drawer-footer">
+                @auth
+                <div class="drawer-user-info">
+                    <div class="drawer-avatar">
+                        @if(auth()->user()->profile_image)
+                        <img src="{{ asset(auth()->user()->profile_image) }}" alt="{{ auth()->user()->name }}">
+                        @else
+                        <i class="bi bi-person-circle"></i>
+                        @endif
+                    </div>
+                    <div class="drawer-user-text">
+                        <span class="drawer-user-name">{{ auth()->user()->name }}</span>
+                        <span class="drawer-user-email">{{ auth()->user()->email }}</span>
+                    </div>
+                </div>
+                <div class="drawer-footer-actions">
+                    <a href="{{ route('dashboard') }}" class="drawer-action-btn" title="Account Settings">
+                        <i class="bi bi-gear-fill"></i>
+                    </a>
+                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="drawer-action-btn drawer-action-logout" title="Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                    </a>
+                </div>
+                @else
+                <div class="drawer-user-info">
+                    <div class="drawer-avatar">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <div class="drawer-user-text">
+                        <span class="drawer-user-name">Welcome Guest</span>
+                        <span class="drawer-user-email">ChapConnect Portal</span>
+                    </div>
+                </div>
+                <div class="drawer-footer-actions">
+                    <a href="{{ route('login') }}" class="drawer-action-btn" title="Login">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                    </a>
+                </div>
+                @endauth
+            </div>
+        </div>
+    </nav>
     </nav>
 
     <!-- Global Floating Notification Alerts Container -->
@@ -312,7 +481,7 @@
             <div class="admin-sidebar-header">
                 <div class="sidebar-user-avatar">
                     @if(auth()->user()->profile_image)
-                    <img src="{{ asset(auth()->user()->profile_image) }}" alt="{{ auth()->user()->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+                    <img src="{{ asset(auth()->user()->profile_image) }}" alt="{{ auth()->user()->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 10px;">
                     @else
                     <i class="bi bi-person-circle"></i>
                     @endif
@@ -555,10 +724,12 @@
             animation: slideInNotif 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             transition: transform 0.2s, box-shadow 0.2s;
         }
+
         .live-instant-toast:hover {
             transform: translateY(-2px);
             box-shadow: 0 14px 35px rgba(15, 23, 42, 0.22);
         }
+
         .live-toast-icon {
             width: 38px;
             height: 38px;
@@ -572,14 +743,31 @@
             flex-shrink: 0;
             animation: notifPulse 1.8s infinite ease-in-out;
         }
+
         @keyframes slideInNotif {
-            from { opacity: 0; transform: translateX(50px) scale(0.95); }
-            to { opacity: 1; transform: translateX(0) scale(1); }
+            from {
+                opacity: 0;
+                transform: translateX(50px) scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
         }
+
         @keyframes notifPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
     </style>
 
@@ -592,7 +780,11 @@
     <audio id="chapconnect-notification-audio" src="{{ $notifSoundUrl }}" preload="auto"></audio>
 
     <script>
-        const isNotificationSoundEnabled = {{ $soundEnabled ? 'true' : 'false' }};
+        const isNotificationSoundEnabled = {
+            {
+                $soundEnabled ? 'true' : 'false'
+            }
+        };
         let audioContext = null;
         let audioUnlocked = false;
 
@@ -666,7 +858,7 @@
                 osc2.start(now + 0.1);
                 osc2.stop(now + 0.75);
                 console.log('[Notification Engine] WebAudio synthesizer chime played.');
-            } catch(e) {
+            } catch (e) {
                 console.warn('[Notification Engine] Synthesis play error:', e);
             }
         }
@@ -675,7 +867,7 @@
             try {
                 const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
                 if (!AudioCtxClass) return;
-                
+
                 const ctx = audioContext || new AudioCtxClass();
                 audioContext = ctx;
 
@@ -764,7 +956,7 @@
             try {
                 const stored = sessionStorage.getItem('chapconnect_alerted_notifs');
                 return stored ? new Set(JSON.parse(stored)) : new Set();
-            } catch(e) {
+            } catch (e) {
                 return new Set();
             }
         }
@@ -772,7 +964,7 @@
         function persistAlertedNotifIds(setObj) {
             try {
                 sessionStorage.setItem('chapconnect_alerted_notifs', JSON.stringify(Array.from(setObj)));
-            } catch(e) {}
+            } catch (e) {}
         }
 
         let knownNotifIds = getAlertedNotifIds();
@@ -789,17 +981,20 @@
                         fetchNotifications();
                     }
                 };
-            } catch(e) {}
+            } catch (e) {}
         }
 
         // Global helper to trigger instant 0ms alert in all open tabs
         window.broadcastNotificationAlert = function() {
             try {
                 if (notificationChannel) {
-                    notificationChannel.postMessage({ type: 'REFRESH_NOTIFICATIONS', time: Date.now() });
+                    notificationChannel.postMessage({
+                        type: 'REFRESH_NOTIFICATIONS',
+                        time: Date.now()
+                    });
                 }
                 localStorage.setItem('chapconnect_alert_broadcast', Date.now());
-            } catch(e) {}
+            } catch (e) {}
         };
 
         // Also listen to localStorage changes across browser windows
@@ -833,7 +1028,7 @@
                         $badge.text(count).show();
                         if (brandNewItems.length > 0) {
                             console.log('[Notification Engine] 🔔 ALERT TRIGGERED! Playing sound & toast instantly for:', brandNewItems);
-                            
+
                             // 1. Play sound immediately (including on login)
                             window.triggerNotificationSound();
 
@@ -939,8 +1134,16 @@
 
                     var textToType = @json($welcomeText);
                     var charIndex = 0;
-                    var typingSpeed = {{ max(15, (int) $welcomeSpeed) }};
-                    var welcomeDelay = {{ max(0, (int) $welcomeDelay) }};
+                    var typingSpeed = {
+                        {
+                            max(15, (int) $welcomeSpeed)
+                        }
+                    };
+                    var welcomeDelay = {
+                        {
+                            max(0, (int) $welcomeDelay)
+                        }
+                    };
                     var welcomeSoundUrl = @json($welcomeSoundUrl);
 
                     var audioInstance = audioEl || (welcomeSoundUrl ? new Audio(welcomeSoundUrl) : null);
@@ -997,10 +1200,19 @@
                     }
 
                     ['mousemove', 'pointermove', 'mouseover', 'touchstart', 'pointerdown', 'click', 'keydown'].forEach(function(evt) {
-                        window.addEventListener(evt, triggerUserInteractionSound, { passive: true, once: false });
-                        document.addEventListener(evt, triggerUserInteractionSound, { passive: true, once: false });
+                        window.addEventListener(evt, triggerUserInteractionSound, {
+                            passive: true,
+                            once: false
+                        });
+                        document.addEventListener(evt, triggerUserInteractionSound, {
+                            passive: true,
+                            once: false
+                        });
                         if (loaderOverlay) {
-                            loaderOverlay.addEventListener(evt, triggerUserInteractionSound, { passive: true, once: false });
+                            loaderOverlay.addEventListener(evt, triggerUserInteractionSound, {
+                                passive: true,
+                                once: false
+                            });
                         }
                     });
 
@@ -1119,7 +1331,9 @@
             if (banner) {
                 banner.style.display = 'none';
                 // Remember dismissal for this browser session only (clears on browser close)
-                try { sessionStorage.setItem('pwaBannerDismissed', '1'); } catch(e) {}
+                try {
+                    sessionStorage.setItem('pwaBannerDismissed', '1');
+                } catch (e) {}
             }
         }
 
@@ -1130,7 +1344,7 @@
                     const banner = document.getElementById('pwaInstallBanner');
                     if (banner) banner.style.display = 'none';
                 }
-            } catch(e) {}
+            } catch (e) {}
         });
 
         function closePwaGuideModal() {
@@ -1396,136 +1610,142 @@
 
     {{-- Global Video Playback Controller: Single video at a time + auto-pause on scroll --}}
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let activeVideoElement = null;
+        document.addEventListener('DOMContentLoaded', function() {
+            let activeVideoElement = null;
 
-        /**
-         * Pause a managed video element (iframe or HTML5 video).
-         */
-        function pauseVideo(el) {
-            if (!el) return;
-            const platform = el.getAttribute('data-platform');
+            /**
+             * Pause a managed video element (iframe or HTML5 video).
+             */
+            function pauseVideo(el) {
+                if (!el) return;
+                const platform = el.getAttribute('data-platform');
 
-            if (platform === 'local' && el.tagName === 'VIDEO') {
-                el.pause();
-            } else if (platform === 'youtube' && el.tagName === 'IFRAME') {
-                try {
-                    el.contentWindow.postMessage(JSON.stringify({event: 'command', func: 'pauseVideo', args: []}), '*');
-                } catch(e) {}
-            } else if (platform === 'vimeo' && el.tagName === 'IFRAME') {
-                try {
-                    el.contentWindow.postMessage(JSON.stringify({method: 'pause'}), '*');
-                } catch(e) {}
-            } else if (el.tagName === 'IFRAME') {
-                // For TikTok, Instagram, Facebook: reload iframe src to stop playback
-                const src = el.getAttribute('data-video-src') || el.src;
-                if (src && el.src !== '') {
-                    el.setAttribute('data-was-playing', 'true');
-                    el.src = '';
+                if (platform === 'local' && el.tagName === 'VIDEO') {
+                    el.pause();
+                } else if (platform === 'youtube' && el.tagName === 'IFRAME') {
+                    try {
+                        el.contentWindow.postMessage(JSON.stringify({
+                            event: 'command',
+                            func: 'pauseVideo',
+                            args: []
+                        }), '*');
+                    } catch (e) {}
+                } else if (platform === 'vimeo' && el.tagName === 'IFRAME') {
+                    try {
+                        el.contentWindow.postMessage(JSON.stringify({
+                            method: 'pause'
+                        }), '*');
+                    } catch (e) {}
+                } else if (el.tagName === 'IFRAME') {
+                    // For TikTok, Instagram, Facebook: reload iframe src to stop playback
+                    const src = el.getAttribute('data-video-src') || el.src;
+                    if (src && el.src !== '') {
+                        el.setAttribute('data-was-playing', 'true');
+                        el.src = '';
+                    }
                 }
             }
-        }
 
-        /**
-         * Resume a managed iframe by restoring its src.
-         */
-        function resumeIframe(el) {
-            if (!el || el.tagName !== 'IFRAME') return;
-            if (el.getAttribute('data-was-playing') === 'true') {
-                const originalSrc = el.getAttribute('data-video-src');
-                if (originalSrc && el.src !== originalSrc) {
-                    el.src = originalSrc;
+            /**
+             * Resume a managed iframe by restoring its src.
+             */
+            function resumeIframe(el) {
+                if (!el || el.tagName !== 'IFRAME') return;
+                if (el.getAttribute('data-was-playing') === 'true') {
+                    const originalSrc = el.getAttribute('data-video-src');
+                    if (originalSrc && el.src !== originalSrc) {
+                        el.src = originalSrc;
+                    }
+                    el.removeAttribute('data-was-playing');
                 }
-                el.removeAttribute('data-was-playing');
             }
-        }
 
-        /**
-         * Pause ALL other managed videos except the given element.
-         */
-        function pauseAllExcept(activeEl) {
-            document.querySelectorAll('.cc-managed-video').forEach(function(el) {
-                if (el !== activeEl) {
-                    pauseVideo(el);
-                }
-            });
-        }
-
-        // ── HTML5 <video> elements: single-play enforcement ──
-        document.querySelectorAll('video.cc-managed-video').forEach(function(video) {
-            video.addEventListener('play', function() {
-                pauseAllExcept(video);
-                activeVideoElement = video;
-            });
-        });
-
-        // ── Iframes: detect click to play (user interaction) ──
-        document.querySelectorAll('iframe.cc-managed-video').forEach(function(iframe) {
-            // Wrap each iframe in a click-detection overlay
-            const parent = iframe.parentElement;
-            if (!parent) return;
-
-            // Use a focus-based detection: when user clicks into iframe, it gains focus
-            iframe.addEventListener('mouseenter', function() {
-                // Mark this iframe as the one the user is interacting with
-                window.__ccHoveredIframe = iframe;
-            });
-            iframe.addEventListener('mouseleave', function() {
-                if (window.__ccHoveredIframe === iframe) {
-                    window.__ccHoveredIframe = null;
-                }
-            });
-        });
-
-        // Detect when an iframe gains focus (user clicked play inside it)
-        window.addEventListener('blur', function() {
-            setTimeout(function() {
-                if (window.__ccHoveredIframe && document.activeElement === document.body) {
-                    // An iframe just stole focus — this means user clicked play
-                    const clickedIframe = window.__ccHoveredIframe;
-                    pauseAllExcept(clickedIframe);
-                    activeVideoElement = clickedIframe;
-                }
-            }, 100);
-        });
-
-        // ── IntersectionObserver: auto-pause videos when scrolled out of view ──
-        if ('IntersectionObserver' in window) {
-            const videoObserver = new IntersectionObserver(function(entries) {
-                entries.forEach(function(entry) {
-                    const el = entry.target;
-                    if (!entry.isIntersecting) {
-                        // Video scrolled out of view — pause it
+            /**
+             * Pause ALL other managed videos except the given element.
+             */
+            function pauseAllExcept(activeEl) {
+                document.querySelectorAll('.cc-managed-video').forEach(function(el) {
+                    if (el !== activeEl) {
                         pauseVideo(el);
-                        if (activeVideoElement === el) {
-                            activeVideoElement = null;
-                        }
-                    } else {
-                        // Video scrolled back into view — restore iframe src if it was playing
-                        if (el.tagName === 'IFRAME') {
-                            resumeIframe(el);
-                        }
                     }
                 });
-            }, {
-                threshold: 0.15  // At least 15% visible to be considered "in view"
-            });
-
-            document.querySelectorAll('.cc-managed-video').forEach(function(el) {
-                videoObserver.observe(el);
-            });
-        }
-
-        // ── Page visibility: pause all when tab is hidden ──
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                document.querySelectorAll('.cc-managed-video').forEach(function(el) {
-                    pauseVideo(el);
-                });
-                activeVideoElement = null;
             }
+
+            // ── HTML5 <video> elements: single-play enforcement ──
+            document.querySelectorAll('video.cc-managed-video').forEach(function(video) {
+                video.addEventListener('play', function() {
+                    pauseAllExcept(video);
+                    activeVideoElement = video;
+                });
+            });
+
+            // ── Iframes: detect click to play (user interaction) ──
+            document.querySelectorAll('iframe.cc-managed-video').forEach(function(iframe) {
+                // Wrap each iframe in a click-detection overlay
+                const parent = iframe.parentElement;
+                if (!parent) return;
+
+                // Use a focus-based detection: when user clicks into iframe, it gains focus
+                iframe.addEventListener('mouseenter', function() {
+                    // Mark this iframe as the one the user is interacting with
+                    window.__ccHoveredIframe = iframe;
+                });
+                iframe.addEventListener('mouseleave', function() {
+                    if (window.__ccHoveredIframe === iframe) {
+                        window.__ccHoveredIframe = null;
+                    }
+                });
+            });
+
+            // Detect when an iframe gains focus (user clicked play inside it)
+            window.addEventListener('blur', function() {
+                setTimeout(function() {
+                    if (window.__ccHoveredIframe && document.activeElement === document.body) {
+                        // An iframe just stole focus — this means user clicked play
+                        const clickedIframe = window.__ccHoveredIframe;
+                        pauseAllExcept(clickedIframe);
+                        activeVideoElement = clickedIframe;
+                    }
+                }, 100);
+            });
+
+            // ── IntersectionObserver: auto-pause videos when scrolled out of view ──
+            if ('IntersectionObserver' in window) {
+                const videoObserver = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        const el = entry.target;
+                        if (!entry.isIntersecting) {
+                            // Video scrolled out of view — pause it
+                            pauseVideo(el);
+                            if (activeVideoElement === el) {
+                                activeVideoElement = null;
+                            }
+                        } else {
+                            // Video scrolled back into view — restore iframe src if it was playing
+                            if (el.tagName === 'IFRAME') {
+                                resumeIframe(el);
+                            }
+                        }
+                    });
+                }, {
+                    threshold: 0.15 // At least 15% visible to be considered "in view"
+                });
+
+                document.querySelectorAll('.cc-managed-video').forEach(function(el) {
+                    videoObserver.observe(el);
+                });
+            }
+
+            // ── Page visibility: pause all when tab is hidden ──
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    document.querySelectorAll('.cc-managed-video').forEach(function(el) {
+                        pauseVideo(el);
+                    });
+                    activeVideoElement = null;
+                }
+            });
         });
-    });
     </script>
 
     @yield('scripts')

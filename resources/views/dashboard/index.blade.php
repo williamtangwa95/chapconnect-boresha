@@ -12,7 +12,7 @@
             <div class="dashboard-welcome" style="display: flex; align-items: center; gap: 20px;">
                 <div class="dashboard-avatar" style="width: 70px; height: 70px; border-radius: 50%; overflow: hidden; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); display: flex; align-items: center; justify-content: center; font-size: 28px; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.4); flex-shrink: 0;">
                     @if($user->profile_image)
-                    <img src="{{ asset($user->profile_image) }}" alt="{{ $user->name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="{{ asset($user->profile_image) }}" alt="{{ $user->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
                     @else
                     <i class="bi bi-shield-lock-fill"></i>
                     @endif

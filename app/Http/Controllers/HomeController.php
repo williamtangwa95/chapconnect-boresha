@@ -12,9 +12,10 @@ class HomeController extends Controller
         $search = $request->input('search');
         $category = $request->input('category');
 
-        // Query only regular users that have published their profiles
+        // Query only regular users that have published their profiles (eager load activeSubscription.package to eliminate N+1 queries)
         $query = User::where('role', 'user')
             ->where('is_published', true)
+            ->with(['activeSubscription.package'])
             ->withCount(['likesReceived', 'followersReceived', 'commentsReceived']);
 
         if ($category && $category !== 'all') {
@@ -29,7 +30,9 @@ class HomeController extends Controller
             });
         }
 
-        $talents = $query->latest()->get();
+        // Paginate profiles (12 per page) preserving query parameters
+        $talents = $query->latest()->paginate(12)->withQueryString();
+
         $currentUser = auth()->user();
         $isStaff = $currentUser && in_array($currentUser->role, ['admin', 'customer_care', 'staff']);
         if (!$isStaff) {
@@ -40,15 +43,19 @@ class HomeController extends Controller
             }
         }
 
-        // Count published talents per category
-        $categoryCounts = User::where('role', 'user')->where('is_published', true)
-            ->groupBy('category')
-            ->selectRaw('category, count(*) as count')
-            ->pluck('count', 'category')
-            ->toArray();
+        // Cache category counts for 10 minutes to eliminate repetitive GROUP BY queries
+        $categoryCounts = \Illuminate\Support\Facades\Cache::remember('home_category_counts', 600, function() {
+            return User::where('role', 'user')->where('is_published', true)
+                ->groupBy('category')
+                ->selectRaw('category, count(*) as count')
+                ->pluck('count', 'category')
+                ->toArray();
+        });
 
-        // Count total published talents
-        $totalTalents = User::where('role', 'user')->where('is_published', true)->count();
+        // Cache total talent count for 10 minutes
+        $totalTalents = \Illuminate\Support\Facades\Cache::remember('home_total_talents', 600, function() {
+            return User::where('role', 'user')->where('is_published', true)->count();
+        });
 
         // Sort categories by talent count descending (most popular first)
         $allCategories = AuthController::categories();
@@ -65,7 +72,7 @@ class HomeController extends Controller
         })
         ->with('user')
         ->latest()
-        ->take(10)
+        ->take(20)
         ->get();
 
         return view('home', [

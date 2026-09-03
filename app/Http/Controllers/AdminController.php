@@ -683,7 +683,7 @@ $media->delete();
             'site_instagram' => 'nullable|url|max:255',
             'site_tiktok' => 'nullable|url|max:255',
             'site_youtube' => 'nullable|url|max:255',
-            'site_logo_file' => 'nullable|image|mimes:png,jpg,jpeg,webp,svg|max:5120',
+            'site_logo_file' => 'nullable|image|mimes:png,jpg,jpeg,webp|max:5120',
             'payment_likes_required' => 'nullable|integer|min:0',
             'payment_followers_required' => 'nullable|integer|min:0',
             'payment_comments_required' => 'nullable|integer|min:0',

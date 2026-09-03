@@ -49,19 +49,18 @@
 
                 <!-- File Selection -->
                 <div class="form-group">
-                    <label for="photo" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Select Portfolio Image File *</label>
-                    <input type="file" id="photo" name="photo" class="form-control" accept="image/*" required style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.88rem; width: 100%;">
-                    <p style="font-size: 0.76rem; color: #64748b; margin-top: 4px;">Formats: JPEG, PNG, JPG, GIF, WEBP, HEIC. Max 15MB.</p>
+                    <label for="photos" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Select Portfolio Image File(s) * (Multiple allowed)</label>
+                    <input type="file" id="photos" name="photos[]" class="form-control" accept="image/*" multiple required style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.88rem; width: 100%;">
+                    <p style="font-size: 0.76rem; color: #64748b; margin-top: 4px;">Formats: JPEG, PNG, JPG, GIF, WEBP, HEIC. Max 15MB per file. You can select multiple images.</p>
                     <div id="photoSizeAlert" style="display: none; margin-top: 6px; font-size: 0.82rem; font-weight: 600;"></div>
 
-                    <!-- Live Image Preview Box -->
-                    <div id="imagePreviewContainer" style="display: none; margin-top: 15px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 15px; width: fit-content;">
-                        <div style="font-weight: 700; font-size: 0.82rem; color: #475569; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-                            <i class="bi bi-eye-fill" style="color: #6366f1;"></i> Selected Image Live Preview
+                    <!-- Live Multi-Image Preview Box -->
+                    <div id="imagePreviewContainer" style="display: none; margin-top: 15px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 15px; width: 100%;">
+                        <div style="font-weight: 700; font-size: 0.82rem; color: #475569; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
+                            <span><i class="bi bi-eye-fill" style="color: #6366f1;"></i> Selected Image(s) Live Preview</span>
+                            <span id="selectedCountBadge" style="font-size: 0.75rem; background: rgba(99,102,241,0.1); color: #6366f1; padding: 2px 8px; border-radius: 10px; font-weight: 700;">0 selected</span>
                         </div>
-                        <div style="position: relative; width: 200px; height: 200px; border-radius: 10px; overflow: hidden; border: 2px solid #6366f1; box-shadow: 0 4px 15px rgba(99,102,241,0.25); background: #f8fafc;">
-                            <img id="imagePreview" src="" alt="Photo Preview" style="width: 100%; height: 100%; object-fit: cover;">
-                        </div>
+                        <div id="multiPreviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; max-height: 320px; overflow-y: auto; padding: 5px;"></div>
                     </div>
                 </div>
             </div>
@@ -81,7 +80,7 @@
             @forelse($photos as $photo)
                 <div class="photo-item" style="border-radius: 14px; overflow: hidden; position: relative; border: 1px solid #e2e8f0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); background: #ffffff; display: flex; flex-direction: column;">
                     <div style="width: 100%; aspect-ratio: 4/3; overflow: hidden; position: relative; background: #0f172a;">
-                        <img src="{{ asset($photo->file_path) }}" alt="{{ $photo->title ?? 'Portfolio Asset' }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        <img src="{{ asset($photo->file_path) }}" alt="{{ $photo->title ?? 'Portfolio Asset' }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
                         
                         <div style="position: absolute; top: 10px; right: 10px; z-index: 2; display: flex; gap: 6px;">
                             <button type="button" onclick="openEditPhotoModal({{ $photo->id }}, '{{ addslashes($photo->title ?? '') }}', '{{ addslashes($photo->content ?? '') }}', '{{ asset($photo->file_path) }}')" style="padding: 6px 12px; border-radius: 8px; font-size: 0.76rem; font-weight: 700; background: rgba(99,102,241,0.9); color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; backdrop-filter: blur(4px); box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
@@ -179,22 +178,43 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const photoInput = document.getElementById('photo');
+        const photoInput = document.getElementById('photos') || document.getElementById('photo');
         const previewContainer = document.getElementById('imagePreviewContainer');
-        const previewImage = document.getElementById('imagePreview');
+        const multiPreviewGrid = document.getElementById('multiPreviewGrid');
+        const selectedCountBadge = document.getElementById('selectedCountBadge');
         const photoSizeAlert = document.getElementById('photoSizeAlert');
         const btnSubmitPhoto = document.getElementById('btnSubmitPhoto');
         const formPhotoUpload = document.getElementById('formPhotoUpload');
 
         if (photoInput) {
             photoInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-                    if (file.size > 15 * 1024 * 1024) {
+                const files = Array.from(e.target.files);
+                if (files && files.length > 0) {
+                    let hasOversized = false;
+                    multiPreviewGrid.innerHTML = '';
+                    selectedCountBadge.textContent = `${files.length} selected`;
+
+                    files.forEach(file => {
+                        if (file.size > 15 * 1024 * 1024) {
+                            hasOversized = true;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = function(evt) {
+                            const card = document.createElement('div');
+                            card.style.cssText = 'position: relative; width: 100px; height: 100px; border-radius: 8px; overflow: hidden; border: 2px solid #6366f1; background: #f8fafc; flex-shrink: 0;';
+                            card.innerHTML = `<img src="${evt.target.result}" style="width: 100%; height: 100%; object-fit: cover;" alt="Preview">`;
+                            multiPreviewGrid.appendChild(card);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+
+                    previewContainer.style.display = 'block';
+
+                    if (hasOversized) {
                         photoSizeAlert.style.display = 'block';
                         photoSizeAlert.style.color = '#ef4444';
-                        photoSizeAlert.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Selected image (${sizeMB} MB) exceeds the 15MB maximum size. Please choose a smaller photo.`;
+                        photoSizeAlert.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> One or more selected images exceed the 15MB maximum size. Please choose smaller photos.`;
                         btnSubmitPhoto.disabled = true;
                         btnSubmitPhoto.style.opacity = '0.6';
                     } else {
@@ -202,16 +222,9 @@
                         btnSubmitPhoto.disabled = false;
                         btnSubmitPhoto.style.opacity = '1';
                     }
-
-                    const reader = new FileReader();
-                    reader.onload = function(evt) {
-                        previewImage.src = evt.target.result;
-                        previewContainer.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
                 } else {
                     previewContainer.style.display = 'none';
-                    previewImage.src = '';
+                    multiPreviewGrid.innerHTML = '';
                     if (photoSizeAlert) photoSizeAlert.style.display = 'none';
                     if (btnSubmitPhoto) btnSubmitPhoto.disabled = false;
                 }
@@ -222,7 +235,7 @@
             formPhotoUpload.addEventListener('submit', function() {
                 if (!btnSubmitPhoto.disabled) {
                     btnSubmitPhoto.disabled = true;
-                    btnSubmitPhoto.innerHTML = `<i class="bi bi-hourglass-split"></i> Uploading &amp; Optimizing Image...`;
+                    btnSubmitPhoto.innerHTML = `<i class="bi bi-hourglass-split"></i> Uploading &amp; Optimizing Image(s)...`;
                     btnSubmitPhoto.style.opacity = '0.7';
                 }
             });

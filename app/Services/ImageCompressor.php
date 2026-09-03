@@ -35,6 +35,15 @@ class ImageCompressor
         }
 
         $mime = strtolower($file->getMimeType() ?? '');
+        $ext = strtolower($file->getClientOriginalExtension() ?? '');
+
+        // Strictly reject SVG, XML, HTML, or executable script formats for security
+        if (
+            str_contains($mime, 'svg') || str_contains($mime, 'xml') || str_contains($mime, 'html') ||
+            in_array($ext, ['svg', 'svgz', 'xml', 'html', 'htm', 'php', 'phtml', 'phar', 'exe', 'sh', 'bat'])
+        ) {
+            throw new \InvalidArgumentException('SVG, XML, HTML, and script formats are strictly prohibited for security reasons.');
+        }
 
         // Create GD image resource based on file type
         $sourceImage = match ($mime) {
@@ -46,9 +55,9 @@ class ImageCompressor
             default => null,
         };
 
-        // Fallback: If GD fails to read, fallback to standard store
+        // If GD fails to decode a valid raster image, reject instead of storing raw unverified file
         if (!$sourceImage) {
-            return $file->store($folder, 'public');
+            throw new \InvalidArgumentException('The file is not a valid or supported raster image (JPEG, PNG, WEBP, GIF, BMP).');
         }
 
         // Auto-orient mobile camera photos using EXIF metadata if available

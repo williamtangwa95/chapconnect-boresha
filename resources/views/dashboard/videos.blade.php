@@ -61,8 +61,8 @@
 
                     <!-- File Input -->
                     <div class="form-group">
-                        <label for="video" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Select Video File *</label>
-                        <input type="file" id="video" name="video" class="form-control" accept="video/*" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.88rem; width: 100%;">
+                        <label for="videos" style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Select Video File(s) * (Multiple allowed)</label>
+                        <input type="file" id="videos" name="videos[]" class="form-control" accept="video/*" multiple style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.88rem; width: 100%;">
                         <div id="videoFileStatus" style="display: none; margin-top: 8px; font-size: 0.82rem; font-weight: 600;"></div>
                     </div>
                 </div>
@@ -233,7 +233,7 @@
         const tabUploadUrl = document.getElementById('tabUploadUrl');
         const formFileUpload = document.getElementById('formFileUpload');
         const formUrlUpload = document.getElementById('formUrlUpload');
-        const videoInput = document.getElementById('video');
+        const videoInput = document.getElementById('videos') || document.getElementById('video');
         const statusEl = document.getElementById('videoFileStatus');
         const videoUrlInput = document.getElementById('video_url');
         const videoUrlStatusEl = document.getElementById('videoUrlStatus');
@@ -363,28 +363,37 @@
             @endif
         }
 
-        // Client-side video file size check
+        // Client-side video file size check for multiple files
         if (videoInput && statusEl && btnSubmitFileUpload) {
             videoInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) {
+                const files = Array.from(e.target.files);
+                if (!files || files.length === 0) {
                     statusEl.style.display = 'none';
                     btnSubmitFileUpload.disabled = false;
                     return;
                 }
 
-                const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                let totalSize = 0;
+                let hasOversized = false;
+                files.forEach(f => {
+                    totalSize += f.size;
+                    if (f.size > 50 * 1024 * 1024) {
+                        hasOversized = true;
+                    }
+                });
+
+                const totalSizeMB = (totalSize / (1024 * 1024)).toFixed(1);
                 statusEl.style.display = 'block';
 
-                if (file.size > 50 * 1024 * 1024) {
+                if (hasOversized) {
                     statusEl.style.color = '#ef4444';
-                    statusEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Selected video file (${sizeMB} MB) exceeds the 50MB maximum limit. Please select a smaller video clip or embed a YouTube link.`;
+                    statusEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> One or more selected video clips exceed the 50MB per-file limit. Please select smaller video clips.`;
                     btnSubmitFileUpload.disabled = true;
                     btnSubmitFileUpload.style.opacity = '0.6';
                     btnSubmitFileUpload.style.cursor = 'not-allowed';
                 } else {
                     statusEl.style.color = '#10b981';
-                    statusEl.innerHTML = `<i class="bi bi-check-circle-fill"></i> Selected video clip (${sizeMB} MB) is ready for upload.`;
+                    statusEl.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${files.length} video clip(s) (${totalSizeMB} MB total) ready for upload.`;
                     btnSubmitFileUpload.disabled = false;
                     btnSubmitFileUpload.style.opacity = '1';
                     btnSubmitFileUpload.style.cursor = 'pointer';

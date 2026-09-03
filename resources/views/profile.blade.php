@@ -198,7 +198,7 @@
                         @forelse($miniPhotos as $photo)
                         <div class="profile-photo-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; transition: transform 0.2s ease, box-shadow 0.2s ease;">
                             <div style="width: 100%; aspect-ratio: 4/3; overflow: hidden; position: relative; background: #0f172a; cursor: pointer;" onclick="openPhotoViewer('{{ asset($photo->file_path) }}', '{{ addslashes($photo->title ?: 'Portfolio Asset') }}', '{{ addslashes($photo->content ?: '') }}')">
-                                <img src="{{ asset($photo->file_path) }}" alt="{{ $photo->title ?: $talent->name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;">
+                                <img src="{{ asset($photo->file_path) }}" alt="{{ $photo->title ?: $talent->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.3s ease;">
                                 <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 6px;">
                                     <button type="button" onclick="event.stopPropagation(); openReportModal({{ $photo->id }});" title="{{ __('Report Inappropriate Content') }}" style="background: rgba(239, 68, 68, 0.85); backdrop-filter: blur(4px); padding: 4px 8px; border: none; border-radius: 12px; font-size: 0.72rem; font-weight: 700; color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;">
                                         <i class="bi bi-flag"></i>
@@ -318,7 +318,7 @@
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <div style="width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 1.5px solid #6366f1; flex-shrink: 0; background: #f1f5f9;">
                                             @if($talent->profile_image)
-                                            <img src="{{ asset($talent->profile_image) }}" alt="{{ $talent->name }}" style="width:100%; height:100%; object-fit:cover;">
+                                            <img src="{{ asset($talent->profile_image) }}" alt="{{ $talent->name }}" style="width:100%; height:100%; object-fit:cover; object-position: top center;">
                                             @else
                                             <i class="bi bi-person-fill" style="color: #64748b; margin: 4px; font-size: 0.8rem;"></i>
                                             @endif

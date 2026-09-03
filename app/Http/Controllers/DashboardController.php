@@ -196,22 +196,34 @@ class DashboardController extends Controller
         }
 
         if ($request->hasFile('profile_image')) {
+            $request->validate([
+                'profile_image' => 'file|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            ], [
+                'profile_image.image' => 'The profile image must be a valid image file (JPEG, PNG, JPG, GIF, or WEBP).',
+                'profile_image.mimes' => 'SVG and non-standard file formats are strictly prohibited.',
+                'profile_image.max'   => 'Profile image file size cannot exceed 10MB.',
+            ]);
+
             // Delete old profile image if it exists and is not a default stock URL
             if ($user->profile_image && !str_starts_with($user->profile_image, 'http')) {
                 $relativePath = str_replace('/storage/', '', $user->profile_image);
                 Storage::disk('public')->delete($relativePath);
             }
 
-            // Compress profile image to web-optimized WebP (800x800 max, 82% quality)
-            $path = ImageCompressor::compressAndStore(
-                $request->file('profile_image'),
-                'profiles',
-                800,
-                800,
-                82,
-                'webp'
-            );
-            $data['profile_image'] = '/storage/' . $path;
+            try {
+                // Compress profile image to web-optimized WebP (800x800 max, 82% quality)
+                $path = ImageCompressor::compressAndStore(
+                    $request->file('profile_image'),
+                    'profiles',
+                    800,
+                    800,
+                    82,
+                    'webp'
+                );
+                $data['profile_image'] = '/storage/' . $path;
+            } catch (\InvalidArgumentException $e) {
+                return redirect()->back()->withInput()->withErrors(['profile_image' => $e->getMessage()]);
+            }
         }
 
         $user->update($data);
@@ -236,72 +248,68 @@ class DashboardController extends Controller
     public function storePhoto(Request $request)
     {
         @ini_set('memory_limit', '512M');
+        @ini_set('max_execution_time', '300');
 
         /** @var \App\Models\User $user */
         $user = auth()->user();
         $limits = $user->currentPackageDetails();
         $photoCount = $user->media()->where('type', 'photo')->count();
-        if ($limits['max_images'] >= 0 && $photoCount >= $limits['max_images']) {
-            return redirect()->back()->withErrors(['photo' => "You have used {$photoCount} of {$limits['max_images']} allowed images. Upgrade your package to upload more images."]);
-        }
 
         // Catch POST body overflow (post_max_size exceeded)
         if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['photo' => 'The uploaded photo file is too large and exceeded the server payload limit. Please select an image under 15MB.']);
+                ->withErrors(['photos' => 'The uploaded file payload is too large and exceeded server upload limits. Please select smaller images under 15MB each.']);
         }
 
-        // Check if PHP upload limits were hit before Laravel validation
-        if ($request->file('photo')) {
-            $photoFile = $request->file('photo');
-            if (!$photoFile->isValid()) {
-                $errorCode = $photoFile->getError();
-                if ($errorCode === UPLOAD_ERR_INI_SIZE || $errorCode === UPLOAD_ERR_FORM_SIZE) {
-                    return redirect()->back()
-                        ->withInput()
-                        ->withErrors(['photo' => 'The photo file exceeds the server upload limit. Please select an image under 15MB.']);
-                }
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['photo' => 'Photo upload failed (' . $photoFile->getErrorMessage() . '). Please select another image.']);
-            }
+        // Support both array 'photos' and single file 'photo'
+        $files = [];
+        if ($request->hasFile('photos')) {
+            $files = is_array($request->file('photos')) ? $request->file('photos') : [$request->file('photos')];
+        } elseif ($request->hasFile('photo')) {
+            $files = [$request->file('photo')];
+        }
+
+        if (empty($files)) {
+            return redirect()->back()->withInput()->withErrors(['photos' => 'Please select at least one image file to upload.']);
+        }
+
+        $batchCount = count($files);
+        if ($limits['max_images'] >= 0 && ($photoCount + $batchCount) > $limits['max_images']) {
+            $remaining = max(0, $limits['max_images'] - $photoCount);
+            return redirect()->back()->withInput()->withErrors(['photos' => "Uploading {$batchCount} images exceeds your package limit ({$photoCount}/{$limits['max_images']} used). You can only upload {$remaining} more image(s)."]);
         }
 
         $request->validate([
-            'title'   => 'nullable|string|max:255',
-            'caption' => 'nullable|string|max:1000',
-            'photo'   => 'required|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:15360',
+            'title'    => 'nullable|string|max:255',
+            'caption'  => 'nullable|string|max:1000',
+            'photos'   => 'nullable|array',
+            'photos.*' => 'file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:15360',
+            'photo'    => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:15360',
         ], [
-            'photo.required' => 'Please select an image file to upload.',
-            'photo.image'    => 'The file must be a valid image (JPEG, PNG, JPG, GIF, WEBP, or HEIC).',
-            'photo.mimes'    => 'The photo must be a file of type: jpeg, png, jpg, gif, webp, heic, heif, bmp.',
-            'photo.max'      => 'The photo file size cannot exceed 15MB.',
-            'photo.uploaded' => 'The photo failed to upload. The image file may exceed server upload limits or was interrupted.',
+            'photos.*.image' => 'Each file must be a valid image format (JPEG, PNG, JPG, GIF, WEBP, or HEIC).',
+            'photos.*.mimes' => 'Each photo must be a file of type: jpeg, png, jpg, gif, webp, heic, heif, bmp.',
+            'photos.*.max'   => 'Individual photo file size cannot exceed 15MB.',
         ]);
 
-        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
-            // Run Automated Content Moderation (NSFW, Nudity & Prohibited Content Detection)
-            $moderation = ContentModerationService::checkImage(
-                $request->file('photo'),
-                $request->title,
-                $request->caption
-            );
+        $uploadedCount = 0;
+        $flaggedCount = 0;
 
-            // Compress portfolio photo to web-optimized WebP (1920x1920 max, 82% quality)
-            $path = ImageCompressor::compressAndStore(
-                $request->file('photo'),
-                'media/photos',
-                1920,
-                1920,
-                82,
-                'webp'
-            );
-            
+        foreach ($files as $file) {
+            if (!$file->isValid()) continue;
+
+            $moderation = ContentModerationService::checkImage($file, $request->title, $request->caption);
+
+            try {
+                $path = ImageCompressor::compressAndStore($file, 'media/photos', 1920, 1920, 82, 'webp');
+            } catch (\InvalidArgumentException $e) {
+                return redirect()->back()->withInput()->withErrors(['photos' => $e->getMessage()]);
+            }
+
             $status = $moderation['flagged'] ? 'flagged' : 'approved';
             $isVisible = !$moderation['flagged'];
 
-            auth()->user()->media()->create([
+            $user->media()->create([
                 'type'              => 'photo',
                 'title'             => $request->title,
                 'content'           => $request->caption,
@@ -312,25 +320,31 @@ class DashboardController extends Controller
                 'is_visible'        => $isVisible,
             ]);
 
+            $uploadedCount++;
             if ($moderation['flagged']) {
+                $flaggedCount++;
                 $staffMembers = User::whereIn('role', ['admin', 'customer_care'])->get();
                 foreach ($staffMembers as $staff) {
                     Notification::create([
                         'user_id' => $staff->id,
                         'type'    => 'nsfw_media_flagged',
                         'title'   => "⚠️ NSFW / Explicit Photo Auto-Flagged",
-                        'message' => "Talent '" . auth()->user()->name . "' uploaded a photo auto-flagged by moderation: " . $moderation['reason'],
-                        'link'    => route('admin.moderation.queue'),
+                        'message' => "Talent '" . $user->name . "' uploaded a photo auto-flagged by moderation: " . $moderation['reason'],
+                        'link'    => route('admin.moderation'),
                     ]);
                 }
-
-                return redirect()->route('dashboard.photos')->with('warning', __('Photo uploaded but flagged for review by our moderation system. It will remain hidden from the public until reviewed by an administrator.'));
             }
-
-            return redirect()->route('dashboard.photos')->with('success', __('Photo compressed & uploaded successfully.'));
         }
 
-        return redirect()->back()->withInput()->withErrors(['photo' => 'Failed to upload photo. Please select a valid image file.']);
+        if ($uploadedCount === 0) {
+            return redirect()->back()->withInput()->withErrors(['photos' => 'No valid images were processed.']);
+        }
+
+        if ($flaggedCount > 0) {
+            return redirect()->route('dashboard.photos')->with('warning', __("{$uploadedCount} photo(s) processed. {$flaggedCount} photo(s) flagged for admin review."));
+        }
+
+        return redirect()->route('dashboard.photos')->with('success', __("{$uploadedCount} photo(s) compressed & uploaded successfully."));
     }
 
     public function updatePhoto(Request $request, $id)
@@ -380,15 +394,19 @@ class DashboardController extends Controller
                 Storage::disk('public')->delete($relativePath);
             }
 
-            $path = ImageCompressor::compressAndStore(
-                $request->file('photo'),
-                'media/photos',
-                1920,
-                1920,
-                82,
-                'webp'
-            );
-            $data['file_path'] = '/storage/' . $path;
+            try {
+                $path = ImageCompressor::compressAndStore(
+                    $request->file('photo'),
+                    'media/photos',
+                    1920,
+                    1920,
+                    82,
+                    'webp'
+                );
+                $data['file_path'] = '/storage/' . $path;
+            } catch (\InvalidArgumentException $e) {
+                return redirect()->back()->withInput()->withErrors(['photo' => $e->getMessage()]);
+            }
         }
 
         $photo->update($data);
@@ -400,8 +418,7 @@ class DashboardController extends Controller
     {
         $photo = auth()->user()->media()->where('type', 'photo')->findOrFail($id);
 
-        // Delete from local disk
-        if (!str_starts_with($photo->file_path, 'http')) {
+        if ($photo->file_path && !str_starts_with($photo->file_path, 'http')) {
             $relativePath = str_replace('/storage/', '', $photo->file_path);
             Storage::disk('public')->delete($relativePath);
         }
@@ -430,15 +447,12 @@ class DashboardController extends Controller
         $user = auth()->user();
         $limits = $user->currentPackageDetails();
         $videoCount = $user->media()->where('type', 'video')->count();
-        if ($limits['max_videos'] >= 0 && $videoCount >= $limits['max_videos']) {
-            return redirect()->back()->withErrors(['video' => "You have used {$videoCount} of {$limits['max_videos']} allowed videos. Upgrade your package to upload more videos."]);
-        }
 
         // Catch POST body overflow (post_max_size exceeded)
         if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['video' => 'The video file is too large and exceeded server payload limits. Please upload a clip under 50MB or embed a YouTube link.']);
+                ->withErrors(['videos' => 'The uploaded video file is too large and exceeded server payload limits. Please upload clips under 50MB each or embed a YouTube link.']);
         }
 
         $request->validate([
@@ -452,8 +466,12 @@ class DashboardController extends Controller
         $reason = $textMod['flagged'] ? 'Explicit keywords detected in title/caption: ' . $textMod['matched'] : null;
         $isVisible = !$textMod['flagged'];
 
-        // 1. If Video URL is provided (must be YouTube)
+        // 1. If Video URL is provided (must be YouTube, TikTok, Vimeo, etc.)
         if ($request->filled('video_url')) {
+            if ($limits['max_videos'] >= 0 && $videoCount >= $limits['max_videos']) {
+                return redirect()->back()->withErrors(['videos' => "You have used {$videoCount} of {$limits['max_videos']} allowed videos. Upgrade your package to upload more videos."]);
+            }
+
             $cleaned = \App\Helpers\VideoHelper::cleanUrl($request->input('video_url'));
             $request->merge(['video_url' => $cleaned]);
 
@@ -506,47 +524,65 @@ class DashboardController extends Controller
                         'type'    => 'nsfw_media_flagged',
                         'title'   => "⚠️ Explicit Video Link Flagged",
                         'message' => "Talent '" . auth()->user()->name . "' added a video auto-flagged by moderation: " . ($reason ?? 'Explicit content'),
-                        'link'    => route('admin.moderation.queue'),
+                        'link'    => route('admin.moderation'),
                     ]);
                 }
 
                 return redirect()->route('dashboard.videos')->with('warning', __('Video added but flagged for review due to potentially inappropriate content. It will remain hidden from the public until reviewed.'));
             }
 
-            return redirect()->route('dashboard.videos')->with('success', 'YouTube video link added successfully to your portfolio.');
+            return redirect()->route('dashboard.videos')->with('success', 'Video link added successfully to your portfolio.');
         }
 
-        // 2. Check if video file upload was attempted but failed PHP ini limits before validation
-        if ($request->file('video')) {
-            $videoFile = $request->file('video');
-            if (!$videoFile->isValid()) {
-                $errorCode = $videoFile->getError();
-                if ($errorCode === UPLOAD_ERR_INI_SIZE || $errorCode === UPLOAD_ERR_FORM_SIZE) {
-                    return redirect()->back()
-                        ->withInput()
-                        ->withErrors(['video' => 'The video file exceeds the server upload limit. Please upload a smaller clip (under 50MB) or use a YouTube video link.']);
-                }
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['video' => 'Video upload failed: ' . $videoFile->getErrorMessage() . '. Please try another file or use a YouTube video link.']);
-            }
+        // 2. Process file uploads (batch `videos[]` or single `video`)
+        $files = [];
+        if ($request->hasFile('videos')) {
+            $files = is_array($request->file('videos')) ? $request->file('videos') : [$request->file('videos')];
+        } elseif ($request->hasFile('video')) {
+            $files = [$request->file('video')];
         }
 
-        // 3. File upload validation
+        if (empty($files)) {
+            return redirect()->back()->withInput()->withErrors(['videos' => 'Please select at least one video file to upload or enter a video link.']);
+        }
+
+        $batchCount = count($files);
+        if ($limits['max_videos'] >= 0 && ($videoCount + $batchCount) > $limits['max_videos']) {
+            $remaining = max(0, $limits['max_videos'] - $videoCount);
+            return redirect()->back()->withInput()->withErrors(['videos' => "Uploading {$batchCount} video clip(s) exceeds your package limit ({$videoCount}/{$limits['max_videos']} used). You can only upload {$remaining} more video clip(s)."]);
+        }
+
         $request->validate([
-            'video' => 'required_without:video_url|nullable|file|mimes:mp4,mov,avi,webm,ogg,mkv,3gp,flv,qt|max:51200', // up to 50MB
+            'videos'   => 'nullable|array',
+            'videos.*' => 'file|mimes:mp4,mov,avi,webm,ogg,mkv,3gp,flv,qt|max:51200',
+            'video'    => 'nullable|file|mimes:mp4,mov,avi,webm,ogg,mkv,3gp,flv,qt|max:51200',
         ], [
-            'video.required_without' => 'Please select a video file to upload or enter a YouTube video link.',
-            'video.file'             => 'The selected video file is invalid.',
-            'video.mimes'            => 'The video format must be: MP4, MOV, AVI, WEBM, OGG, MKV, or 3GP.',
-            'video.max'              => 'The video file size cannot exceed 50MB.',
-            'video.uploaded'         => 'The video file failed to upload. Please ensure the clip is under 50MB or use a YouTube video link.',
+            'videos.*.mimes' => 'The video format must be: MP4, MOV, AVI, WEBM, OGG, MKV, or 3GP.',
+            'videos.*.max'   => 'Individual video file size cannot exceed 50MB.',
         ]);
 
-        if ($request->hasFile('video') && $request->file('video')->isValid()) {
-            $path = $request->file('video')->store('media/videos', 'public');
+        $uploadedCount = 0;
+        $flaggedCount = 0;
+        $allowedExts = ['mp4', 'mov', 'avi', 'webm', 'ogg', 'mkv', '3gp', 'flv', 'qt'];
 
-            auth()->user()->media()->create([
+        foreach ($files as $videoFile) {
+            if (!$videoFile->isValid()) continue;
+
+            $mime = strtolower($videoFile->getMimeType() ?? '');
+            $ext = strtolower($videoFile->getClientOriginalExtension() ?? '');
+
+            if (
+                str_contains($mime, 'svg') || str_contains($mime, 'xml') || str_contains($mime, 'html') ||
+                in_array($ext, ['svg', 'svgz', 'xml', 'html', 'htm', 'php', 'phtml', 'phar', 'exe', 'sh', 'js', 'bat']) ||
+                !in_array($ext, $allowedExts)
+            ) {
+                return redirect()->back()->withInput()->withErrors(['videos' => 'One or more files have an invalid or prohibited video format.']);
+            }
+
+            $safeFilename = \Illuminate\Support\Str::random(40) . '.' . $ext;
+            $path = $videoFile->storeAs('media/videos', $safeFilename, 'public');
+
+            $user->media()->create([
                 'type'              => 'video',
                 'title'             => $request->title,
                 'content'           => $request->caption,
@@ -556,25 +592,31 @@ class DashboardController extends Controller
                 'is_visible'        => $isVisible,
             ]);
 
+            $uploadedCount++;
             if ($textMod['flagged']) {
+                $flaggedCount++;
                 $staffMembers = User::whereIn('role', ['admin', 'customer_care'])->get();
                 foreach ($staffMembers as $staff) {
                     Notification::create([
                         'user_id' => $staff->id,
                         'type'    => 'nsfw_media_flagged',
                         'title'   => "⚠️ NSFW / Explicit Video Auto-Flagged",
-                        'message' => "Talent '" . auth()->user()->name . "' uploaded a video auto-flagged by moderation: " . ($reason ?? 'Explicit content'),
-                        'link'    => route('admin.moderation.queue'),
+                        'message' => "Talent '" . $user->name . "' uploaded a video auto-flagged by moderation: " . ($reason ?? 'Explicit content'),
+                        'link'    => route('admin.moderation'),
                     ]);
                 }
-
-                return redirect()->route('dashboard.videos')->with('warning', __('Video file uploaded but flagged for moderation review. It will remain hidden until approved.'));
             }
-
-            return redirect()->route('dashboard.videos')->with('success', 'Video file uploaded successfully.');
         }
 
-        return redirect()->back()->withInput()->withErrors(['video' => 'Failed to process video upload. Please select a valid video file or enter a YouTube video link.']);
+        if ($uploadedCount === 0) {
+            return redirect()->back()->withInput()->withErrors(['videos' => 'No valid video files were processed.']);
+        }
+
+        if ($flaggedCount > 0) {
+            return redirect()->route('dashboard.videos')->with('warning', __("{$uploadedCount} video file(s) uploaded. {$flaggedCount} flagged for review."));
+        }
+
+        return redirect()->route('dashboard.videos')->with('success', __("{$uploadedCount} video file(s) uploaded successfully."));
     }
 
     public function updateVideo(Request $request, $id)
@@ -664,12 +706,32 @@ class DashboardController extends Controller
             ]);
 
             if ($videoFile->isValid()) {
+                $mime = strtolower($videoFile->getMimeType() ?? '');
+                $ext = strtolower($videoFile->getClientOriginalExtension() ?? '');
+
+                if (
+                    str_contains($mime, 'svg') || str_contains($mime, 'xml') || str_contains($mime, 'html') ||
+                    in_array($ext, ['svg', 'svgz', 'xml', 'html', 'htm', 'php', 'phtml', 'phar', 'exe', 'sh', 'js', 'bat'])
+                ) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['video' => 'SVG, HTML, XML, and executable formats are strictly prohibited for video uploads.']);
+                }
+
+                $allowedExts = ['mp4', 'mov', 'avi', 'webm', 'ogg', 'mkv', '3gp', 'flv', 'qt'];
+                if (!in_array($ext, $allowedExts)) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->withErrors(['video' => 'The video format must be: MP4, MOV, AVI, WEBM, OGG, MKV, or 3GP.']);
+                }
+
                 if ($video->file_path && !str_starts_with($video->file_path, 'http')) {
                     $relativePath = str_replace('/storage/', '', $video->file_path);
                     Storage::disk('public')->delete($relativePath);
                 }
 
-                $path = $videoFile->store('media/videos', 'public');
+                $safeFilename = \Illuminate\Support\Str::random(40) . '.' . $ext;
+                $path = $videoFile->storeAs('media/videos', $safeFilename, 'public');
                 $data['file_path'] = '/storage/' . $path;
             }
         }
@@ -722,15 +784,19 @@ class DashboardController extends Controller
 
         $filePath = null;
         if ($request->hasFile('image')) {
-            $path = ImageCompressor::compressAndStore(
-                $request->file('image'),
-                'media/news',
-                1200,
-                1200,
-                82,
-                'webp'
-            );
-            $filePath = '/storage/' . $path;
+            try {
+                $path = ImageCompressor::compressAndStore(
+                    $request->file('image'),
+                    'media/news',
+                    1200,
+                    1200,
+                    82,
+                    'webp'
+                );
+                $filePath = '/storage/' . $path;
+            } catch (\InvalidArgumentException $e) {
+                return redirect()->back()->withInput()->withErrors(['image' => $e->getMessage()]);
+            }
         }
 
         auth()->user()->media()->create([
@@ -776,15 +842,19 @@ class DashboardController extends Controller
                 Storage::disk('public')->delete($relativePath);
             }
 
-            $path = ImageCompressor::compressAndStore(
-                $request->file('image'),
-                'media/news',
-                1200,
-                1200,
-                82,
-                'webp'
-            );
-            $data['file_path'] = '/storage/' . $path;
+            try {
+                $path = ImageCompressor::compressAndStore(
+                    $request->file('image'),
+                    'media/news',
+                    1200,
+                    1200,
+                    82,
+                    'webp'
+                );
+                $data['file_path'] = '/storage/' . $path;
+            } catch (\InvalidArgumentException $e) {
+                return redirect()->back()->withInput()->withErrors(['image' => $e->getMessage()]);
+            }
         }
 
         $news->update($data);

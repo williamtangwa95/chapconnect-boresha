@@ -32,7 +32,7 @@
         <div class="photos-grid">
             @forelse($photos as $photo)
                 <div class="photo-item" style="position: relative; overflow: hidden; border-radius: 12px; group">
-                    <img src="{{ $photo->file_path }}" alt="{{ $talent->name }} Portfolio Photo" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="{{ $photo->file_path }}" alt="{{ $talent->name }} Portfolio Photo" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
                     <button type="button" onclick="openReportModal({{ $photo->id }})" title="{{ __('Report Inappropriate Content') }}" style="position: absolute; top: 8px; right: 8px; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.4); border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.75rem; transition: all 0.2s ease;">
                         <i class="bi bi-flag"></i>
                     </button>

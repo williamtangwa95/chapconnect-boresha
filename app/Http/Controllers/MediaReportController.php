@@ -72,7 +72,7 @@ class MediaReportController extends Controller
                 'type'    => 'content_moderation_report',
                 'title'   => "🚨 Content Reported: #{$media->id} ({$media->type})",
                 'message' => "Media item #{$media->id} by '{$media->user?->name}' was reported for '{$reasonLabel}'. Total reports: {$media->report_count}.",
-                'link'    => route('admin.moderation.queue'),
+                'link'    => route('admin.moderation'),
             ]);
         }
 

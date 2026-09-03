@@ -154,6 +154,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 // Automated Content Moderation & NSFW Review Routes (Accessible to both Super Admin and Customer Care)
 Route::middleware(['auth', 'customer_care'])->group(function () {
     Route::get('/admin/moderation', [AdminController::class, 'moderationQueue'])->name('admin.moderation');
+    Route::get('/admin/moderation/queue', [AdminController::class, 'moderationQueue'])->name('admin.moderation.queue');
     Route::post('/admin/moderation/{id}/approve', [AdminController::class, 'approveMedia'])->name('admin.moderation.approve');
     Route::post('/admin/moderation/{id}/reject', [AdminController::class, 'rejectMedia'])->name('admin.moderation.reject');
     Route::post('/admin/moderation/{id}/ban', [AdminController::class, 'banMediaOwner'])->name('admin.moderation.ban');
