@@ -182,8 +182,17 @@
                 </form>
                 @else
                 <a href="{{ route('home') }}" class="nav-btn nav-btn-home"><i class="bi bi-house-door-fill" style="color: #6366f1;"></i> {{ __('Home') }}</a>
+                @if(\App\Services\MaintenanceService::isFeatureRestricted('login'))
+                <a href="{{ route('login') }}" onclick="showMaintenanceNotice(event, '{{ addslashes(\App\Services\MaintenanceService::getMessage()) }}', 'Login'); return false;" class="nav-btn nav-btn-login" style="opacity: 0.85; border-color: rgba(245, 158, 11, 0.5);"><i class="bi bi-lock-fill" style="color: #f59e0b;"></i> {{ __('Login') }}</a>
+                @else
                 <a href="{{ route('login') }}" class="nav-btn nav-btn-login"><i class="bi bi-box-arrow-in-right"></i> {{ __('Login') }}</a>
+                @endif
+
+                @if(\App\Services\MaintenanceService::isFeatureRestricted('register'))
+                <a href="{{ route('register') }}" onclick="showMaintenanceNotice(event, '{{ addslashes(\App\Services\MaintenanceService::getMessage()) }}', 'Registration'); return false;" class="nav-btn nav-btn-register" style="opacity: 0.85; background: linear-gradient(135deg, #d97706 0%, #b45309 100%);"><i class="bi bi-lock-fill"></i> {{ __('Register') }}</a>
+                @else
                 <a href="{{ route('register') }}" class="nav-btn nav-btn-register"><i class="bi bi-person-plus-fill"></i> {{ __('Register') }}</a>
+                @endif
                 @endauth
             </div>
             @yield('search_bar')
@@ -361,12 +370,25 @@
                     </a>
 
                     <div class="drawer-section-label">ACCOUNT ACCESS</div>
+                    @if(\App\Services\MaintenanceService::isFeatureRestricted('login'))
+                    <a href="{{ route('login') }}" onclick="showMaintenanceNotice(event, '{{ addslashes(\App\Services\MaintenanceService::getMessage()) }}', 'Login'); return false;" class="nav-mobile-link {{ Request::routeIs('login') ? 'active' : '' }}" style="opacity: 0.85;">
+                        <i class="bi bi-lock-fill" style="color: #f59e0b;"></i> {{ __('Login') }} <span style="font-size: 0.68rem; background: #f59e0b; color: #fff; padding: 2px 6px; border-radius: 8px; margin-left: auto; font-weight: 800;">RESTRICTED</span>
+                    </a>
+                    @else
                     <a href="{{ route('login') }}" class="nav-mobile-link {{ Request::routeIs('login') ? 'active' : '' }}">
                         <i class="bi bi-box-arrow-in-right"></i> {{ __('Login') }}
                     </a>
+                    @endif
+
+                    @if(\App\Services\MaintenanceService::isFeatureRestricted('register'))
+                    <a href="{{ route('register') }}" onclick="showMaintenanceNotice(event, '{{ addslashes(\App\Services\MaintenanceService::getMessage()) }}', 'Registration'); return false;" class="nav-mobile-link {{ Request::routeIs('register') ? 'active' : '' }}" style="opacity: 0.85;">
+                        <i class="bi bi-lock-fill" style="color: #f59e0b;"></i> {{ __('Register') }} <span style="font-size: 0.68rem; background: #f59e0b; color: #fff; padding: 2px 6px; border-radius: 8px; margin-left: auto; font-weight: 800;">RESTRICTED</span>
+                    </a>
+                    @else
                     <a href="{{ route('register') }}" class="nav-mobile-link {{ Request::routeIs('register') ? 'active' : '' }}">
                         <i class="bi bi-person-plus-fill"></i> {{ __('Register') }}
                     </a>
+                    @endif
                     @endauth
 
                     <div class="drawer-section-label">CONTACT US</div>
@@ -414,9 +436,15 @@
                     </div>
                 </div>
                 <div class="drawer-footer-actions">
+                    @if(\App\Services\MaintenanceService::isFeatureRestricted('login'))
+                    <a href="{{ route('login') }}" onclick="showMaintenanceNotice(event, '{{ addslashes(\App\Services\MaintenanceService::getMessage()) }}', 'Login'); return false;" class="drawer-action-btn" title="Login (Restricted)">
+                        <i class="bi bi-lock-fill" style="color: #f59e0b;"></i>
+                    </a>
+                    @else
                     <a href="{{ route('login') }}" class="drawer-action-btn" title="Login">
                         <i class="bi bi-box-arrow-in-right"></i>
                     </a>
+                    @endif
                 </div>
                 @endauth
             </div>
@@ -595,6 +623,14 @@
                 </a>
 
                 <div class="sidebar-group-label">SETTINGS & PROFILES</div>
+                <a href="{{ Request::is('admin*') ? '#maintenance' : route('admin.dashboard') . '#maintenance' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="maintenance">
+                    <i class="bi bi-shield-lock-fill" style="color: #f59e0b;"></i> <span>System Maintenance</span>
+                    @if(\App\Services\MaintenanceService::getStatus() === 'ACTIVE')
+                    <span style="margin-left: auto; background: #ef4444; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 10px; text-transform: uppercase;">ACTIVE</span>
+                    @elseif(\App\Services\MaintenanceService::getStatus() === 'SCHEDULED')
+                    <span style="margin-left: auto; background: #3b82f6; color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 10px; text-transform: uppercase;">SCHEDULED</span>
+                    @endif
+                </a>
                 <a href="{{ Request::is('admin*') ? '#system-settings' : route('admin.dashboard') . '#system-settings' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="system-settings">
                     <i class="bi bi-gear-wide-connected"></i> <span>System Settings</span>
                 </a>
@@ -1746,6 +1782,62 @@
                 }
             });
         });
+    </script>
+
+    <script>
+        function showMaintenanceNotice(event, customMessage, featureName) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            if (typeof toggleMobileNav === 'function') {
+                const navMenu = document.getElementById("navIconMenu");
+                if (navMenu && navMenu.classList.contains("open")) {
+                    toggleMobileNav();
+                }
+            }
+
+            const msg = customMessage || 'Kwa sasa huduma hii imefungwa kwa muda kutokana na maboresho ya mfumo.';
+            const label = featureName ? featureName.toUpperCase() : 'MAINTENANCE';
+
+            let container = document.querySelector('.toast-alert-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.className = 'toast-alert-container';
+                document.body.appendChild(container);
+            }
+
+            const existingToasts = container.querySelectorAll('.maintenance-dynamic-toast');
+            existingToasts.forEach(t => t.remove());
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-alert toast-error auto-toast-item maintenance-dynamic-toast';
+            toast.style.cssText = 'background: #0f172a; border: 1px solid rgba(245, 158, 11, 0.6); color: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.5); font-family: system-ui, -apple-system, sans-serif; border-radius: 16px; padding: 18px 20px; z-index: 999999; animation: slideInRight 0.3s ease; width: 100%; max-width: 440px;';
+            
+            toast.innerHTML = `
+                <div style="display: flex; align-items: flex-start; gap: 14px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(245, 158, 11, 0.2); border: 1.5px solid #f59e0b; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                        <i class="bi bi-tools" style="color: #fbbf24; font-size: 1.2rem;"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <strong style="color: #fbbf24; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">
+                            HUDUMA HAPATIKANI KWA MUDA (${label})
+                        </strong>
+                        <p style="margin: 0; font-size: 0.88rem; line-height: 1.5; color: #e2e8f0; font-weight: 500;">${msg}</p>
+                    </div>
+                    <button type="button" onclick="dismissToast(this.closest('.toast-alert'))" style="background: rgba(255,255,255,0.1); border: none; color: #cbd5e1; border-radius: 50%; width: 28px; height: 28px; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-left: 8px; flex-shrink: 0;">&times;</button>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                if (toast && toast.parentElement) {
+                    dismissToast(toast);
+                }
+            }, 10000);
+        }
     </script>
 
     @yield('scripts')

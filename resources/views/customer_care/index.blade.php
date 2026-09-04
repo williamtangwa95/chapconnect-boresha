@@ -490,7 +490,12 @@
                                         }
                                     @endphp
 
-                                    <button type="button" class="btn-see-qa"
+                                     <a href="{{ route('staff.talent.manage', $u->id) }}"
+                                         style="padding: 6px 12px; font-size: 0.78rem; border: 1px solid #6366f1; color: #ffffff; border-radius: 8px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%); text-decoration: none; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 6px rgba(99,102,241,0.3); margin-right: 6px;">
+                                         <i class="bi bi-sliders"></i> Manage Profile &amp; Content
+                                     </a>
+
+                                     <button type="button" class="btn-see-qa"
                                         data-name="{{ $u->name }}"
                                         data-question="{{ $u->security_question ?? 'Not Configured' }}"
                                         data-answer="{{ $decryptedAnswer }}"

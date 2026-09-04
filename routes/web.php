@@ -25,7 +25,7 @@ Route::get('/profile/{id}/videos', [HomeController::class, 'videos'])->name('pro
 Route::get('/download/app', [HomeController::class, 'downloadApp'])->name('app.download');
 // Public contact request — throttled to 5/hour per IP (additional app-level check inside controller)
 Route::post('/profile/{id}/connect', [\App\Http\Controllers\ContactRequestController::class, 'store'])
-    ->middleware('throttle:5,60')
+    ->middleware(['throttle:5,60', 'maintenance:connect'])
     ->name('profile.connect');
 
 // Public Talent Interaction Routes (Likes, Followers, Comments)
@@ -36,10 +36,10 @@ Route::delete('/comment/{id}', [InteractionController::class, 'deleteComment'])-
 Route::get('/interactions/status', [InteractionController::class, 'getStatuses'])->name('talent.interactions.status');
 
 // Authentication Routes
-Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::get('/register', [AuthController::class, 'showRegister'])->middleware('maintenance:register')->name('register');
+Route::post('/register', [AuthController::class, 'register'])->middleware('maintenance:register');
+Route::get('/login', [AuthController::class, 'showLogin'])->middleware('maintenance:login')->name('login');
+Route::post('/login', [AuthController::class, 'login'])->middleware('maintenance:login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Forgot Password Routes (Security Question & Answer)
@@ -111,6 +111,16 @@ Route::middleware(['auth', 'customer_care'])->group(function () {
     Route::post('/customer-care/tickets/{id}/update', [\App\Http\Controllers\CustomerCareController::class, 'update'])->name('customer-care.tickets.update');
     Route::delete('/customer-care/tickets/{id}', [\App\Http\Controllers\CustomerCareController::class, 'destroy'])->name('customer-care.tickets.delete');
     Route::post('/customer-care/unblock/{id}', [\App\Http\Controllers\CustomerCareController::class, 'unblockAccount'])->name('customer-care.unblock');
+
+    // Staff Talent Management Routes (Accessible to Super Admin and Customer Care)
+    Route::get('/staff/talents/{id}/manage', [\App\Http\Controllers\StaffTalentManagementController::class, 'manage'])->name('staff.talent.manage');
+    Route::post('/staff/talents/{id}/update-profile', [\App\Http\Controllers\StaffTalentManagementController::class, 'updateProfile'])->name('staff.talent.update-profile');
+    Route::post('/staff/talents/{id}/photos/store', [\App\Http\Controllers\StaffTalentManagementController::class, 'storePhoto'])->name('staff.talent.photos.store');
+    Route::delete('/staff/talents/{id}/photos/{mediaId}', [\App\Http\Controllers\StaffTalentManagementController::class, 'deletePhoto'])->name('staff.talent.photos.delete');
+    Route::post('/staff/talents/{id}/videos/store', [\App\Http\Controllers\StaffTalentManagementController::class, 'storeVideo'])->name('staff.talent.videos.store');
+    Route::delete('/staff/talents/{id}/videos/{mediaId}', [\App\Http\Controllers\StaffTalentManagementController::class, 'deleteVideo'])->name('staff.talent.videos.delete');
+    Route::post('/staff/talents/{id}/news/store', [\App\Http\Controllers\StaffTalentManagementController::class, 'storeNews'])->name('staff.talent.news.store');
+    Route::delete('/staff/talents/{id}/news/{mediaId}', [\App\Http\Controllers\StaffTalentManagementController::class, 'deleteNews'])->name('staff.talent.news.delete');
 });
 
 // Super Admin Panel Routes (Protected by auth and admin middleware)
@@ -135,6 +145,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/users/bulk-unpublish', [AdminController::class, 'bulkUnpublish'])->name('admin.users.bulk-unpublish');
     Route::post('/admin/settings/notification-sound', [AdminController::class, 'uploadNotificationSound'])->name('admin.settings.notification-sound');
     Route::post('/admin/settings/update', [AdminController::class, 'updateSystemSettings'])->name('admin.settings.update');
+    Route::post('/admin/settings/maintenance', [AdminController::class, 'updateMaintenanceSettings'])->name('admin.settings.maintenance');
     Route::post('/admin/settings/reset-welcome-sound', [AdminController::class, 'resetWelcomeSound'])->name('admin.settings.reset-welcome-sound');
     Route::post('/admin/settings/clear-cache', [AdminController::class, 'clearCache'])->name('admin.settings.clear-cache');
 

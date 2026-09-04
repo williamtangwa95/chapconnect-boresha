@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'customer_care' => \App\Http\Middleware\CustomerCareMiddleware::class,
+            'maintenance' => \App\Http\Middleware\CheckMaintenanceMode::class,
         ]);
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,

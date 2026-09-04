@@ -438,6 +438,12 @@
                                                 <i class="bi bi-pencil-square" style="font-size: 0.72rem;"></i> Edit
                                             </button>
 
+                                            <!-- Manage Profile & Content -->
+                                            <a href="{{ route('staff.talent.manage', $u->id) }}"
+                                                style="padding: 4px 9px; font-size: 0.73rem; border: 1px solid #6366f1; color: #ffffff; border-radius: 6px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%); text-decoration: none; display: inline-flex; align-items: center; gap: 3px; line-height: 1.2; box-shadow: 0 2px 6px rgba(99,102,241,0.3);">
+                                                <i class="bi bi-sliders" style="font-size: 0.72rem;"></i> Manage Content
+                                            </a>
+
                                             <!-- Manage Package -->
                                             <button type="button" class="btn-manage-user-package"
                                                 data-id="{{ $u->id }}"
@@ -820,6 +826,167 @@
                     </table>
                 </div>
             </div>
+        </div>
+
+        <!-- ==========================================
+         TAB MAINTENANCE: System Maintenance & Access Control
+         ========================================== -->
+        <div id="tab-maintenance" class="tab-content">
+            <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
+                <div>
+                    <h1 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: flex; align-items: center; gap: 10px;">
+                        <i class="bi bi-shield-lock-fill" style="color: #f59e0b;"></i> System Maintenance & Access Control
+                    </h1>
+                    <p style="color: #64748b; margin: 0; font-size: 0.92rem;">Temporarily disable public guest actions (Login, Registration, Ask to Connect) during scheduled system upgrades or maintenance periods.</p>
+                </div>
+            </div>
+
+            <!-- Maintenance Status Overview Banner -->
+            @php
+                $mDetails = $maintenanceDetails ?? \App\Services\MaintenanceService::getDetails();
+            @endphp
+            <div style="background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); margin-bottom: 25px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">SYSTEM MAINTENANCE STATUS</div>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px;">
+                            @if($mDetails['status'] === 'ACTIVE')
+                                <span style="background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                                    <span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; display: inline-block; box-shadow: 0 0 10px #ef4444; animation: pulseDot 1.5s infinite;"></span>
+                                    ACTIVE RESTRICTION
+                                </span>
+                            @elseif($mDetails['status'] === 'SCHEDULED')
+                                <span style="background: rgba(59, 130, 246, 0.15); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3); padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                                    <span style="width: 10px; height: 10px; border-radius: 50%; background: #3b82f6; display: inline-block;"></span>
+                                    SCHEDULED FOR FUTURE
+                                </span>
+                            @elseif($mDetails['status'] === 'EXPIRED')
+                                <span style="background: rgba(100, 116, 139, 0.15); color: #64748b; border: 1px solid rgba(100, 116, 139, 0.3); padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                                    <span style="width: 10px; height: 10px; border-radius: 50%; background: #94a3b8; display: inline-block;"></span>
+                                    EXPIRED (AUTO-RESUMED)
+                                </span>
+                            @else
+                                <span style="background: rgba(34, 197, 94, 0.15); color: #16a34a; border: 1px solid rgba(34, 197, 94, 0.3); padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                                    <span style="width: 10px; height: 10px; border-radius: 50%; background: #22c55e; display: inline-block;"></span>
+                                    NORMAL ACCESS (DISABLED)
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Summary Badges -->
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 12px; font-size: 0.85rem;">
+                            <strong style="color: #475569;">Login:</strong>
+                            @if($mDetails['restrict_login'])
+                                <span style="color: #ef4444; font-weight: 800;">✓ Restricted</span>
+                            @else
+                                <span style="color: #22c55e; font-weight: 700;">✗ Allowed</span>
+                            @endif
+                        </div>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 12px; font-size: 0.85rem;">
+                            <strong style="color: #475569;">Registration:</strong>
+                            @if($mDetails['restrict_register'])
+                                <span style="color: #ef4444; font-weight: 800;">✓ Restricted</span>
+                            @else
+                                <span style="color: #22c55e; font-weight: 700;">✗ Allowed</span>
+                            @endif
+                        </div>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 12px; font-size: 0.85rem;">
+                            <strong style="color: #475569;">Ask to Connect:</strong>
+                            @if($mDetails['restrict_connect'])
+                                <span style="color: #ef4444; font-weight: 800;">✓ Restricted</span>
+                            @else
+                                <span style="color: #22c55e; font-weight: 700;">✗ Allowed</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Maintenance Settings Form -->
+            <form action="{{ route('admin.settings.maintenance') }}" method="POST">
+                @csrf
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+
+                    <!-- Card 1: Status & Restricted Features -->
+                    <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-toggle-on" style="color: #6366f1;"></i> Status & Restricted Features
+                        </h3>
+
+                        <!-- Master Toggle -->
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+                            <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; margin: 0; font-weight: 800; color: #0f172a;">
+                                <span>Enable Maintenance Restriction</span>
+                                <input type="checkbox" name="maintenance_enabled" value="1" {{ $mDetails['enabled'] ? 'checked' : '' }} style="width: 20px; height: 20px; accent-color: #6366f1;">
+                            </label>
+                            <small style="color: #64748b; display: block; margin-top: 6px; font-size: 0.8rem;">Master switch. When enabled, selected features will be restricted during the configured timeframe.</small>
+                        </div>
+
+                        <div style="font-weight: 800; font-size: 0.9rem; color: #1e293b; margin-bottom: 12px;">Features to Restrict Independently:</div>
+
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <label style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid #cbd5e1; padding: 12px 16px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #334155;">
+                                <span style="display: flex; align-items: center; gap: 8px;"><i class="bi bi-box-arrow-in-right" style="color: #6366f1;"></i> Restrict Guest Login</span>
+                                <input type="checkbox" name="maintenance_restrict_login" value="1" {{ $mDetails['restrict_login'] ? 'checked' : '' }} style="width: 18px; height: 18px; accent-color: #ef4444;">
+                            </label>
+
+                            <label style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid #cbd5e1; padding: 12px 16px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #334155;">
+                                <span style="display: flex; align-items: center; gap: 8px;"><i class="bi bi-person-plus-fill" style="color: #6366f1;"></i> Restrict New Registration</span>
+                                <input type="checkbox" name="maintenance_restrict_register" value="1" {{ $mDetails['restrict_register'] ? 'checked' : '' }} style="width: 18px; height: 18px; accent-color: #ef4444;">
+                            </label>
+
+                            <label style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid #cbd5e1; padding: 12px 16px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; font-weight: 700; color: #334155;">
+                                <span style="display: flex; align-items: center; gap: 8px;"><i class="bi bi-telephone-outbound-fill" style="color: #6366f1;"></i> Restrict Ask to Connect</span>
+                                <input type="checkbox" name="maintenance_restrict_connect" value="1" {{ $mDetails['restrict_connect'] ? 'checked' : '' }} style="width: 18px; height: 18px; accent-color: #ef4444;">
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Schedule & Automatic Expiration -->
+                    <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-calendar-event" style="color: #6366f1;"></i> Maintenance Schedule (Server Time)
+                        </h3>
+
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 6px; font-size: 0.88rem;">Start Date & Time:</label>
+                            <input type="datetime-local" name="maintenance_start_at" value="{{ $mDetails['start_at'] }}" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; font-weight: 600;">
+                            <small style="color: #64748b; font-size: 0.78rem;">When restriction should automatically begin.</small>
+                        </div>
+
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-weight: 700; color: #334155; margin-bottom: 6px; font-size: 0.88rem;">End Date & Time:</label>
+                            <input type="datetime-local" name="maintenance_end_at" value="{{ $mDetails['end_at'] }}" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.9rem; font-weight: 600;">
+                            <small style="color: #64748b; font-size: 0.78rem;">When restriction will automatically expire and resume normal access.</small>
+                        </div>
+
+                        <div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); padding: 12px 14px; border-radius: 10px; font-size: 0.82rem; color: #1e40af;">
+                            <i class="bi bi-clock-history"></i> Server Time: <strong>{{ \Carbon\Carbon::now()->format('Y-m-d H:i:s') }}</strong> ({{ config('app.timezone') }})
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Custom Maintenance Message -->
+                    <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); grid-column: 1 / -1;">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-chat-quote-fill" style="color: #6366f1;"></i> User-Facing Custom Maintenance Message
+                        </h3>
+
+                        <div style="margin-bottom: 16px;">
+                            <textarea name="maintenance_message" rows="4" style="width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.92rem; font-family: inherit; box-sizing: border-box;" placeholder="Enter custom message to be displayed to users attempting restricted actions...">{{ $mDetails['message'] }}</textarea>
+                            <small style="color: #64748b; font-size: 0.78rem;">This custom message will be displayed prominently when users click or visit a restricted public action.</small>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                            <button type="submit" style="background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%); color: #ffffff; border: none; padding: 12px 30px; border-radius: 30px; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4); display: inline-flex; align-items: center; gap: 8px;">
+                                <i class="bi bi-check-lg" style="font-size: 1.1rem;"></i> Save Maintenance Settings
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
         </div>
 
         <!-- ==========================================
@@ -1809,7 +1976,7 @@
             defaultTab = "activity-logs";
         } else if (window.location.hash) {
             const hash = window.location.hash.substring(1);
-            if (["dashboard", "talents", "categories", "settings", "staff", "system-settings", "customer-care", "packages", "invoices", "requests", "analytics", "activity-logs", "payments"].includes(hash)) {
+            if (["dashboard", "talents", "categories", "settings", "staff", "system-settings", "customer-care", "packages", "invoices", "requests", "analytics", "activity-logs", "payments", "maintenance"].includes(hash)) {
                 defaultTab = hash;
             }
         }

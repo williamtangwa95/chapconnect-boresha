@@ -115,10 +115,17 @@
                                     <span style="font-size: 0.82rem; color: #94a3b8; font-weight: 600; display: flex; align-items: center; gap: 5px;">
                                         <i class="bi bi-lock-fill" style="color: #cbd5e1; font-size: 0.75rem;"></i> {{ __('Contact Private') }}
                                     </span>
+                                    @if(\App\Services\MaintenanceService::isFeatureRestricted('connect'))
+                                    <button type="button" id="askToConnectBtn" onclick="showMaintenanceNotice(event, '{{ addslashes(\App\Services\MaintenanceService::getMessage()) }}', 'Ask to Connect'); return false;"
+                                        style="padding: 5px 13px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; border: none; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 3px 10px rgba(245,158,11,0.35); transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+                                        <i class="bi bi-lock-fill" style="font-size: 0.7rem;"></i> {{ __('Ask to Connect') }}
+                                    </button>
+                                    @else
                                     <button type="button" id="askToConnectBtn" onclick="document.getElementById('ask-to-connect-modal').style.display='flex'"
                                         style="padding: 5px 13px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; border: none; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 3px 10px rgba(99,102,241,0.35); transition: opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
                                         <i class="bi bi-person-plus-fill" style="font-size: 0.7rem;"></i> {{ __('Ask to Connect') }}
                                     </button>
+                                    @endif
                                 </div>
                                 @endif
                             </div>
@@ -648,6 +655,16 @@
             <h3 style="margin: 0 0 4px 0; font-size: 1.15rem; font-weight: 800; color: #0f172a;">{{ __('Ask to Connect') }}</h3>
             <p style="margin: 0; color: #64748b; font-size: 0.85rem;">{{ __('Leave your contact info —') }} <strong>{{ $talent->name }}</strong>.</p>
         </div>
+
+        @if(\App\Services\MaintenanceService::isFeatureRestricted('connect'))
+        <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 14px; margin-bottom: 18px; color: #b45309; font-size: 0.85rem; font-weight: 700; text-align: left; display: flex; align-items: flex-start; gap: 10px;">
+            <i class="bi bi-tools" style="font-size: 1.2rem; color: #d97706; margin-top: 2px;"></i>
+            <div>
+                <div style="font-weight: 800; text-transform: uppercase; margin-bottom: 2px; font-size: 0.78rem;">HUDUMA HAPATIKANI KWA MUDA</div>
+                <div>{{ \App\Services\MaintenanceService::getMessage() }}</div>
+            </div>
+        </div>
+        @endif
 
         @if(session('success') && str_contains(session('success'), 'connect'))
         <div style="background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; color: #065f46; font-size: 0.85rem; font-weight: 600;">

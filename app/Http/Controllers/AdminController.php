@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\StoreCategoryRequest;
+use App\Services\MaintenanceService;
 
 class AdminController extends Controller
 {
@@ -296,6 +297,7 @@ class AdminController extends Controller
             'selectedTimeframe' => $selectedTimeframe,
             'selectedLocation' => $selectedLocation,
             'selectedUser' => $selectedUser,
+            'maintenanceDetails' => MaintenanceService::getDetails(),
         ]);
     }
 
@@ -768,6 +770,40 @@ $media->delete();
         ], null, 'SystemSetting');
 
         return redirect()->back()->with('success', 'System settings saved and updated successfully.');
+    }
+
+    /**
+     * Update System Maintenance & Access Control settings.
+     */
+    public function updateMaintenanceSettings(Request $request)
+    {
+        $request->validate([
+            'maintenance_start_at' => 'nullable|string',
+            'maintenance_end_at' => 'nullable|string',
+            'maintenance_message' => 'nullable|string|max:1000',
+        ]);
+
+        \App\Models\SystemSetting::set('maintenance_enabled', $request->has('maintenance_enabled') ? '1' : '0');
+        \App\Models\SystemSetting::set('maintenance_restrict_login', $request->has('maintenance_restrict_login') ? '1' : '0');
+        \App\Models\SystemSetting::set('maintenance_restrict_register', $request->has('maintenance_restrict_register') ? '1' : '0');
+        \App\Models\SystemSetting::set('maintenance_restrict_connect', $request->has('maintenance_restrict_connect') ? '1' : '0');
+
+        \App\Models\SystemSetting::set('maintenance_start_at', $request->input('maintenance_start_at') ?: '');
+        \App\Models\SystemSetting::set('maintenance_end_at', $request->input('maintenance_end_at') ?: '');
+        \App\Models\SystemSetting::set('maintenance_message', $request->input('maintenance_message') ?: '');
+
+        \App\Models\UserActivityLog::log('UPDATED', 'Updated System Maintenance & Access Control settings.', [
+            'new' => [
+                'enabled' => $request->has('maintenance_enabled') ? '1' : '0',
+                'restrict_login' => $request->has('maintenance_restrict_login') ? '1' : '0',
+                'restrict_register' => $request->has('maintenance_restrict_register') ? '1' : '0',
+                'restrict_connect' => $request->has('maintenance_restrict_connect') ? '1' : '0',
+                'start_at' => $request->input('maintenance_start_at'),
+                'end_at' => $request->input('maintenance_end_at'),
+            ]
+        ], null, 'SystemSetting');
+
+        return redirect()->back()->with('success', 'System Maintenance & Access Control settings updated successfully.');
     }
 
     /**
