@@ -314,21 +314,112 @@
 
 @section('content')
 @if(\App\Services\MaintenanceService::isEnabled() || \App\Services\MaintenanceService::isLoginRestrictedFlag() || \App\Services\MaintenanceService::isRegisterRestrictedFlag() || \App\Services\MaintenanceService::isConnectRestrictedFlag())
-<div class="maintenance-marquee-bar" style="max-width: 1550px; width: 98%; margin: 10px auto 14px auto; background: linear-gradient(135deg, #7c2d12 0%, #b45309 50%, #d97706 100%); color: #ffffff; padding: 10px 16px; border-radius: 12px; box-shadow: 0 4px 18px rgba(180, 83, 9, 0.35); border: 1px solid rgba(251, 191, 36, 0.4); display: flex; align-items: center; gap: 14px; overflow: hidden;">
-    <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.3); padding: 5px 12px; border-radius: 20px; flex-shrink: 0; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.6px; border: 1px solid rgba(255,255,255,0.25); text-transform: uppercase;">
-        <i class="bi bi-tools" style="color: #fbbf24; font-size: 1rem; animation: wrenchPulse 1.8s infinite ease-in-out;"></i>
-        <span>{{ __('MAINTENANCE NOTICE') }}</span>
+<div class="maintenance-marquee-bar">
+    <div class="maintenance-badge">
+        <i class="bi bi-tools maintenance-icon"></i>
+        <span class="badge-text-desktop">{{ __('MAINTENANCE NOTICE') }}</span>
+        <span class="badge-text-mobile">{{ __('NOTICE') }}</span>
     </div>
-    <div style="flex: 1; overflow: hidden; white-space: nowrap;">
-        <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();" style="font-weight: 600; font-size: 0.92rem; text-shadow: 0 1px 3px rgba(0,0,0,0.4); vertical-align: middle;">
+    <div class="maintenance-marquee-content">
+        <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();">
             ⚠️ {{ \App\Services\MaintenanceService::getMessage() }}
         </marquee>
     </div>
 </div>
 <style>
+.maintenance-marquee-bar {
+    max-width: 1550px;
+    width: 98%;
+    margin: 10px auto 14px auto;
+    background: linear-gradient(135deg, #7c2d12 0%, #b45309 50%, #d97706 100%);
+    color: #ffffff;
+    padding: 10px 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(180, 83, 9, 0.35);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    overflow: hidden;
+}
+
+.maintenance-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px 12px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    text-transform: uppercase;
+}
+
+.maintenance-icon {
+    color: #fbbf24;
+    font-size: 1rem;
+    animation: wrenchPulse 1.8s infinite ease-in-out;
+}
+
+.badge-text-desktop {
+    display: inline;
+}
+
+.badge-text-mobile {
+    display: none;
+}
+
+.maintenance-marquee-content {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.maintenance-marquee-content marquee {
+    font-weight: 600;
+    font-size: 0.92rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    vertical-align: middle;
+}
+
 @keyframes wrenchPulse {
     0%, 100% { transform: scale(1) rotate(0deg); }
     50% { transform: scale(1.15) rotate(-10deg); }
+}
+
+@media (max-width: 680px) {
+    .maintenance-marquee-bar {
+        padding: 6px 10px;
+        margin: 6px auto 10px auto;
+        gap: 8px;
+        border-radius: 10px;
+    }
+
+    .maintenance-badge {
+        padding: 3px 8px;
+        gap: 5px;
+        font-size: 0.7rem;
+    }
+
+    .maintenance-icon {
+        font-size: 0.85rem;
+    }
+
+    .badge-text-desktop {
+        display: none;
+    }
+
+    .badge-text-mobile {
+        display: inline;
+    }
+
+    .maintenance-marquee-content marquee {
+        font-size: 0.84rem;
+    }
 }
 </style>
 @endif
