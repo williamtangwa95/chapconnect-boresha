@@ -217,8 +217,8 @@
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px;">
             @foreach($photos as $photo)
             <div style="background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.03); display: flex; flex-direction: column; transition: transform 0.2s ease;">
-                <div style="width: 100%; height: 200px; position: relative; background: #1e293b; cursor: pointer;" onclick="openPhotoViewer('{{ asset($photo->file_path) }}', '{{ addslashes($photo->title ?: 'Portfolio Photo') }}', '{{ addslashes($photo->content ?: '') }}')">
-                    <img src="{{ asset($photo->file_path) }}" alt="{{ $photo->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                <div style="width: 100%; aspect-ratio: 4/3; overflow: hidden; position: relative; background: #0f172a; cursor: pointer;" onclick="openPhotoViewer('{{ asset($photo->file_path) }}', '{{ addslashes($photo->title ?: 'Portfolio Photo') }}', '{{ addslashes($photo->content ?: '') }}')">
+                    <img src="{{ asset($photo->file_path) }}" alt="{{ $photo->title }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.3s ease;">
                     <div style="position: absolute; top: 10px; right: 10px; background: rgba(15,23,42,0.75); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 4px;">
                         <i class="bi bi-arrows-angle-expand"></i> View
                     </div>
