@@ -28,7 +28,7 @@
     @yield('styles')
 </head>
 
-<body class="{{ (Request::is('admin*') || Request::is('customer-care*') || Request::is('dashboard*')) ? 'admin-body' : '' }}">
+<body class="{{ (Request::is('admin*') || Request::is('customer-care*') || Request::is('dashboard*') || Request::is('staff*')) ? 'admin-body' : '' }}">
 
     <!-- First-Time Visitor Typewriter Splash Loader Overlay -->
     @php
@@ -106,6 +106,275 @@
     </style>
     <!-- Off-Canvas Drawer Backdrop -->
     <div class="nav-backdrop" id="drawerBackdrop" onclick="toggleMobileNav()"></div>
+
+    <!-- Left Side Navigation Off-Canvas Drawer (Top Level to avoid nav backdrop-filter blur) -->
+    <div class="icon" id="navIconMenu">
+        <!-- Drawer Header -->
+        <div class="drawer-header">
+            <div class="drawer-brand">
+                <div class="drawer-logo-box">
+                    <img src="{{ asset(\App\Models\SystemSetting::get('site_logo', 'logo.png')) }}" alt="Logo" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'">
+                </div>
+                <div class="drawer-title-box">
+                    <h2>{{ \App\Models\SystemSetting::get('site_title', 'ChapConnect') }}</h2>
+                </div>
+            </div>
+            <button type="button" class="drawer-close-btn" onclick="toggleMobileNav()" aria-label="Close menu">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Language Switcher Row -->
+        <div class="drawer-lang-row">
+            <span class="drawer-lang-label">
+                <i class="bi bi-translate" style="color: #38bdf8; font-size: 1.05rem;"></i> {{ __('Language') }}:
+            </span>
+            <div class="drawer-lang-btns">
+                <a href="{{ route('lang.switch', 'sw') }}" class="drawer-lang-btn {{ app()->getLocale() === 'sw' ? 'active' : 'inactive' }}">🇹🇿 SW</a>
+                <a href="{{ route('lang.switch', 'en') }}" class="drawer-lang-btn {{ app()->getLocale() === 'en' ? 'active' : 'inactive' }}">🇬🇧 EN</a>
+            </div>
+        </div>
+
+        <!-- Drawer Body -->
+        <div class="drawer-body">
+            <div class="nav-mobile-list">
+                @auth
+                @if(in_array(auth()->user()->role, ['admin', 'customer_care']))
+                @if(Request::is('admin*'))
+                <div class="drawer-section-label">MAIN CONTROL</div>
+                <a href="#dashboard" class="tab-link nav-mobile-link active" data-tab="dashboard">
+                    <i class="bi bi-speedometer2"></i> {{ __('Dashboard Overview') }}
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="#talents" class="tab-link nav-mobile-link" data-tab="talents">
+                    <i class="bi bi-people-fill"></i> Registered Talents
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="#categories" class="tab-link nav-mobile-link" data-tab="categories">
+                    <i class="bi bi-tags-fill"></i> Manage Categories
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="#packages" class="tab-link nav-mobile-link" data-tab="packages">
+                    <i class="bi bi-box-seam-fill"></i> Membership Packages
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="#invoices" class="tab-link nav-mobile-link" data-tab="invoices">
+                    <i class="bi bi-receipt-cutoff"></i> Invoices & Billing
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="#payments" class="tab-link nav-mobile-link" data-tab="payments">
+                    <i class="bi bi-wallet2"></i> Talent Payments
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="#staff" class="tab-link nav-mobile-link" data-tab="staff">
+                    <i class="bi bi-person-plus-fill"></i> Registered Staff
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="#analytics" class="tab-link nav-mobile-link" data-tab="analytics">
+                    <i class="bi bi-graph-up-arrow"></i> Visitor Analytics
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="#activity-logs" class="tab-link nav-mobile-link" data-tab="activity-logs">
+                    <i class="bi bi-journal-text"></i> Activity Logs
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+
+                <div class="drawer-section-label">OPERATIONS & SUPPORT</div>
+                <a href="{{ route('admin.moderation') }}" class="nav-mobile-link">
+                    <i class="bi bi-shield-exclamation" style="color: #f59e0b;"></i> Content Moderation
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link cc-tab-link" data-cctab="tickets">
+                    <i class="bi bi-life-preserver"></i> Support Tickets Roster
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link cc-tab-link" data-cctab="blocked">
+                    <i class="bi bi-shield-slash-fill" style="color: #ef4444;"></i> Blocked Accounts
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#talents" class="nav-mobile-link cc-tab-link" data-cctab="talents">
+                    <i class="bi bi-people-fill"></i> Talents Directory
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#requests" class="nav-mobile-link cc-tab-link" data-cctab="requests">
+                    <i class="bi bi-person-check-fill"></i> Contact Requests
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#payments" class="nav-mobile-link cc-tab-link" data-cctab="payments">
+                    <i class="bi bi-wallet2"></i> Payment Requests
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+
+                <div class="drawer-section-label">SYSTEM CONFIG</div>
+                <a href="#maintenance" class="tab-link nav-mobile-link" data-tab="maintenance">
+                    <i class="bi bi-shield-lock-fill" style="color: #f59e0b;"></i> Maintenance Mode
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="#system-settings" class="tab-link nav-mobile-link" data-tab="system-settings">
+                    <i class="bi bi-gear-wide-connected"></i> System Settings
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="#settings" class="tab-link nav-mobile-link" data-tab="settings">
+                    <i class="bi bi-person-gear"></i> Admin Account Profile
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                @elseif(Request::is('customer-care*'))
+                <div class="drawer-section-label">CUSTOMER CARE CONTROL</div>
+                <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link cc-tab-link active" data-cctab="tickets">
+                    <i class="bi bi-life-preserver"></i> Support Tickets Roster
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link cc-tab-link" data-cctab="blocked">
+                    <i class="bi bi-shield-slash-fill"></i> Blocked Accounts & Login
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#talents" class="nav-mobile-link cc-tab-link" data-cctab="talents">
+                    <i class="bi bi-people-fill"></i> Talents Directory & Q&A
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#requests" class="nav-mobile-link cc-tab-link" data-cctab="requests">
+                    <i class="bi bi-person-check-fill"></i> Guest Contact Requests
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#payments" class="nav-mobile-link cc-tab-link" data-cctab="payments">
+                    <i class="bi bi-wallet2"></i> Talent Payment Requests
+                </a>
+
+                <div class="drawer-section-label">NAVIGATION</div>
+                @if(auth()->user()->role === 'admin')
+                <a href="{{ route('admin.dashboard') }}" class="nav-mobile-link">
+                    <i class="bi bi-speedometer2"></i> Super Admin Panel
+                </a>
+                @endif
+                <a href="{{ route('home') }}" class="nav-mobile-link">
+                    <i class="bi bi-house-door-fill"></i> {{ __('Home Directory') }}
+                </a>
+                @else
+                <div class="drawer-section-label">MAIN CONTROL</div>
+                <a href="{{ route('home') }}" class="nav-mobile-link">
+                    <i class="bi bi-house-door-fill"></i> {{ __('Home') }}
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}" class="nav-mobile-link">
+                    <i class="bi bi-headset"></i> Support Portal
+                </a>
+                @if(auth()->user()->role === 'admin')
+                <a href="{{ route('admin.dashboard') }}" class="nav-mobile-link">
+                    <i class="bi bi-speedometer2"></i> Admin Dashboard
+                </a>
+                @endif
+                @endif
+                @else
+                <!-- REGULAR USER / TALENT SIDEBAR LINKS -->
+                <div class="drawer-section-label">MAIN NAVIGATION</div>
+                <a href="{{ route('home') }}" class="nav-mobile-link {{ Request::routeIs('home') ? 'active' : '' }}">
+                    <i class="bi bi-house-door-fill"></i> {{ __('Home') }}
+                </a>
+                <a href="{{ route('dashboard') }}" class="nav-mobile-link {{ Request::routeIs('dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-speedometer2"></i> {{ __('Dashboard') }}
+                </a>
+
+                <div class="drawer-section-label">PORTFOLIO CONTENT</div>
+                <a href="{{ route('dashboard.photos') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.photos') ? 'active' : '' }}">
+                    <i class="bi bi-camera-fill"></i> {{ __('Photos') }}
+                </a>
+                <a href="{{ route('dashboard.videos') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.videos') ? 'active' : '' }}">
+                    <i class="bi bi-camera-video-fill"></i> {{ __('Videos') }}
+                </a>
+                <a href="{{ route('dashboard.news') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.news') ? 'active' : '' }}">
+                    <i class="bi bi-newspaper"></i> Manage News
+                </a>
+                <a href="{{ route('dashboard.comments') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.comments') ? 'active' : '' }}">
+                    <i class="bi bi-chat-left-text-fill"></i> {{ __('Comments') }}
+                </a>
+                @endif
+
+                <div class="drawer-section-label">ACCOUNT</div>
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-mobile-link" style="color: #fca5a5 !important;">
+                    <i class="bi bi-box-arrow-right" style="color: #ef4444;"></i> {{ __('Logout') }}
+                </a>
+                @else
+                <!-- GUEST USER NAVIGATION -->
+                <div class="drawer-section-label">MAIN MENU</div>
+                <a href="{{ route('home') }}" class="nav-mobile-link {{ Request::routeIs('home') ? 'active' : '' }}">
+                    <i class="bi bi-house-door-fill"></i> {{ __('Home') }}
+                </a>
+
+                <div class="drawer-section-label">ACCOUNT ACCESS</div>
+                @if(\App\Services\MaintenanceService::isFeatureRestricted('login'))
+                <a href="{{ route('login') }}" onclick="showMaintenanceNotice(event, '{{ addslashes(\App\Services\MaintenanceService::getMessage()) }}', 'Login'); return false;" class="nav-mobile-link {{ Request::routeIs('login') ? 'active' : '' }}" style="opacity: 0.85;">
+                    <i class="bi bi-lock-fill" style="color: #f59e0b;"></i> {{ __('Login') }} <span style="font-size: 0.68rem; background: #f59e0b; color: #fff; padding: 2px 6px; border-radius: 8px; margin-left: auto; font-weight: 800;">RESTRICTED</span>
+                </a>
+                @else
+                <a href="{{ route('login') }}" class="nav-mobile-link {{ Request::routeIs('login') ? 'active' : '' }}">
+                    <i class="bi bi-box-arrow-in-right"></i> {{ __('Login') }}
+                </a>
+                @endif
+
+                @if(\App\Services\MaintenanceService::isFeatureRestricted('register'))
+                <a href="{{ route('register') }}" onclick="showMaintenanceNotice(event, '{{ addslashes(\App\Services\MaintenanceService::getMessage()) }}', 'Registration'); return false;" class="nav-mobile-link {{ Request::routeIs('register') ? 'active' : '' }}" style="opacity: 0.85;">
+                    <i class="bi bi-lock-fill" style="color: #f59e0b;"></i> {{ __('Register') }} <span style="font-size: 0.68rem; background: #f59e0b; color: #fff; padding: 2px 6px; border-radius: 8px; margin-left: auto; font-weight: 800;">RESTRICTED</span>
+                </a>
+                @else
+                <a href="{{ route('register') }}" class="nav-mobile-link {{ Request::routeIs('register') ? 'active' : '' }}">
+                    <i class="bi bi-person-plus-fill"></i> {{ __('Register') }}
+                </a>
+                @endif
+                @endauth
+
+                <div class="drawer-section-label">CONTACT US</div>
+                <a href="tel:0710383352" class="nav-mobile-link">
+                    <i class="bi bi-telephone-fill" style="color: #38bdf8;"></i> Call: 0710383352
+                </a>
+                <a href="https://wa.me/255710383352" target="_blank" class="nav-mobile-link">
+                    <i class="bi bi-whatsapp" style="color: #34d399;"></i> WhatsApp: 0710383352
+                </a>
+            </div>
+        </div>
+
+        <!-- Drawer Footer (User Profile & Quick Actions as in Picture 1) -->
+        <div class="drawer-footer">
+            @auth
+            <div class="drawer-user-info">
+                <div class="drawer-avatar">
+                    @if(auth()->user()->profile_image)
+                    <img src="{{ asset(auth()->user()->profile_image) }}" alt="{{ auth()->user()->name }}">
+                    @else
+                    <i class="bi bi-person-circle"></i>
+                    @endif
+                </div>
+                <div class="drawer-user-text">
+                    <span class="drawer-user-name">{{ auth()->user()->name }}</span>
+                    <span class="drawer-user-email">{{ auth()->user()->email }}</span>
+                </div>
+            </div>
+            <div class="drawer-footer-actions">
+                <a href="{{ route('dashboard') }}" class="drawer-action-btn" title="Account Settings">
+                    <i class="bi bi-gear-fill"></i>
+                </a>
+                <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="drawer-action-btn drawer-action-logout" title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+            @else
+            <div class="drawer-user-info">
+                <div class="drawer-avatar">
+                    <i class="bi bi-person"></i>
+                </div>
+                <div class="drawer-user-text">
+                    <span class="drawer-user-name">Welcome Guest</span>
+                    <span class="drawer-user-email">ChapConnect Portal</span>
+                </div>
+            </div>
+            <div class="drawer-footer-actions">
+                @if(\App\Services\MaintenanceService::isFeatureRestricted('login'))
+                <a href="{{ route('login') }}" onclick="showMaintenanceNotice(event, '{{ addslashes(\App\Services\MaintenanceService::getMessage()) }}', 'Login'); return false;" class="drawer-action-btn" title="Login (Restricted)">
+                    <i class="bi bi-lock-fill" style="color: #f59e0b;"></i>
+                </a>
+                @else
+                <a href="{{ route('login') }}" class="drawer-action-btn" title="Login">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                </a>
+                @endif
+            </div>
+            @endauth
+        </div>
+    </div>
 
     <nav class="nav">
         <div class="logo">
@@ -189,7 +458,7 @@
                 @endif
 
                 @if(\App\Services\MaintenanceService::isFeatureRestricted('register'))
-                <a href="{{ route('register') }}" onclick="showMaintenanceNotice(event, '{{ addslashes(\App\Services\MaintenanceService::getMessage()) }}', 'Registration'); return false;" class="nav-btn nav-btn-register" style="opacity: 0.85; background: linear-gradient(135deg, #d97706 0%, #b45309 100%);"><i class="bi bi-lock-fill"></i> {{ __('Register') }}</a>
+                <a href="{{ route('register') }}" onclick="showMaintenanceNotice(event, '{{ addslashes(\App\Services\MaintenanceService::getMessage()) }}', 'Registration'); return false;" class="nav-btn nav-btn-register" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border: 1px solid rgba(245, 158, 11, 0.5); color: #ffffff; box-shadow: 0 4px 14px rgba(15, 23, 42, 0.35);"><i class="bi bi-lock-fill" style="color: #fbbf24;"></i> {{ __('Register') }}</a>
                 @else
                 <a href="{{ route('register') }}" class="nav-btn nav-btn-register"><i class="bi bi-person-plus-fill"></i> {{ __('Register') }}</a>
                 @endif
@@ -450,7 +719,6 @@
             </div>
         </div>
     </nav>
-    </nav>
 
     <!-- Global Floating Notification Alerts Container -->
     <div class="toast-alert-container">
@@ -502,7 +770,7 @@
     </div>
 
     @auth
-    @if(Request::is('admin*') || Request::is('customer-care*') || Request::is('dashboard*'))
+    @if(Request::is('admin*') || Request::is('customer-care*') || Request::is('dashboard*') || Request::is('staff*'))
     <div class="admin-layout-container">
         <!-- Sidebar Navigation -->
         <aside class="admin-sidebar" id="adminSidebar">
@@ -1784,6 +2052,11 @@
         });
     </script>
 
+    @php
+    $currentLang = app()->getLocale();
+    $headingTitle = $currentLang === 'en' ? 'SERVICE TEMPORARILY RESTRICTED' : 'HUDUMA HAIPATIKANI KWA MUDA';
+    $fallbackNoticeMsg = \App\Services\MaintenanceService::getMessage();
+    @endphp
     <script>
         function showMaintenanceNotice(event, customMessage, featureName) {
             if (event) {
@@ -1798,8 +2071,9 @@
                 }
             }
 
-            const msg = customMessage || 'Kwa sasa huduma hii imefungwa kwa muda kutokana na maboresho ya mfumo.';
-            const label = featureName ? featureName.toUpperCase() : 'MAINTENANCE';
+            const msg = customMessage || '{{ addslashes($fallbackNoticeMsg) }}';
+            const label = featureName ? featureName.toUpperCase() : 'RESTRICTED';
+            const heading = '{{ addslashes($headingTitle) }}';
 
             let container = document.querySelector('.toast-alert-container');
             if (!container) {
@@ -1821,8 +2095,8 @@
                         <i class="bi bi-tools" style="color: #fbbf24; font-size: 1.2rem;"></i>
                     </div>
                     <div style="flex: 1;">
-                        <strong style="color: #fbbf24; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">
-                            HUDUMA HAPATIKANI KWA MUDA (${label})
+                        <strong style="color: #fbbf24; font-size: 0.88rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px;">
+                            ${heading} (${label})
                         </strong>
                         <p style="margin: 0; font-size: 0.88rem; line-height: 1.5; color: #e2e8f0; font-weight: 500;">${msg}</p>
                     </div>

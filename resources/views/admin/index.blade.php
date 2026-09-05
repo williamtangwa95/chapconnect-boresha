@@ -967,15 +967,28 @@
                         </div>
                     </div>
 
-                    <!-- Card 3: Custom Maintenance Message -->
+                    <!-- Card 3: Custom Maintenance Messages (Swahili & English) -->
                     <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); grid-column: 1 / -1;">
                         <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                            <i class="bi bi-chat-quote-fill" style="color: #6366f1;"></i> User-Facing Custom Maintenance Message
+                            <i class="bi bi-chat-quote-fill" style="color: #6366f1;"></i> User-Facing Multilingual Maintenance Messages (Swahili &amp; English)
                         </h3>
 
-                        <div style="margin-bottom: 16px;">
-                            <textarea name="maintenance_message" rows="4" style="width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.92rem; font-family: inherit; box-sizing: border-box;" placeholder="Enter custom message to be displayed to users attempting restricted actions...">{{ $mDetails['message'] }}</textarea>
-                            <small style="color: #64748b; font-size: 0.78rem;">This custom message will be displayed prominently when users click or visit a restricted public action.</small>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 16px;">
+                            <div>
+                                <label style="display: block; font-weight: 700; color: #334155; font-size: 0.88rem; margin-bottom: 6px;">
+                                    <span>🇹🇿</span> Swahili Restriction Message (Ujumbe wa Kiswahili):
+                                </label>
+                                <textarea name="maintenance_message_sw" rows="4" style="width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.92rem; font-family: inherit; box-sizing: border-box;" placeholder="Ingiza ujumbe wa Kiswahili wa kuzuia huduma...">{{ $mDetails['message_sw'] ?? $mDetails['message'] }}</textarea>
+                                <small style="color: #64748b; font-size: 0.78rem;">Displayed when the website language is Swahili (SW).</small>
+                            </div>
+
+                            <div>
+                                <label style="display: block; font-weight: 700; color: #334155; font-size: 0.88rem; margin-bottom: 6px;">
+                                    <span>🇬🇧</span> English Restriction Message (English Notice):
+                                </label>
+                                <textarea name="maintenance_message_en" rows="4" style="width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.92rem; font-family: inherit; box-sizing: border-box;" placeholder="Enter custom English restriction message to be displayed when language is English...">{{ $mDetails['message_en'] ?? '' }}</textarea>
+                                <small style="color: #64748b; font-size: 0.78rem;">Displayed when the website language is English (EN).</small>
+                            </div>
                         </div>
 
                         <div style="display: flex; justify-content: flex-end; margin-top: 20px;">

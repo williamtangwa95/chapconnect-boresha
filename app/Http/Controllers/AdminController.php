@@ -781,6 +781,8 @@ $media->delete();
             'maintenance_start_at' => 'nullable|string',
             'maintenance_end_at' => 'nullable|string',
             'maintenance_message' => 'nullable|string|max:1000',
+            'maintenance_message_sw' => 'nullable|string|max:1000',
+            'maintenance_message_en' => 'nullable|string|max:1000',
         ]);
 
         \App\Models\SystemSetting::set('maintenance_enabled', $request->has('maintenance_enabled') ? '1' : '0');
@@ -790,7 +792,13 @@ $media->delete();
 
         \App\Models\SystemSetting::set('maintenance_start_at', $request->input('maintenance_start_at') ?: '');
         \App\Models\SystemSetting::set('maintenance_end_at', $request->input('maintenance_end_at') ?: '');
-        \App\Models\SystemSetting::set('maintenance_message', $request->input('maintenance_message') ?: '');
+
+        $swMsg = $request->input('maintenance_message_sw') ?: ($request->input('maintenance_message') ?: '');
+        $enMsg = $request->input('maintenance_message_en') ?: '';
+
+        \App\Models\SystemSetting::set('maintenance_message', $swMsg);
+        \App\Models\SystemSetting::set('maintenance_message_sw', $swMsg);
+        \App\Models\SystemSetting::set('maintenance_message_en', $enMsg);
 
         \App\Models\UserActivityLog::log('UPDATED', 'Updated System Maintenance & Access Control settings.', [
             'new' => [
@@ -800,6 +808,8 @@ $media->delete();
                 'restrict_connect' => $request->has('maintenance_restrict_connect') ? '1' : '0',
                 'start_at' => $request->input('maintenance_start_at'),
                 'end_at' => $request->input('maintenance_end_at'),
+                'message_sw' => $swMsg,
+                'message_en' => $enMsg,
             ]
         ], null, 'SystemSetting');
 

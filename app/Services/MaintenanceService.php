@@ -72,12 +72,29 @@ class MaintenanceService
     }
 
     /**
-     * Get custom maintenance message or fallback default.
+     * Get custom maintenance message or fallback default based on current or requested locale.
      */
-    public static function getMessage(): string
+    public static function getMessage(?string $locale = null): string
     {
-        $defaultMsg = 'Kwa sasa huduma hii imefungwa kwa muda kutokana na maboresho ya mfumo. Tafadhali jaribu tena baada ya muda wa maboresho kukamilika.';
-        return SystemSetting::get('maintenance_message', $defaultMsg) ?: $defaultMsg;
+        $currentLocale = strtolower($locale ?: app()->getLocale());
+
+        $defaultSw = 'Kwa sasa huduma hii imefungwa kwa muda kutokana na maboresho ya mfumo. Tafadhali jaribu tena baada ya muda wa maboresho kukamilika.';
+        $defaultEn = 'This service is temporarily restricted due to system maintenance. Please try again after maintenance completes.';
+
+        if ($currentLocale === 'en') {
+            $enMsg = trim((string) SystemSetting::get('maintenance_message_en', ''));
+            if (!empty($enMsg)) {
+                return $enMsg;
+            }
+            return $defaultEn;
+        }
+
+        $swMsg = trim((string) SystemSetting::get('maintenance_message_sw', ''));
+        if (empty($swMsg)) {
+            $swMsg = trim((string) SystemSetting::get('maintenance_message', ''));
+        }
+
+        return !empty($swMsg) ? $swMsg : $defaultSw;
     }
 
     /**
@@ -186,6 +203,8 @@ class MaintenanceService
             'start_at_formatted' => $start ? $start->format('d M Y, H:i') : 'N/A',
             'end_at_formatted' => $end ? $end->format('d M Y, H:i') : 'N/A',
             'message' => self::getMessage(),
+            'message_sw' => SystemSetting::get('maintenance_message_sw', '') ?: SystemSetting::get('maintenance_message', ''),
+            'message_en' => SystemSetting::get('maintenance_message_en', ''),
         ];
     }
 }

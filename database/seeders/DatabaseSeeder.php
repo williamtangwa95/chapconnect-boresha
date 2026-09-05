@@ -47,8 +47,8 @@ class DatabaseSeeder extends Seeder
         // 1. Seed Super Admin Account
         User::create([
             'name' => 'Super Admin',
-            'email' => 'admin@chapconnect.com',
-            'password' => Hash::make('adminpassword'),
+            'email' => 'connectchap@gmail.com',
+            'password' => Hash::make('password@2026'),
             'role' => 'admin',
             'category' => 'management',
             'category_label' => 'Administration',

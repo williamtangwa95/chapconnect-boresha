@@ -660,7 +660,7 @@
         <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 12px; padding: 14px; margin-bottom: 18px; color: #b45309; font-size: 0.85rem; font-weight: 700; text-align: left; display: flex; align-items: flex-start; gap: 10px;">
             <i class="bi bi-tools" style="font-size: 1.2rem; color: #d97706; margin-top: 2px;"></i>
             <div>
-                <div style="font-weight: 800; text-transform: uppercase; margin-bottom: 2px; font-size: 0.78rem;">HUDUMA HAPATIKANI KWA MUDA</div>
+                <div style="font-weight: 800; text-transform: uppercase; margin-bottom: 2px; font-size: 0.78rem;">{{ app()->getLocale() === 'en' ? 'SERVICE TEMPORARILY RESTRICTED' : 'HUDUMA HAIPATIKANI KWA MUDA' }}</div>
                 <div>{{ \App\Services\MaintenanceService::getMessage() }}</div>
             </div>
         </div>
