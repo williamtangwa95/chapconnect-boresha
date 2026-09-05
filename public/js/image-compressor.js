@@ -20,59 +20,81 @@ document.addEventListener("DOMContentLoaded", () => {
         input.parentNode.appendChild(statusEl);
 
         input.addEventListener("change", async (e) => {
-            const file = e.target.files[0];
-            if (!file || !file.type.startsWith("image/")) {
+            const rawFiles = e.target.files;
+            if (!rawFiles || rawFiles.length === 0) {
                 statusEl.style.display = "none";
                 return;
             }
 
-            const origSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            const files = Array.from(rawFiles);
+            const imageFiles = files.filter(f => f.type && f.type.startsWith("image/"));
 
-            // Pre-compress if file size is > 1MB
-            if (file.size > 1024 * 1024) {
-                const form = input.closest("form");
-                const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+            if (imageFiles.length === 0) {
+                statusEl.style.display = "none";
+                return;
+            }
 
+            const form = input.closest("form");
+            const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+            const hasLargeFiles = imageFiles.some(f => f.size > 1024 * 1024);
+
+            if (hasLargeFiles) {
                 statusEl.style.display = "block";
                 statusEl.style.color = "#6366f1";
-                statusEl.innerHTML = `⚡ Optimizing large image (${origSizeMB} MB)...`;
+                statusEl.innerHTML = `⚡ Optimizing ${imageFiles.length} image(s)...`;
 
                 if (submitBtn) {
                     submitBtn.disabled = true;
                     if (!submitBtn.dataset.origText) {
                         submitBtn.dataset.origText = submitBtn.innerText;
                     }
-                    submitBtn.innerText = "Compressing Image...";
+                    submitBtn.innerText = "Compressing Image(s)...";
                 }
 
                 try {
-                    // Maximum 1920px, 82% JPEG quality compression
-                    const compressedFile = await compressImageOnClient(file, 1920, 1920, 0.82);
-                    
                     const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(compressedFile);
-                    input.files = dataTransfer.files;
+                    for (const file of files) {
+                        if (file.type && file.type.startsWith("image/") && file.size > 1024 * 1024) {
+                            try {
+                                const compressed = await compressImageOnClient(file, 1920, 1920, 0.82);
+                                dataTransfer.items.add(compressed);
+                            } catch (err) {
+                                console.warn("Pre-compression skipped for:", file.name, err);
+                                dataTransfer.items.add(file);
+                            }
+                        } else {
+                            dataTransfer.items.add(file);
+                        }
+                    }
 
-                    const newSizeMB = (compressedFile.size / (1024 * 1024)).toFixed(2);
-                    const newSizeKB = Math.round(compressedFile.size / 1024);
-                    const sizeDisplay = newSizeMB >= 1 ? `${newSizeMB} MB` : `${newSizeKB} KB`;
+                    if (dataTransfer.files.length > 0) {
+                        input.files = dataTransfer.files;
+                    }
 
                     statusEl.style.color = "#10b981";
-                    statusEl.innerHTML = `✓ Compressed from ${origSizeMB} MB down to ${sizeDisplay} for fast upload!`;
+                    statusEl.innerHTML = `✓ ${imageFiles.length} image(s) optimized & ready for upload!`;
                 } catch (err) {
                     console.warn("Client pre-compression skipped:", err);
-                    statusEl.style.color = "#f59e0b";
-                    statusEl.innerHTML = `Original image (${origSizeMB} MB) ready for upload.`;
+                    statusEl.style.color = "#10b981";
+                    statusEl.innerHTML = `✓ ${files.length} file(s) ready for upload.`;
                 } finally {
                     if (submitBtn) {
                         submitBtn.disabled = false;
-                        submitBtn.innerText = submitBtn.dataset.origText;
+                        if (submitBtn.dataset.origText) {
+                            submitBtn.innerText = submitBtn.dataset.origText;
+                        }
                     }
                 }
             } else {
                 statusEl.style.display = "block";
                 statusEl.style.color = "#10b981";
-                statusEl.innerHTML = `✓ Ready for fast upload (${Math.round(file.size / 1024)} KB)`;
+                statusEl.innerHTML = `✓ ${files.length} file(s) ready for fast upload.`;
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    if (submitBtn.dataset.origText) {
+                        submitBtn.innerText = submitBtn.dataset.origText;
+                    }
+                }
             }
         });
     });

@@ -106,6 +106,8 @@
         .mobile-search-form {
             display: block !important;
             padding: 6px 8px 2px 8px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .mobile-search-inner {
@@ -118,6 +120,8 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
             overflow: hidden;
             transition: box-shadow 0.2s, border-color 0.2s;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .mobile-search-inner:focus-within {
@@ -131,25 +135,32 @@
             color: #94a3b8;
             font-size: 14px;
             pointer-events: none;
+            z-index: 2;
         }
 
         .mobile-search-input {
-            flex: 1;
+            flex: 1 1 auto;
+            min-width: 0;
+            width: 0;
             border: none;
             outline: none;
-            padding: 11px 12px 11px 38px;
+            padding: 10px 10px 10px 38px;
             font-size: 13px;
             font-family: inherit;
             color: var(--text-main);
             background: transparent;
+            -webkit-appearance: none;
+            appearance: none;
+            box-sizing: border-box;
         }
 
         .mobile-search-btn {
             background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
             border: none;
             color: #ffffff !important;
-            padding: 0 16px;
+            padding: 0 14px;
             height: 42px;
+            width: 48px;
             min-width: 48px;
             cursor: pointer;
             font-size: 16px;
@@ -161,6 +172,7 @@
             border-radius: 0 25px 25px 0;
             -webkit-appearance: none;
             appearance: none;
+            box-sizing: border-box;
         }
 
         .mobile-search-btn:hover {
@@ -174,6 +186,7 @@
             display: inline-block;
             vertical-align: middle;
             line-height: 1;
+            font-size: 16px;
         }
     }
 
