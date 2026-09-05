@@ -116,8 +116,10 @@ Route::middleware(['auth', 'customer_care'])->group(function () {
     Route::get('/staff/talents/{id}/manage', [\App\Http\Controllers\StaffTalentManagementController::class, 'manage'])->name('staff.talent.manage');
     Route::post('/staff/talents/{id}/update-profile', [\App\Http\Controllers\StaffTalentManagementController::class, 'updateProfile'])->name('staff.talent.update-profile');
     Route::post('/staff/talents/{id}/photos/store', [\App\Http\Controllers\StaffTalentManagementController::class, 'storePhoto'])->name('staff.talent.photos.store');
+    Route::post('/staff/talents/{id}/photos/{mediaId}/update', [\App\Http\Controllers\StaffTalentManagementController::class, 'updatePhoto'])->name('staff.talent.photos.update');
     Route::delete('/staff/talents/{id}/photos/{mediaId}', [\App\Http\Controllers\StaffTalentManagementController::class, 'deletePhoto'])->name('staff.talent.photos.delete');
     Route::post('/staff/talents/{id}/videos/store', [\App\Http\Controllers\StaffTalentManagementController::class, 'storeVideo'])->name('staff.talent.videos.store');
+    Route::post('/staff/talents/{id}/videos/{mediaId}/update', [\App\Http\Controllers\StaffTalentManagementController::class, 'updateVideo'])->name('staff.talent.videos.update');
     Route::delete('/staff/talents/{id}/videos/{mediaId}', [\App\Http\Controllers\StaffTalentManagementController::class, 'deleteVideo'])->name('staff.talent.videos.delete');
     Route::post('/staff/talents/{id}/news/store', [\App\Http\Controllers\StaffTalentManagementController::class, 'storeNews'])->name('staff.talent.news.store');
     Route::delete('/staff/talents/{id}/news/{mediaId}', [\App\Http\Controllers\StaffTalentManagementController::class, 'deleteNews'])->name('staff.talent.news.delete');

@@ -221,6 +221,57 @@ class StaffTalentManagementController extends Controller
     }
 
     /**
+     * Update photo details or replace image file on behalf of talent.
+     */
+    public function updatePhoto(Request $request, $talentId, $mediaId)
+    {
+        @ini_set('memory_limit', '512M');
+        $talent = User::where('role', 'user')->findOrFail($talentId);
+        $photo = $talent->media()->where('type', 'photo')->findOrFail($mediaId);
+
+        $request->validate([
+            'title'   => 'nullable|string|max:255',
+            'caption' => 'nullable|string|max:1000',
+            'photo'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:15360',
+        ]);
+
+        $data = [
+            'title'   => $request->title,
+            'content' => $request->caption,
+        ];
+
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            if ($photo->file_path && !str_starts_with($photo->file_path, 'http')) {
+                $relativePath = str_replace('/storage/', '', $photo->file_path);
+                Storage::disk('public')->delete($relativePath);
+            }
+
+            try {
+                $path = ImageCompressor::compressAndStore(
+                    $request->file('photo'),
+                    'media/photos',
+                    1920,
+                    1920,
+                    82,
+                    'webp'
+                );
+                $data['file_path'] = '/storage/' . $path;
+            } catch (\InvalidArgumentException $e) {
+                return redirect()->back()->withInput()->withErrors(['photo' => $e->getMessage()]);
+            }
+        }
+
+        $photo->update($data);
+
+        UserActivityLog::log('UPDATED', "Staff '" . auth()->user()->name . "' updated photo details for talent: {$talent->name}", [
+            'talent_id' => $talent->id,
+            'photo_id'  => $photo->id,
+        ], null, 'Media', $talent->id);
+
+        return redirect()->back()->with('success', "Photo updated successfully for talent '{$talent->name}'.");
+    }
+
+    /**
      * Upload/Add video on behalf of talent.
      */
     public function storeVideo(Request $request, $talentId)
@@ -301,6 +352,67 @@ class StaffTalentManagementController extends Controller
         $media->delete();
 
         return redirect()->back()->with('success', "Video deleted successfully from talent '{$talent->name}' portfolio.");
+    }
+
+    /**
+     * Update video details, link URL, or replacement file on behalf of talent.
+     */
+    public function updateVideo(Request $request, $talentId, $mediaId)
+    {
+        @ini_set('memory_limit', '512M');
+        @ini_set('max_execution_time', '300');
+
+        $talent = User::where('role', 'user')->findOrFail($talentId);
+        $video = $talent->media()->where('type', 'video')->findOrFail($mediaId);
+
+        $request->validate([
+            'title'   => 'nullable|string|max:255',
+            'caption' => 'nullable|string|max:1000',
+        ]);
+
+        $data = [
+            'title'   => $request->title,
+            'content' => $request->caption,
+        ];
+
+        if ($request->filled('video_url')) {
+            $cleaned = VideoHelper::cleanUrl($request->input('video_url'));
+            $request->merge(['video_url' => $cleaned]);
+
+            $request->validate([
+                'video_url' => 'required|url|max:500',
+            ]);
+
+            if ($video->file_path && !str_starts_with($video->file_path, 'http')) {
+                $relativePath = str_replace('/storage/', '', $video->file_path);
+                Storage::disk('public')->delete($relativePath);
+            }
+
+            $data['file_path'] = $request->video_url;
+        } elseif ($request->hasFile('video') && $request->file('video')->isValid()) {
+            $request->validate([
+                'video' => 'required|file|mimes:mp4,mov,avi,wmv,webm,mkv|max:51200',
+            ]);
+
+            if ($video->file_path && !str_starts_with($video->file_path, 'http')) {
+                $relativePath = str_replace('/storage/', '', $video->file_path);
+                Storage::disk('public')->delete($relativePath);
+            }
+
+            $file = $request->file('video');
+            $filename = 'video_' . time() . '_' . \Illuminate\Support\Str::random(6) . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('media/videos', $filename, 'public');
+            $data['file_path'] = '/storage/' . $path;
+        }
+
+        $video->update($data);
+
+        UserActivityLog::log('UPDATED', "Staff '" . auth()->user()->name . "' updated video details for talent: {$talent->name}", [
+            'talent_id' => $talent->id,
+            'video_id'  => $video->id,
+        ], null, 'Media', $talent->id);
+
+        return redirect()->back()->with('success', "Video updated successfully for talent '{$talent->name}'.");
     }
 
     /**

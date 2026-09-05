@@ -228,7 +228,10 @@
                         <strong style="display: block; font-size: 0.92rem; color: #0f172a; margin-bottom: 4px;">{{ $photo->title ?: 'Untitled Photo' }}</strong>
                         <p style="font-size: 0.8rem; color: #64748b; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">{{ $photo->content ?: 'No caption details' }}</p>
                     </div>
-                    <div style="margin-top: 14px; display: flex; justify-content: flex-end;">
+                    <div style="margin-top: 14px; display: flex; gap: 8px; justify-content: flex-end;">
+                        <button type="button" onclick="$('#edit-photo-form-{{ $photo->id }}').slideToggle(200);" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); color: #6366f1; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </button>
                         <form action="{{ route('staff.talent.photos.delete', [$talent->id, $photo->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this photo?')">
                             @csrf
                             @method('DELETE')
@@ -237,6 +240,29 @@
                             </button>
                         </form>
                     </div>
+                </div>
+
+                <!-- Inline Edit Photo Form Container -->
+                <div id="edit-photo-form-{{ $photo->id }}" style="display: none; padding: 14px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                    <form action="{{ route('staff.talent.photos.update', [$talent->id, $photo->id]) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; margin-bottom: 4px;">Photo Title</label>
+                            <input type="text" name="title" value="{{ $photo->title }}" placeholder="Photo Title" style="width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem; box-sizing: border-box;">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; margin-bottom: 4px;">Caption / Details</label>
+                            <input type="text" name="caption" value="{{ $photo->content }}" placeholder="Caption details..." style="width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem; box-sizing: border-box;">
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <label style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; margin-bottom: 4px;">Replace Image File (Optional)</label>
+                            <input type="file" name="photo" accept="image/*" style="width: 100%; font-size: 0.78rem;">
+                        </div>
+                        <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                            <button type="button" onclick="$('#edit-photo-form-{{ $photo->id }}').slideUp(200);" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">Cancel</button>
+                            <button type="submit" style="background: #6366f1; color: #ffffff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">Save Changes</button>
+                        </div>
+                    </form>
                 </div>
             </div>
             @endforeach
@@ -306,7 +332,10 @@
                         <strong style="display: block; font-size: 0.94rem; color: #0f172a; margin-bottom: 4px;">{{ $video->title ?: 'Untitled Video' }}</strong>
                         <p style="font-size: 0.8rem; color: #64748b; margin: 0;">{{ $video->content ?: 'No details provided' }}</p>
                     </div>
-                    <div style="margin-top: 14px; display: flex; justify-content: flex-end;">
+                    <div style="margin-top: 14px; display: flex; gap: 8px; justify-content: flex-end;">
+                        <button type="button" onclick="$('#edit-video-form-{{ $video->id }}').slideToggle(200);" style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); color: #6366f1; padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </button>
                         <form action="{{ route('staff.talent.videos.delete', [$talent->id, $video->id]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this video?')">
                             @csrf
                             @method('DELETE')
@@ -315,6 +344,33 @@
                             </button>
                         </form>
                     </div>
+                </div>
+
+                <!-- Inline Edit Video Form Container -->
+                <div id="edit-video-form-{{ $video->id }}" style="display: none; padding: 14px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
+                    <form action="{{ route('staff.talent.videos.update', [$talent->id, $video->id]) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; margin-bottom: 4px;">Video Title</label>
+                            <input type="text" name="title" value="{{ $video->title }}" placeholder="Video Title" style="width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem; box-sizing: border-box;">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; margin-bottom: 4px;">External Video URL (YouTube, TikTok, IG, FB)</label>
+                            <input type="url" name="video_url" value="{{ str_starts_with($video->file_path, 'http') ? $video->file_path : '' }}" placeholder="https://youtube.com/..." style="width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem; box-sizing: border-box;">
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; margin-bottom: 4px;">Or Replace Direct Video File (Optional)</label>
+                            <input type="file" name="video" accept="video/mp4,video/quicktime,video/webm" style="width: 100%; font-size: 0.78rem;">
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <label style="display: block; font-weight: 700; font-size: 0.78rem; color: #334155; margin-bottom: 4px;">Caption / Details</label>
+                            <input type="text" name="caption" value="{{ $video->content }}" placeholder="Caption details..." style="width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.82rem; box-sizing: border-box;">
+                        </div>
+                        <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                            <button type="button" onclick="$('#edit-video-form-{{ $video->id }}').slideUp(200);" style="background: #e2e8f0; color: #475569; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">Cancel</button>
+                            <button type="submit" style="background: #6366f1; color: #ffffff; border: none; padding: 6px 14px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">Save Changes</button>
+                        </div>
+                    </form>
                 </div>
             </div>
             @endforeach
