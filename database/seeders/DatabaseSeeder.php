@@ -2,458 +2,598 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\Category;
 use App\Models\Media;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Seed the application's database safely.
+     *
+     * This seeder is designed to be repeatable:
+     * - Never truncates tables
+     * - Never deletes existing records
+     * - Never duplicates categories
+     * - Never duplicates users
+     * - Never duplicates media
+     * - Never overwrites existing user passwords
+     * - Safe to run multiple times
      */
     public function run(): void
     {
-        // Seed Initial Categories
-        $categoriesList = [
-            'videodirector' => 'Video Director',
-            'musicproducer' => 'Music Producer',
-            'musicartist' => 'Music Artist',
-            'musicband' => 'Music Band',
-            'videovixen' => 'Video Vixen',
-            'dancer' => 'Dancer',
-            'actor' => 'Actor',
-            'journalist' => 'Journalist',
-            'eventmc' => 'Event MC',
-            'musicmc' => 'Music MC',
-            'guitarist' => 'Guitarist',
-            'pianist' => 'Pianist',
-            'musicdj' => 'Music DJ',
-            'contentcreator' => 'Content Creator',
-            'talented' => 'Talented',
-            'manager' => 'Manager',
-            'management' => 'Management',
-            'comedian' => 'Comedian',
-            'onlinetv' => 'Online TV'
-        ];
+        DB::transaction(function () {
 
-        foreach ($categoriesList as $slug => $name) {
-            \App\Models\Category::create([
-                'slug' => $slug,
-                'name' => $name
-            ]);
-        }
+            /*
+             * ============================================================
+             * 1. SEED CATEGORIES
+             * ============================================================
+             */
 
-        // 1. Seed Super Admin Account
-        User::create([
-            'name' => 'Super Admin',
-            'email' => 'connectchap@gmail.com',
-            'password' => Hash::make('password@2026'),
-            'role' => 'admin',
-            'category' => 'management',
-            'category_label' => 'Administration',
-            'country' => 'East Africa Tanzania',
-        ]);
+            $categoriesList = [
+                'videodirector' => 'Video Director',
+                'musicproducer' => 'Music Producer',
+                'musicartist' => 'Music Artist',
+                'musicband' => 'Music Band',
+                'videovixen' => 'Video Vixen',
+                'dancer' => 'Dancer',
+                'actor' => 'Actor',
+                'journalist' => 'Journalist',
+                'eventmc' => 'Event MC',
+                'musicmc' => 'Music MC',
+                'guitarist' => 'Guitarist',
+                'pianist' => 'Pianist',
+                'musicdj' => 'Music DJ',
+                'contentcreator' => 'Content Creator',
+                'talented' => 'Talented',
+                'manager' => 'Manager',
+                'management' => 'Management',
+                'comedian' => 'Comedian',
+                'onlinetv' => 'Online TV',
+            ];
 
-        // 2. Mock Talents Data
-        $talents = [
-            [
-                'id' => 'zuuhtwalib',
-                'name' => 'Zuuh Twalib - PLANET FM',
-                'category' => 'journalist',
-                'category_label' => 'Journalist/Media',
-                'description' => 'Experienced radio journalist and media presenter at Planet FM, dedicated to bringing the latest updates, culture news, and high-energy broadcasts to the community.',
-                'image' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'chapconnect',
-                'name' => 'Chap Connect',
-                'category' => 'management',
-                'category_label' => 'Management',
-                'description' => 'Premium entertainment talent management agency representing elite artists, actors, directors, and creators across East Africa.',
-                'image' => 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-hands-adjusting-sound-board-faders-in-studio-41591-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'jaycombat',
-                'name' => 'Jay Combat',
-                'category' => 'musicartist',
-                'category_label' => 'Music Artist',
-                'description' => 'High-speed Singeli artist pushing the boundaries of traditional Tanzanian street music with rapid lyrics and infectious high-tempo beats.',
-                'image' => 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'bambocomedian',
-                'name' => 'Bambo Comedian',
-                'category' => 'comedian',
-                'category_label' => 'Comedian',
-                'description' => 'Versatile stand-up comedian and comic creator known for hilarious sketches, observational humor, and captivating live audiences.',
-                'image' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-backlight-41838-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'mafuru',
-                'name' => 'Mafuru Comedian',
-                'category' => 'comedian',
-                'category_label' => 'Comedian',
-                'description' => 'Energetic comedy artist focusing on physical comedy, street interviews, and engaging social media content that keeps thousands laughing daily.',
-                'image' => 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-backlight-41838-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'melodiesclassicband',
-                'name' => 'The Melodies Classic Band',
-                'category' => 'musicband',
-                'category_label' => 'Music Band',
-                'description' => 'Premium live performance band playing classic fusion, Afro-jazz, and contemporary pop covers. Available for weddings, corporate galas, and VIP shows.',
-                'image' => 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-video-camera-screen-filming-a-concert-41587-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'directorclevorx',
-                'name' => 'Director Clevor X',
-                'category' => 'videodirector',
-                'category_label' => 'Video Director',
-                'description' => 'Award-winning cinematographer and director specializing in music videos, commercials, and visual storytelling that transforms brands.',
-                'image' => 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-video-camera-screen-filming-a-concert-41587-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'minobongotv',
-                'name' => 'Mino Bongo TV',
-                'category' => 'onlinetv',
-                'category_label' => 'Online TV',
-                'description' => 'Leading online television channel covering music releases, artist gossip, cultural news, and trending social debates across Tanzania.',
-                'image' => 'https://images.unsplash.com/photo-1626379616459-b2ce1d9decbc?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1626379616459-b2ce1d9decbc?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1598257006458-087169a1f08d?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-video-camera-screen-filming-a-concert-41587-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'rude',
-                'name' => 'Rude',
-                'category' => 'videodirector',
-                'category_label' => 'Video Director',
-                'description' => 'Multi-talented video director and screenplay writer known for deep visual narratives, musicality, and cinematic lighting setups.',
-                'image' => 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-holding-a-video-camera-recording-footage-41589-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'lwitikomatumba',
-                'name' => 'Lwitiko Matumba',
-                'category' => 'musicartist',
-                'category_label' => 'Music Artist',
-                'description' => 'Creative fusion singer and vocal artist exploring traditional styles combined with modern afro-beats rhythms.',
-                'image' => 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'aryana',
-                'name' => 'Aryana',
-                'category' => 'musicartist',
-                'category_label' => 'Music Artist',
-                'description' => 'Gospel musician and talented film actress blending soulful melodies with inspirational and powerful message-driven lyrics.',
-                'image' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'tyserxl',
-                'name' => 'Tyser XL',
-                'category' => 'musicartist',
-                'category_label' => 'Music Artist',
-                'description' => 'Fierce HipHop lyricist known for hard-hitting delivery, socially conscious bars, and a commanding mic presence.',
-                'image' => 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'popweezy',
-                'name' => 'Pop Weezy',
-                'category' => 'musicartist',
-                'category_label' => 'Music Artist',
-                'description' => 'Rising star of the East African drill scene, delivering heavy 808s and fast-paced rhymes about modern urban life.',
-                'image' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'zellahmsekeni',
-                'name' => 'Zellah Msekeni',
-                'category' => 'musicartist',
-                'category_label' => 'Music Artist',
-                'description' => 'Expressive multi-talent bridging high-energy spiritual dancing, acting, and gospel recording to inspire youth across regions.',
-                'image' => 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'ukhtymayrah',
-                'name' => 'Ukhty Mayrah',
-                'category' => 'contentcreator',
-                'category_label' => 'Content Creator',
-                'description' => 'Creative digital designer and social media influencer making engaging lifestyle videos, reviews, and community stories.',
-                'image' => 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-backlight-41838-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'directorngalawa',
-                'name' => 'Director Ngalawa',
-                'category' => 'videodirector',
-                'category_label' => 'Video Director',
-                'description' => 'Prominent visual creator specializing in high-definition video production, narrative-driven cinematography, and top-tier musical edits.',
-                'image' => 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1542204172-e7052809f85e?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-holding-a-video-camera-recording-footage-41589-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'ghosthandbeatz',
-                'name' => 'Ghosthand Tz',
-                'category' => 'musicproducer',
-                'category_label' => 'Music Producer',
-                'description' => 'Elite beatmaker and audio engineer forging iconic Afro-pop, Bongo Flava, and Trap backdrops for superstars.',
-                'image' => 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-hands-adjusting-sound-board-faders-in-studio-41591-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'nazzerplanetfm',
-                'name' => 'Nazzer Controller Planet FM',
-                'category' => 'journalist',
-                'category_label' => 'Journalist/Media',
-                'description' => 'Highly energetic entertainment pundit and host bringing celebrity exclusives and fresh music news to the radio airwaves.',
-                'image' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'producerelly',
-                'name' => 'Producer Elly',
-                'category' => 'musicproducer',
-                'category_label' => 'Music Producer',
-                'description' => 'Renowned record producer and master mixing expert who sculpted numerous top-charting tracks and emotional ballads.',
-                'image' => 'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-hands-adjusting-sound-board-faders-in-studio-41591-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'cinehood',
-                'name' => 'Cinehood',
-                'category' => 'videodirector',
-                'category_label' => 'Video Director',
-                'description' => 'Creative film studio and video director group creating television advertisements and cinematic musical blockbusters.',
-                'image' => 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-video-camera-screen-filming-a-concert-41587-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'directornasonga',
-                'name' => 'Director Nasonga',
-                'category' => 'videodirector',
-                'category_label' => 'Video Director',
-                'description' => 'Cinematic director known for dramatic shorts, full-length storytelling movies, and visually stunning musical releases.',
-                'image' => 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-holding-a-video-camera-recording-footage-41589-large.mp4'
-                ]
-            ],
-            [
-                'id' => 'winnerman',
-                'name' => 'Winner Man',
-                'category' => 'contentcreator',
-                'category_label' => 'Content Creator',
-                'description' => 'Inspiring digital video blogger publishing creative challenges, social experiments, and comedy clips across multiple online platforms.',
-                'image' => 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&auto=format&fit=crop&q=80',
-                'phone' => '+255 710 383 352',
-                'photos' => [
-                    'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80',
-                    'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80'
-                ],
-                'videos' => [
-                    'https://assets.mixkit.co/videos/preview/mixkit-holding-a-video-camera-recording-footage-41589-large.mp4'
-                ]
-            ]
-        ];
-
-        // 3. Seed Talents and their Media Portfolio
-        foreach ($talents as $t) {
-            $user = User::create([
-                'name' => $t['name'],
-                'email' => $t['id'] . '@chapconnect.com',
-                'password' => Hash::make('password123'), // standard mock password
-                'category' => $t['category'],
-                'category_label' => $t['category_label'],
-                'description' => $t['description'],
-                'profile_image' => $t['image'],
-                'phone' => $t['phone'],
-                'country' => 'East Africa Tanzania',
-                'role' => 'user',
-                'is_published' => true,
-                'social_instagram' => 'https://instagram.com',
-                'social_facebook' => 'https://facebook.com',
-                'social_tiktok' => 'https://tiktok.com',
-                'social_youtube' => 'https://youtube.com',
-            ]);
-
-            // Seed Photos
-            foreach ($t['photos'] as $pUrl) {
-                Media::create([
-                    'user_id' => $user->id,
-                    'type' => 'photo',
-                    'file_path' => $pUrl
-                ]);
+            foreach ($categoriesList as $slug => $name) {
+                Category::firstOrCreate(
+                    ['slug' => $slug],
+                    ['name' => $name]
+                );
             }
 
-            // Seed Videos
-            foreach ($t['videos'] as $vUrl) {
-                Media::create([
-                    'user_id' => $user->id,
-                    'type' => 'video',
-                    'file_path' => $vUrl
+            /*
+             * ============================================================
+             * 2. SUPER ADMIN
+             * ============================================================
+             *
+             * IMPORTANT:
+             * Existing admin account is NEVER modified.
+             *
+             * If the admin does not exist, the seeder will ask for a
+             * password interactively instead of storing a password
+             * inside this source file.
+             */
+
+            $adminEmail = 'connectchap@gmail.com';
+
+            $admin = User::where('email', $adminEmail)->first();
+
+            if (!$admin) {
+
+                $password = $this->command
+                    ? $this->command->secret(
+                        'Enter password for the new Super Admin'
+                    )
+                    : null;
+
+                if (!$password) {
+                    throw new \RuntimeException(
+                        'Cannot create Super Admin: no password was provided.'
+                    );
+                }
+
+                if (strlen($password) < 12) {
+                    throw new \RuntimeException(
+                        'Super Admin password must be at least 12 characters.'
+                    );
+                }
+
+                User::create([
+                    'name' => 'Super Admin',
+                    'email' => $adminEmail,
+                    'password' => Hash::make($password),
+                    'role' => 'admin',
+                    'category' => 'management',
+                    'category_label' => 'Administration',
+                    'country' => 'East Africa Tanzania',
                 ]);
+
+                $this->command?->info(
+                    'Super Admin created successfully.'
+                );
+            } else {
+                $this->command?->info(
+                    'Super Admin already exists. No changes made to the account.'
+                );
             }
-        }
+
+            /*
+             * ============================================================
+             * 3. DEMO TALENTS
+             * ============================================================
+             */
+
+            $talents = [
+
+                [
+                    'id' => 'zuuhtwalib',
+                    'name' => 'Zuuh Twalib - PLANET FM',
+                    'category' => 'journalist',
+                    'category_label' => 'Journalist/Media',
+                    'description' => 'Experienced radio journalist and media presenter at Planet FM, dedicated to bringing the latest updates, culture news, and high-energy broadcasts to the community.',
+                    'image' => 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'chapconnect',
+                    'name' => 'Chap Connect',
+                    'category' => 'management',
+                    'category_label' => 'Management',
+                    'description' => 'Premium entertainment talent management agency representing elite artists, actors, directors, and creators across East Africa.',
+                    'image' => 'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-hands-adjusting-sound-board-faders-in-studio-41591-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'jaycombat',
+                    'name' => 'Jay Combat',
+                    'category' => 'musicartist',
+                    'category_label' => 'Music Artist',
+                    'description' => 'High-speed Singeli artist pushing the boundaries of traditional Tanzanian street music with rapid lyrics and infectious high-tempo beats.',
+                    'image' => 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'bambocomedian',
+                    'name' => 'Bambo Comedian',
+                    'category' => 'comedian',
+                    'category_label' => 'Comedian',
+                    'description' => 'Versatile stand-up comedian and comic creator known for hilarious sketches, observational humor, and captivating live audiences.',
+                    'image' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-backlight-41838-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'mafuru',
+                    'name' => 'Mafuru Comedian',
+                    'category' => 'comedian',
+                    'category_label' => 'Comedian',
+                    'description' => 'Energetic comedy artist focusing on physical comedy, street interviews, and engaging social media content that keeps thousands laughing daily.',
+                    'image' => 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-backlight-41838-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'melodiesclassicband',
+                    'name' => 'The Melodies Classic Band',
+                    'category' => 'musicband',
+                    'category_label' => 'Music Band',
+                    'description' => 'Premium live performance band playing classic fusion, Afro-jazz, and contemporary pop covers. Available for weddings, corporate galas, and VIP shows.',
+                    'image' => 'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-video-camera-screen-filming-a-concert-41587-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'directorclevorx',
+                    'name' => 'Director Clevor X',
+                    'category' => 'videodirector',
+                    'category_label' => 'Video Director',
+                    'description' => 'Award-winning cinematographer and director specializing in music videos, commercials, and visual storytelling that transforms brands.',
+                    'image' => 'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-video-camera-screen-filming-a-concert-41587-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'minobongotv',
+                    'name' => 'Mino Bongo TV',
+                    'category' => 'onlinetv',
+                    'category_label' => 'Online TV',
+                    'description' => 'Leading online television channel covering music releases, artist gossip, cultural news, and trending social debates across Tanzania.',
+                    'image' => 'https://images.unsplash.com/photo-1626379616459-b2ce1d9decbc?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1626379616459-b2ce1d9decbc?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1598257006458-087169a1f08d?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-video-camera-screen-filming-a-concert-41587-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'rude',
+                    'name' => 'Rude',
+                    'category' => 'videodirector',
+                    'category_label' => 'Video Director',
+                    'description' => 'Multi-talented video director and screenplay writer known for deep visual narratives, musicality, and cinematic lighting setups.',
+                    'image' => 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-holding-a-video-camera-recording-footage-41589-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'lwitikomatumba',
+                    'name' => 'Lwitiko Matumba',
+                    'category' => 'musicartist',
+                    'category_label' => 'Music Artist',
+                    'description' => 'Creative fusion singer and vocal artist exploring traditional styles combined with modern afro-beats rhythms.',
+                    'image' => 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'aryana',
+                    'name' => 'Aryana',
+                    'category' => 'musicartist',
+                    'category_label' => 'Music Artist',
+                    'description' => 'Gospel musician and talented film actress blending soulful melodies with inspirational and powerful message-driven lyrics.',
+                    'image' => 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'tyserxl',
+                    'name' => 'Tyser XL',
+                    'category' => 'musicartist',
+                    'category_label' => 'Music Artist',
+                    'description' => 'Fierce HipHop lyricist known for hard-hitting delivery, socially conscious bars, and a commanding mic presence.',
+                    'image' => 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'popweezy',
+                    'name' => 'Pop Weezy',
+                    'category' => 'musicartist',
+                    'category_label' => 'Music Artist',
+                    'description' => 'Rising star of the East African drill scene, delivering heavy 808s and fast-paced rhymes about modern urban life.',
+                    'image' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'zellahmsekeni',
+                    'name' => 'Zellah Msekeni',
+                    'category' => 'musicartist',
+                    'category_label' => 'Music Artist',
+                    'description' => 'Expressive multi-talent bridging high-energy spiritual dancing, acting, and gospel recording to inspire youth across regions.',
+                    'image' => 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'ukhtymayrah',
+                    'name' => 'Ukhty Mayrah',
+                    'category' => 'contentcreator',
+                    'category_label' => 'Content Creator',
+                    'description' => 'Creative digital designer and social media influencer making engaging lifestyle videos, reviews, and community stories.',
+                    'image' => 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-backlight-41838-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'directorngalawa',
+                    'name' => 'Director Ngalawa',
+                    'category' => 'videodirector',
+                    'category_label' => 'Video Director',
+                    'description' => 'Prominent visual creator specializing in high-definition video production, narrative-driven cinematography, and top-tier musical edits.',
+                    'image' => 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1542204172-e7052809f85e?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-holding-a-video-camera-recording-footage-41589-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'ghosthandbeatz',
+                    'name' => 'Ghosthand Tz',
+                    'category' => 'musicproducer',
+                    'category_label' => 'Music Producer',
+                    'description' => 'Elite beatmaker and audio engineer forging iconic Afro-pop, Bongo Flava, and Trap backdrops for superstars.',
+                    'image' => 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-hands-adjusting-sound-board-faders-in-studio-41591-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'nazzerplanetfm',
+                    'name' => 'Nazzer Controller Planet FM',
+                    'category' => 'journalist',
+                    'category_label' => 'Journalist/Media',
+                    'description' => 'Highly energetic entertainment pundit and host bringing celebrity exclusives and fresh music news to the radio airwaves.',
+                    'image' => 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-singer-singing-into-a-microphone-in-a-studio-41583-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'producerelly',
+                    'name' => 'Producer Elly',
+                    'category' => 'musicproducer',
+                    'category_label' => 'Music Producer',
+                    'description' => 'Renowned record producer and master mixing expert who sculpted numerous top-charting tracks and emotional ballads.',
+                    'image' => 'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-hands-adjusting-sound-board-faders-in-studio-41591-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'cinehood',
+                    'name' => 'Cinehood',
+                    'category' => 'videodirector',
+                    'category_label' => 'Video Director',
+                    'description' => 'Creative film studio and video director group creating television advertisements and cinematic musical blockbusters.',
+                    'image' => 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1485846234645-a62644f84728?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-video-camera-screen-filming-a-concert-41587-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'directornasonga',
+                    'name' => 'Director Nasonga',
+                    'category' => 'videodirector',
+                    'category_label' => 'Video Director',
+                    'description' => 'Cinematic director known for dramatic shorts, full-length storytelling movies, and visually stunning musical releases.',
+                    'image' => 'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1598899134739-24c46f58b8c0?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-holding-a-video-camera-recording-footage-41589-large.mp4',
+                    ],
+                ],
+
+                [
+                    'id' => 'winnerman',
+                    'name' => 'Winner Man',
+                    'category' => 'contentcreator',
+                    'category_label' => 'Content Creator',
+                    'description' => 'Inspiring digital video blogger publishing creative challenges, social experiments, and comedy clips across multiple online platforms.',
+                    'image' => 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&auto=format&fit=crop&q=80',
+                    'phone' => '+255 710 383 352',
+                    'photos' => [
+                        'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=800&auto=format&fit=crop&q=80',
+                        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&auto=format&fit=crop&q=80',
+                    ],
+                    'videos' => [
+                        'https://assets.mixkit.co/videos/preview/mixkit-holding-a-video-camera-recording-footage-41589-large.mp4',
+                    ],
+                ],
+            ];
+
+            /*
+             * ============================================================
+             * 4. SEED TALENTS SAFELY
+             * ============================================================
+             */
+
+            foreach ($talents as $talent) {
+
+                $email = $talent['id'] . '@chapconnect.com';
+
+                /*
+                 * Find existing user first.
+                 *
+                 * IMPORTANT:
+                 * Existing users are NOT updated.
+                 */
+                $user = User::where('email', $email)->first();
+
+                if (!$user) {
+
+                    $user = User::create([
+                        'name' => $talent['name'],
+                        'email' => $email,
+                        'password' => Hash::make(
+                            'password123'
+                        ),
+                        'category' => $talent['category'],
+                        'category_label' => $talent['category_label'],
+                        'description' => $talent['description'],
+                        'profile_image' => $talent['image'],
+                        'phone' => $talent['phone'],
+                        'country' => 'East Africa Tanzania',
+                        'role' => 'user',
+                        'is_published' => true,
+                        'social_instagram' => 'https://instagram.com',
+                        'social_facebook' => 'https://facebook.com',
+                        'social_tiktok' => 'https://tiktok.com',
+                        'social_youtube' => 'https://youtube.com',
+                    ]);
+
+                    $this->command?->info(
+                        "Created talent: {$talent['name']}"
+                    );
+                } else {
+
+                    $this->command?->info(
+                        "Talent already exists: {$talent['name']} - skipped user creation."
+                    );
+                }
+
+                /*
+                 * ========================================================
+                 * PHOTOS
+                 * ========================================================
+                 *
+                 * Only create a media record if the same user/type/path
+                 * combination does not already exist.
+                 */
+
+                foreach ($talent['photos'] as $photoUrl) {
+
+                    Media::firstOrCreate([
+                        'user_id' => $user->id,
+                        'type' => 'photo',
+                        'file_path' => $photoUrl,
+                    ]);
+                }
+
+                /*
+                 * ========================================================
+                 * VIDEOS
+                 * ========================================================
+                 */
+
+                foreach ($talent['videos'] as $videoUrl) {
+
+                    Media::firstOrCreate([
+                        'user_id' => $user->id,
+                        'type' => 'video',
+                        'file_path' => $videoUrl,
+                    ]);
+                }
+            }
+        });
+
+        $this->command?->info(
+            'Database seeding completed safely.'
+        );
     }
 }
