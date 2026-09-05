@@ -399,6 +399,9 @@
             <h4 style="margin: 0 0 6px 0; color: #475569; font-weight: 700;">No News Bulletins Published</h4>
             <p style="margin: 0; font-size: 0.88rem;">Publish news articles and tour announcements using the form above.</p>
         </div>
+        @endif
+    </div>
+
     <!-- Photo Lightbox Viewer Modal -->
     <div id="photoViewerModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.92); backdrop-filter: blur(8px); z-index: 999999; justify-content: center; align-items: center; padding: 20px;" onclick="closePhotoViewer()">
         <div style="position: relative; max-width: 90vw; max-height: 90vh; text-align: center;" onclick="event.stopPropagation();">
