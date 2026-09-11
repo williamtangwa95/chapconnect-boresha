@@ -75,6 +75,16 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function profile()
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+
+        return view('dashboard.profile', [
+            'user' => $user,
+        ]);
+    }
+
     public function update(Request $request)
     {
         /** @var \App\Models\User $user */
@@ -82,6 +92,7 @@ class DashboardController extends Controller
 
         $rules = [
             'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:30',
             'country' => 'nullable|string|max:100',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:12288',
@@ -185,7 +196,7 @@ class DashboardController extends Controller
         }
 
         $data = $request->only([
-            'name', 'country', 'description',
+            'name', 'email', 'country', 'description',
             'social_instagram', 'social_facebook', 'social_tiktok', 'social_youtube'
         ]);
 

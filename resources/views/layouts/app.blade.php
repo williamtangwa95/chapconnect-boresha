@@ -285,6 +285,9 @@
                 @endif
 
                 <div class="drawer-section-label">ACCOUNT</div>
+                <a href="{{ route('dashboard.profile') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.profile') ? 'active' : '' }}">
+                    <i class="bi bi-person-gear" style="color: #60a5fa;"></i> {{ __('My Profile') }}
+                </a>
                 <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-mobile-link" style="color: #fca5a5 !important;">
                     <i class="bi bi-box-arrow-right" style="color: #ef4444;"></i> {{ __('Logout') }}
                 </a>
@@ -344,8 +347,11 @@
                 </div>
             </div>
             <div class="drawer-footer-actions">
-                <a href="{{ route('dashboard') }}" class="drawer-action-btn" title="Account Settings">
-                    <i class="bi bi-gear-fill"></i>
+                <a href="{{ route('dashboard.profile') }}" class="drawer-action-btn" title="{{ __('My Profile') }}">
+                    <i class="bi bi-person-gear"></i>
+                </a>
+                <a href="{{ route('dashboard') }}" class="drawer-action-btn" title="Account Overview">
+                    <i class="bi bi-speedometer2"></i>
                 </a>
                 <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="drawer-action-btn drawer-action-logout" title="Logout">
                     <i class="bi bi-box-arrow-right"></i>
@@ -628,6 +634,9 @@
                     @endif
 
                     <div class="drawer-section-label">ACCOUNT</div>
+                    <a href="{{ route('dashboard.profile') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.profile') ? 'active' : '' }}">
+                        <i class="bi bi-person-gear" style="color: #60a5fa;"></i> {{ __('My Profile') }}
+                    </a>
                     <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="nav-mobile-link" style="color: #fca5a5 !important;">
                         <i class="bi bi-box-arrow-right" style="color: #ef4444;"></i> {{ __('Logout') }}
                     </a>
@@ -687,8 +696,11 @@
                     </div>
                 </div>
                 <div class="drawer-footer-actions">
-                    <a href="{{ route('dashboard') }}" class="drawer-action-btn" title="Account Settings">
-                        <i class="bi bi-gear-fill"></i>
+                    <a href="{{ route('dashboard.profile') }}" class="drawer-action-btn" title="{{ __('My Profile') }}">
+                        <i class="bi bi-person-gear"></i>
+                    </a>
+                    <a href="{{ route('dashboard') }}" class="drawer-action-btn" title="Account Overview">
+                        <i class="bi bi-speedometer2"></i>
                     </a>
                     <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="drawer-action-btn drawer-action-logout" title="Logout">
                         <i class="bi bi-box-arrow-right"></i>
@@ -916,6 +928,9 @@
                 <div class="sidebar-group-label">MAIN CONTROL</div>
                 <a href="{{ route('dashboard') }}" class="sidebar-link {{ Request::routeIs('dashboard') && !Request::has('tab') ? 'active' : '' }}">
                     <i class="bi bi-speedometer2"></i> <span>Dashboard Overview</span>
+                </a>
+                <a href="{{ route('dashboard.profile') }}" class="sidebar-link {{ Request::routeIs('dashboard.profile') ? 'active' : '' }}">
+                    <i class="bi bi-person-gear"></i> <span>My Profile Settings</span>
                 </a>
                 <a href="{{ route('dashboard') }}?tab=billing" class="sidebar-link {{ Request::routeIs('dashboard') && Request::input('tab') === 'billing' ? 'active' : '' }}">
                     <i class="bi bi-receipt"></i> <span>My Package & Bills</span>
@@ -2088,7 +2103,7 @@
             const toast = document.createElement('div');
             toast.className = 'toast-alert toast-error auto-toast-item maintenance-dynamic-toast';
             toast.style.cssText = 'background: #0f172a; border: 1px solid rgba(245, 158, 11, 0.6); color: #ffffff; box-shadow: 0 15px 35px rgba(0,0,0,0.5); font-family: system-ui, -apple-system, sans-serif; border-radius: 16px; padding: 18px 20px; z-index: 999999; animation: slideInRight 0.3s ease; width: 100%; max-width: 440px;';
-            
+
             toast.innerHTML = `
                 <div style="display: flex; align-items: flex-start; gap: 14px;">
                     <div style="width: 40px; height: 40px; border-radius: 50%; background: rgba(245, 158, 11, 0.2); border: 1.5px solid #f59e0b; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">

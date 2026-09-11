@@ -51,6 +51,7 @@ Route::post('/forgot-password/verify', [AuthController::class, 'verifySecurityQu
 // User Dashboard Panel Routes (Authenticated)
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/profile', [DashboardController::class, 'profile'])->name('dashboard.profile');
     Route::post('/dashboard/update', [DashboardController::class, 'update'])->name('dashboard.update');
     
     // Photos uploads management
