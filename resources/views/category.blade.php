@@ -20,12 +20,8 @@
     <div class="talent-grid">
         @forelse($talents as $talent)
             <div class="container">
-                <div class="image">
-                    @if($talent->profile_image)
-                        <img src="{{ $talent->profile_image }}" alt="{{ $talent->name }}">
-                    @else
-                        <img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600&auto=format&fit=crop&q=80" alt="{{ $talent->name }}">
-                    @endif
+                <div class="imagea">
+                        <img src="{{ $talent->avatar_url }}" alt="{{ $talent->name }}">
                 </div>
                 <div class="details">
                     <h2>{{ $talent->name }}</h2>

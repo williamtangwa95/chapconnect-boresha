@@ -35,11 +35,7 @@
     <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-radius: 20px; padding: 26px 30px; color: #ffffff; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.2); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px; border: 1px solid rgba(255, 255, 255, 0.08);">
         <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
             <div style="width: 90px; height: 90px; border-radius: 50%; overflow: hidden; border: 3px solid rgba(255,255,255,0.2); box-shadow: 0 8px 24px rgba(0,0,0,0.4); flex-shrink: 0; background: #334155; display: flex; align-items: center; justify-content: center; position: relative;">
-                @if($talent->profile_image)
-                <img src="{{ asset($talent->profile_image) }}" alt="{{ $talent->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
-                @else
-                <i class="bi bi-person-fill" style="font-size: 3.2rem; color: #94a3b8;"></i>
-                @endif
+                <img src="{{ $talent->avatar_url }}" alt="{{ $talent->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
             </div>
             <div>
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px; flex-wrap: wrap;">
@@ -218,7 +214,7 @@
             @foreach($photos as $photo)
             <div style="background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 14px rgba(0,0,0,0.03); display: flex; flex-direction: column; transition: transform 0.2s ease;">
                 <div style="width: 100%; aspect-ratio: 4/3; overflow: hidden; position: relative; background: #0f172a; cursor: pointer;" onclick="openPhotoViewer('{{ asset($photo->file_path) }}', '{{ addslashes($photo->title ?: 'Portfolio Photo') }}', '{{ addslashes($photo->content ?: '') }}')">
-                    <img src="{{ asset($photo->file_path) }}" alt="{{ $photo->title }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.3s ease;">
+                    <img src="{{ asset($photo->file_path) }}" alt="{{ $photo->title }}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;">
                     <div style="position: absolute; top: 10px; right: 10px; background: rgba(15,23,42,0.75); backdrop-filter: blur(4px); padding: 4px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 4px;">
                         <i class="bi bi-arrows-angle-expand"></i> View
                     </div>

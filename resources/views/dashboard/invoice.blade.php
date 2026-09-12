@@ -343,7 +343,7 @@
                 <h3>Invoice Details</h3>
                 <p><strong>Date Issued:</strong> {{ date('M d, Y', strtotime($invoice->created_at)) }}</p>
                 <p><strong>Payment Due:</strong> {{ date('M d, Y', strtotime($invoice->due_date)) }}</p>
-                <p><strong>Billing Cycle:</strong> {{ date('M d, Y', strtotime($invoice->start_date)) }} - {{ date('M d, Y', strtotime($invoice->end_date)) }}</p>
+                <p><strong>Billing Cycle:</strong> {{ ($invoice->duration == -1 || $invoice->duration_unit === 'lifetime' || str_contains($invoice->end_date, '2099')) ? 'Lifetime Access' : date('M d, Y', strtotime($invoice->start_date)) . ' - ' . date('M d, Y', strtotime($invoice->end_date)) }}</p>
             </div>
         </div>
 

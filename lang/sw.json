@@ -267,5 +267,10 @@
     "Video added but flagged for review due to potentially inappropriate content. It will remain hidden from the public until reviewed.": "Video imepakiwa lakini imezuiwa na mfumo wa maadili. Haionekani hadharani hadi ikaguliwe.",
     "Your account has been blocked due to violation of content guidelines. Please contact Customer Care to unblock.": "Akaunti yako imefungiwa kutokana na kukiuka miongozo ya maudhui. Tafadhali wasiliana na Huduma kwa Wateja (Customer Care) kufunguliwa.",
     "Your account has been blocked due to multiple consecutive failed login attempts. Please contact Customer Care to unblock.": "Akaunti yako imefungiwa kutokana na majaribio mengi ya nenosiri yasiyo sahihi. Tafadhali wasiliana na Huduma kwa Wateja (Customer Care) kufunguliwa.",
-    "Your account has been suspended by administration. Please contact Customer Care to unblock.": "Akaunti yako imesimamishwa na utawala. Tafadhali wasiliana na Huduma kwa Wateja (Customer Care) kufunguliwa."
+    "Your account has been suspended by administration. Please contact Customer Care to unblock.": "Akaunti yako imesimamishwa na utawala. Tafadhali wasiliana na Huduma kwa Wateja (Customer Care) kufunguliwa.",
+    "Phone Number Visibility": "Muonekano wa Namba ya Simu",
+    "Yes — Show Phone Number Publicly": "Ndio — Onyesha Namba ya Simu Hadharani",
+    "No — Keep Phone Number Private / Hidden": "Hapana — Ficha Namba ya Simu / Iwe ya Siri",
+    "Public visitors can view your contact details.": "Watembeleaji wa mtandaoni wanaweza kuona taarifa zako za mawasiliano.",
+    "Phone number will be kept hidden/private from public visitors.": "Namba ya simu itafichwa / itakuwa ya siri kwa watembeleaji wa mtandaoni."
 }

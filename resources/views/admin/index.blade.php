@@ -11,24 +11,20 @@
          ========================================== -->
         <div id="tab-dashboard" class="tab-content">
             <!-- Executive Header Banner -->
-            <div class="dashboard-header" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; padding: 24px 28px; border-radius: 18px; margin-bottom: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; border: 1px solid rgba(255,255,255,0.08);">
-                <div class="dashboard-welcome" style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; max-width: 100%;">
-                    <div class="dashboard-avatar" style="width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); display: flex; align-items: center; justify-content: center; font-size: 26px; color: #fff; box-shadow: 0 4px 15px rgba(99,102,241,0.4); flex-shrink: 0;">
-                        <i class="bi bi-shield-lock-fill"></i>
-                    </div>
-                    <div class="dashboard-welcome-text" style="flex: 1; min-width: 220px;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
-                            <h2 style="color: #ffffff; margin: 0; font-size: 1.4rem; font-weight: 800; word-break: break-word;">Welcome, {{ auth()->user()->name }}</h2>
-                            <span style="font-size: 0.72rem; font-weight: 700; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 3px 9px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                                <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; display: inline-block;"></span> System Operational
+            <div class="dashboard-header" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #ffffff; padding: 14px 20px; border-radius: 14px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.12); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border: 1px solid rgba(255,255,255,0.08);">
+                <div class="dashboard-welcome" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; max-width: 100%;">
+                    <div class="dashboard-welcome-text" style="flex: 1; min-width: 180px;">
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                            <h2 style="color: #ffffff; margin: 0; font-size: 1.15rem; font-weight: 800; word-break: break-word;">Welcome, {{ auth()->user()->name }}</h2>
+                            <span style="font-size: 0.68rem; font-weight: 700; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 2px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                                <span style="width: 5px; height: 5px; border-radius: 50%; background: #34d399; display: inline-block;"></span> System Operational
                             </span>
                         </div>
-                        <p style="color: #94a3b8; margin: 0; font-size: 0.88rem; line-height: 1.4;">Executive Command Center • Real-time platform oversight, talent analytics, and directory control.</p>
                     </div>
                 </div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <a href="{{ route('home') }}" target="_blank" class="vbtn" style="width: auto; padding: 9px 18px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 30px; font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
-                        <i class="bi bi-globe"></i> View Live Site
+                    <a href="{{ route('home') }}" target="_blank" class="vbtn" style="width: auto; padding: 7px 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 30px; font-weight: 700; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;">
+                        <i class="bi bi-globe" style="font-size: 0.85rem;"></i> View Live Site
                     </a>
                 </div>
             </div>
@@ -125,13 +121,7 @@
                                     <td style="font-weight: 700; color: #64748b; font-size: 0.82rem; text-align: center;">{{ $loop->iteration }}</td>
                                     <td style="font-weight: 700; color: #0f172a; font-size: 0.9rem;">
                                         <div style="display: flex; align-items: center; gap: 10px;">
-                                            @if($u->profile_image)
-                                            <img src="{{ asset($u->profile_image) }}" alt="{{ $u->name }}" class="zoomable-profile-img" data-full-src="{{ asset($u->profile_image) }}" data-name="{{ $u->name }}" data-category="{{ $u->category_label }}" title="Click to zoom profile picture" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); cursor: pointer;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop';">
-                                            @else
-                                            <div class="zoomable-profile-img" data-full-src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop" data-name="{{ $u->name }}" data-category="{{ $u->category_label }}" title="Click to view full size" style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; cursor: pointer;">
-                                                {{ strtoupper(substr($u->name, 0, 1)) }}
-                                            </div>
-                                            @endif
+                                            <img src="{{ $u->avatar_url }}" alt="{{ $u->name }}" class="zoomable-profile-img" data-full-src="{{ $u->avatar_url }}" data-name="{{ $u->name }}" data-category="{{ $u->category_label }}" title="Click to zoom profile picture" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); cursor: pointer;" onerror="this.onerror=null; this.src='{{ asset('images/default-avatar.png') }}';">
                                             <div>
                                                 <span style="display: block;">{{ $u->name }}</span>
                                                 <span style="font-size: 0.75rem; color: #64748b; font-weight: 400;">{{ $u->email }}</span>
@@ -337,28 +327,29 @@
          TAB 2: Registered Talents content
          ========================================== -->
         <div id="tab-talents" class="tab-content">
-            <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
+            <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
                 <div>
-                    <h1 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: flex; align-items: center; gap: 10px;">
-                        <i class="bi bi-people-fill" style="color: var(--primary);"></i> Registered Talents Directory
+                    <h1 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-people-fill" style="color: #6366f1;"></i> Registered Talents Directory
                     </h1>
-                    <p style="color: #64748b; margin: 0; font-size: 0.92rem;">Review, edit profiles, publish/unpublish, or manage registered creative talent accounts.</p>
+                    <p style="color: #64748b; margin: 0; font-size: 0.85rem; line-height: 1.4;">Review, edit profiles, manage publishing status, and platform credentials.</p>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                    <div style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 0.88rem; border: 1px solid rgba(99, 102, 241, 0.2);">
-                        <i class="bi bi-person-check-fill"></i> Total Talents: {{ count($users) }}
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div style="background: rgba(99, 102, 241, 0.08); color: #4f46e5; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; border: 1px solid rgba(99, 102, 241, 0.18); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                        <i class="bi bi-person-check-fill" style="color: #6366f1;"></i> Total: {{ count($users) }} Talents
                     </div>
-                    <button type="button" id="btn-open-add-talent" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; border: none; border-radius: 30px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35); transition: all 0.3s ease;">
-                        <i class="bi bi-person-plus-fill" style="font-size: 1.1rem;"></i> Register New Talent
+                    <button type="button" id="btn-open-add-talent" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; border: none; border-radius: 20px; font-weight: 700; font-size: 0.82rem; cursor: pointer; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); transition: all 0.2s ease; white-space: nowrap;">
+                        <i class="bi bi-person-plus-fill" style="font-size: 0.95rem;"></i> Register New Talent
                     </button>
                 </div>
             </div>
 
-            <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                     <div>
-                        <h2 style="margin: 0 0 4px 0; font-size: 1.2rem; font-weight: 700; color: #0f172a;">Active Talents Roster</h2>
-                        <p style="margin: 0; color: #64748b; font-size: 0.85rem;">Manage registered talent profiles, change publishing status, or reset credentials.</p>
+                        <h2 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-journal-text" style="color: #64748b; font-size: 0.95rem;"></i> Active Talents Roster
+                        </h2>
                     </div>
                 </div>
 
@@ -394,13 +385,7 @@
                                     <td style="font-weight: 700; color: #64748b; font-size: 0.85rem; text-align: center;">{{ $loop->iteration }}</td>
                                     <td style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">
                                         <div style="display: flex; align-items: center; gap: 10px;">
-                                            @if($u->profile_image)
-                                            <img src="{{ $u->profile_image }}" alt="{{ $u->name }}" class="zoomable-profile-img" data-full-src="{{ asset($u->profile_image) }}" data-name="{{ $u->name }}" data-category="{{ $u->category_label }}" title="Click to zoom profile picture" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); cursor: pointer;" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop';">
-                                            @else
-                                            <div class="zoomable-profile-img" data-full-src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop" data-name="{{ $u->name }}" data-category="{{ $u->category_label }}" title="Click to view full size" style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; cursor: pointer;">
-                                                {{ strtoupper(substr($u->name, 0, 1)) }}
-                                            </div>
-                                            @endif
+                                            <img src="{{ $u->avatar_url }}" alt="{{ $u->name }}" class="zoomable-profile-img" data-full-src="{{ $u->avatar_url }}" data-name="{{ $u->name }}" data-category="{{ $u->category_label }}" title="Click to zoom profile picture" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); cursor: pointer;" onerror="this.onerror=null; this.src='{{ asset('images/default-avatar.png') }}';">
                                             <span>{{ $u->name }}</span>
                                         </div>
                                     </td>
@@ -465,14 +450,14 @@
                                             </form>
 
                                             @php
-                                                $decryptedAnswer = 'Not Configured';
-                                                if ($u->security_answer) {
-                                                    try {
-                                                        $decryptedAnswer = \Illuminate\Support\Facades\Crypt::decryptString($u->security_answer);
-                                                    } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-                                                        $decryptedAnswer = 'Legacy (Hashed Answer)';
-                                                    }
-                                                }
+                                            $decryptedAnswer = 'Not Configured';
+                                            if ($u->security_answer) {
+                                            try {
+                                            $decryptedAnswer = \Illuminate\Support\Facades\Crypt::decryptString($u->security_answer);
+                                            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                                            $decryptedAnswer = 'Legacy (Hashed Answer)';
+                                            }
+                                            }
                                             @endphp
 
                                             <!-- See Q&A -->
@@ -515,10 +500,10 @@
                     <div id="bulk-action-bar" class="bulk-action-bar">
                         <div class="bulk-action-info"><span id="selected-count">0</span> talents selected</div>
                         <div class="bulk-action-buttons">
-                            <button type="button" class="bulk-btn-cancel" id="bulk-cancel-btn">Cancel</button>
-                            <button type="button" id="bulk-publish-btn" class="bulk-btn-publish">🌐 Publish Selected</button>
-                            <button type="button" id="bulk-unpublish-btn" class="bulk-btn-unpublish">🔒 Unpublish Selected</button>
-                            <button type="button" id="bulk-delete-btn" class="bulk-btn-delete">🗑️ Delete Selected</button>
+                            <button type="button" class="bulk-btn bulk-btn-cancel" id="bulk-cancel-btn">Cancel</button>
+                            <button type="button" id="bulk-publish-btn" class="bulk-btn bulk-btn-publish"><i class="bi bi-globe"></i> Publish</button>
+                            <button type="button" id="bulk-unpublish-btn" class="bulk-btn bulk-btn-unpublish"><i class="bi bi-lock-fill"></i> Unpublish</button>
+                            <button type="button" id="bulk-delete-btn" class="bulk-btn bulk-btn-delete"><i class="bi bi-trash-fill"></i> Delete</button>
                         </div>
                     </div>
                 </form>
@@ -529,28 +514,29 @@
          TAB 3: Manage Categories content
          ========================================== -->
         <div id="tab-categories" class="tab-content">
-            <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
+            <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
                 <div>
-                    <h1 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: flex; align-items: center; gap: 10px;">
-                        <i class="bi bi-tags-fill" style="color: var(--primary);"></i> Manage Talent Categories
+                    <h1 style="font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0 0 4px 0; display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-tags-fill" style="color: #6366f1;"></i> Manage Talent Categories
                     </h1>
-                    <p style="color: #64748b; margin: 0; font-size: 0.92rem;">Define and organize creative skill categories for user registration and feed discovery.</p>
+                    <p style="color: #64748b; margin: 0; font-size: 0.85rem; line-height: 1.4;">Define and organize creative skill categories for user registration and feed discovery.</p>
                 </div>
-                <div>
-                    <button type="button" id="btn-open-add-category" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; border: none; border-radius: 30px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35); transition: all 0.3s ease;">
-                        <i class="bi bi-plus-circle-fill" style="font-size: 1.1rem;"></i> Register New Category
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div style="background: rgba(99, 102, 241, 0.08); color: #4f46e5; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; border: 1px solid rgba(99, 102, 241, 0.18); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;">
+                        <i class="bi bi-tag-fill" style="color: #6366f1;"></i> Total: {{ count($categories) }} Categories
+                    </div>
+                    <button type="button" id="btn-open-add-category" style="display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; border: none; border-radius: 20px; font-weight: 700; font-size: 0.82rem; cursor: pointer; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); transition: all 0.2s ease; white-space: nowrap;">
+                        <i class="bi bi-plus-circle-fill" style="font-size: 0.95rem;"></i> Register New Category
                     </button>
                 </div>
             </div>
 
-            <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+            <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                     <div>
-                        <h2 style="margin: 0 0 4px 0; font-size: 1.2rem; font-weight: 700; color: #0f172a;">Categories Directory</h2>
-                        <p style="margin: 0; color: #64748b; font-size: 0.85rem;">Active system categories used across talent registrations.</p>
-                    </div>
-                    <div style="background: rgba(99, 102, 241, 0.1); color: var(--primary); padding: 6px 16px; border-radius: 20px; font-weight: 700; font-size: 0.83rem; border: 1px solid rgba(99, 102, 241, 0.2);">
-                        <i class="bi bi-tag-fill"></i> Total Categories: {{ count($categories) }}
+                        <h2 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-tags" style="color: #64748b; font-size: 0.95rem;"></i> Categories Directory
+                        </h2>
                     </div>
                 </div>
 
@@ -843,7 +829,7 @@
 
             <!-- Maintenance Status Overview Banner -->
             @php
-                $mDetails = $maintenanceDetails ?? \App\Services\MaintenanceService::getDetails();
+            $mDetails = $maintenanceDetails ?? \App\Services\MaintenanceService::getDetails();
             @endphp
             <div style="background: #ffffff; border-radius: 16px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); margin-bottom: 25px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
@@ -851,25 +837,25 @@
                         <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">SYSTEM MAINTENANCE STATUS</div>
                         <div style="display: flex; align-items: center; gap: 12px; margin-top: 6px;">
                             @if($mDetails['status'] === 'ACTIVE')
-                                <span style="background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
-                                    <span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; display: inline-block; box-shadow: 0 0 10px #ef4444; animation: pulseDot 1.5s infinite;"></span>
-                                    ACTIVE RESTRICTION
-                                </span>
+                            <span style="background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                                <span style="width: 10px; height: 10px; border-radius: 50%; background: #ef4444; display: inline-block; box-shadow: 0 0 10px #ef4444; animation: pulseDot 1.5s infinite;"></span>
+                                ACTIVE RESTRICTION
+                            </span>
                             @elseif($mDetails['status'] === 'SCHEDULED')
-                                <span style="background: rgba(59, 130, 246, 0.15); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3); padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
-                                    <span style="width: 10px; height: 10px; border-radius: 50%; background: #3b82f6; display: inline-block;"></span>
-                                    SCHEDULED FOR FUTURE
-                                </span>
+                            <span style="background: rgba(59, 130, 246, 0.15); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.3); padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                                <span style="width: 10px; height: 10px; border-radius: 50%; background: #3b82f6; display: inline-block;"></span>
+                                SCHEDULED FOR FUTURE
+                            </span>
                             @elseif($mDetails['status'] === 'EXPIRED')
-                                <span style="background: rgba(100, 116, 139, 0.15); color: #64748b; border: 1px solid rgba(100, 116, 139, 0.3); padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
-                                    <span style="width: 10px; height: 10px; border-radius: 50%; background: #94a3b8; display: inline-block;"></span>
-                                    EXPIRED (AUTO-RESUMED)
-                                </span>
+                            <span style="background: rgba(100, 116, 139, 0.15); color: #64748b; border: 1px solid rgba(100, 116, 139, 0.3); padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                                <span style="width: 10px; height: 10px; border-radius: 50%; background: #94a3b8; display: inline-block;"></span>
+                                EXPIRED (AUTO-RESUMED)
+                            </span>
                             @else
-                                <span style="background: rgba(34, 197, 94, 0.15); color: #16a34a; border: 1px solid rgba(34, 197, 94, 0.3); padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
-                                    <span style="width: 10px; height: 10px; border-radius: 50%; background: #22c55e; display: inline-block;"></span>
-                                    NORMAL ACCESS (DISABLED)
-                                </span>
+                            <span style="background: rgba(34, 197, 94, 0.15); color: #16a34a; border: 1px solid rgba(34, 197, 94, 0.3); padding: 6px 16px; border-radius: 20px; font-weight: 900; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px;">
+                                <span style="width: 10px; height: 10px; border-radius: 50%; background: #22c55e; display: inline-block;"></span>
+                                NORMAL ACCESS (DISABLED)
+                            </span>
                             @endif
                         </div>
                     </div>
@@ -879,25 +865,25 @@
                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 12px; font-size: 0.85rem;">
                             <strong style="color: #475569;">Login:</strong>
                             @if($mDetails['restrict_login'])
-                                <span style="color: #ef4444; font-weight: 800;">✓ Restricted</span>
+                            <span style="color: #ef4444; font-weight: 800;">✓ Restricted</span>
                             @else
-                                <span style="color: #22c55e; font-weight: 700;">✗ Allowed</span>
+                            <span style="color: #22c55e; font-weight: 700;">✗ Allowed</span>
                             @endif
                         </div>
                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 12px; font-size: 0.85rem;">
                             <strong style="color: #475569;">Registration:</strong>
                             @if($mDetails['restrict_register'])
-                                <span style="color: #ef4444; font-weight: 800;">✓ Restricted</span>
+                            <span style="color: #ef4444; font-weight: 800;">✓ Restricted</span>
                             @else
-                                <span style="color: #22c55e; font-weight: 700;">✗ Allowed</span>
+                            <span style="color: #22c55e; font-weight: 700;">✗ Allowed</span>
                             @endif
                         </div>
                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 16px; border-radius: 12px; font-size: 0.85rem;">
                             <strong style="color: #475569;">Ask to Connect:</strong>
                             @if($mDetails['restrict_connect'])
-                                <span style="color: #ef4444; font-weight: 800;">✓ Restricted</span>
+                            <span style="color: #ef4444; font-weight: 800;">✓ Restricted</span>
                             @else
-                                <span style="color: #22c55e; font-weight: 700;">✗ Allowed</span>
+                            <span style="color: #22c55e; font-weight: 700;">✗ Allowed</span>
                             @endif
                         </div>
                     </div>
@@ -1065,10 +1051,10 @@
                             <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Platform Logo Image (.png, .jpg, .svg)</label>
                             <input type="file" name="site_logo_file" accept="image/*" class="form-control" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.88rem;">
                             @if(!empty($systemSettings['site_logo']))
-                                <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
-                                    <img src="{{ asset($systemSettings['site_logo']) }}" alt="Logo" style="height: 32px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                                    <span style="font-size: 0.78rem; color: #64748b;">Active Logo</span>
-                                </div>
+                            <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px;">
+                                <img src="{{ asset($systemSettings['site_logo']) }}" alt="Logo" style="height: 32px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                                <span style="font-size: 0.78rem; color: #64748b;">Active Logo</span>
+                            </div>
                             @endif
                         </div>
 
@@ -1137,7 +1123,7 @@
                         <div class="form-group" style="margin-bottom: 12px;">
                             <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Background Welcome Audio Sound (.mp3, .wav, .ogg)</label>
                             <input type="file" name="welcome_sound_file" accept="audio/*" class="form-control" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.88rem;">
-                            
+
                             <div style="margin-top: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
                                 @if(!empty($systemSettings['welcome_sound']))
                                 <div style="font-size: 0.82rem; color: #10b981; display: flex; align-items: center; gap: 6px;">
@@ -1426,13 +1412,7 @@
                                 <td style="font-weight: 700; color: #64748b; font-size: 0.82rem; text-align: center;">{{ $loop->iteration }}</td>
                                 <td style="font-weight: 700; color: #0f172a; font-size: 0.9rem;">
                                     <div style="display: flex; align-items: center; gap: 10px;">
-                                        @if($req->user->profile_image)
-                                        <img src="{{ asset($req->user->profile_image) }}" alt="{{ $req->user->name }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
-                                        @else
-                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem;">
-                                            {{ strtoupper(substr($req->user->name, 0, 1)) }}
-                                        </div>
-                                        @endif
+                                        <img src="{{ $req->user->avatar_url }}" alt="{{ $req->user->name }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
                                         <div>
                                             <span style="display: block;">{{ $req->user->name }}</span>
                                             <span style="font-size: 0.75rem; color: #64748b; font-weight: 400;">{{ $req->user->email }}</span>
@@ -1463,14 +1443,14 @@
                                 </td>
                                 <td style="font-size: 0.8rem; color: #334155; max-width: 220px; white-space: normal;">
                                     @if($req->status === 'paid')
-                                        <strong>Method:</strong> {{ $req->payment_method }}<br>
-                                        <strong>Ref:</strong> {{ $req->payment_reference ?? 'N/A' }}<br>
-                                        <strong>By:</strong> {{ $req->payer ? $req->payer->name : 'Admin' }}<br>
-                                        <small class="text-muted">{{ $req->paid_at->format('Y-m-d H:i') }}</small>
+                                    <strong>Method:</strong> {{ $req->payment_method }}<br>
+                                    <strong>Ref:</strong> {{ $req->payment_reference ?? 'N/A' }}<br>
+                                    <strong>By:</strong> {{ $req->payer ? $req->payer->name : 'Admin' }}<br>
+                                    <small class="text-muted">{{ $req->paid_at->format('Y-m-d H:i') }}</small>
                                     @elseif($req->status === 'rejected')
-                                        <span style="color:#ef4444;"><strong>Reason:</strong> {{ $req->admin_notes }}</span>
+                                    <span style="color:#ef4444;"><strong>Reason:</strong> {{ $req->admin_notes }}</span>
                                     @else
-                                        <span style="color:#94a3b8; font-style:italic;">Awaiting Processing</span>
+                                    <span style="color:#94a3b8; font-style:italic;">Awaiting Processing</span>
                                     @endif
                                 </td>
                                 <td style="text-align: right; white-space: nowrap;">
@@ -1524,7 +1504,7 @@
             </h3>
             <button type="button" class="admin-modal-close" onclick="$('#see-qa-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
         </div>
-        
+
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 18px;">
             <span style="font-size: 0.78rem; font-weight: 600; color: #64748b;">Talent Stage Name:</span>
             <div id="qa-modal-talent-name" style="font-weight: 800; color: #0f172a; font-size: 1.05rem; margin-top: 2px;"></div>
@@ -1880,7 +1860,10 @@
         function recalcDataTables() {
             if (typeof $.fn.DataTable !== "undefined") {
                 try {
-                    $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust().responsive.recalc();
+                    $.fn.dataTable.tables({
+                        visible: true,
+                        api: true
+                    }).columns.adjust().responsive.recalc();
                 } catch (e) {}
             }
         }
@@ -1993,7 +1976,7 @@
                 defaultTab = hash;
             }
         }
-        
+
         // Execute initial tab switch AFTER DataTables initialization
         switchTab(defaultTab);
 
@@ -2527,7 +2510,7 @@
             const id = $(this).data('id');
             const name = $(this).data('name');
             const amount = $(this).data('amount');
-            
+
             $('#payout-talent-name').text(name);
             $('#payout-talent-amount').text(amount);
             $('#payout-process-form').attr('action', `/admin/payment-requests/${id}/pay`);
@@ -2538,7 +2521,7 @@
         $(document).on('click', '.btn-reject-payout', function() {
             const id = $(this).data('id');
             const name = $(this).data('name');
-            
+
             $('#payout-reject-talent-name').text(name);
             $('#payout-reject-form').attr('action', `/admin/payment-requests/${id}/reject`);
             $('#payout-reject-modal').fadeIn(200);
@@ -2558,7 +2541,7 @@
             $('#assign_current_pkg_name').text(packageName || 'None (Standard Free)');
             $('#assign_current_start').text(startDate || 'N/A');
             $('#assign_current_end').text(endDate || 'N/A');
-            
+
             if (packageId) {
                 $('#assign-package-form select[name="package_id"]').val(packageId);
             } else {

@@ -57,6 +57,7 @@ class CustomerCareController extends Controller
         $allUsers = User::where('role', 'user')->orderBy('name')->get(['id', 'name', 'email', 'phone', 'role', 'security_question', 'security_answer']);
         $contactRequests = \App\Models\ContactRequest::with(['targetUser', 'requesterUser'])->latest()->get();
         $paymentRequests = \App\Models\TalentPaymentRequest::with(['user', 'payer'])->latest()->get();
+        $invoices = \App\Models\Invoice::with(['user', 'userPackage'])->latest()->get();
 
         return view('customer_care.index', compact(
             'tickets',
@@ -72,7 +73,8 @@ class CustomerCareController extends Controller
             'blockedAccounts',
             'allUsers',
             'contactRequests',
-            'paymentRequests'
+            'paymentRequests',
+            'invoices'
         ));
     }
 
@@ -287,5 +289,55 @@ class CustomerCareController extends Controller
         }
 
         return redirect()->back()->with('success', "User account '" . ($user ? $user->name : 'Unknown') . "' unblocked successfully.");
+    }
+
+    /**
+     * Customer Care payment confirmation / recording for talent package invoices.
+     */
+    public function recordInvoicePayment(Request $request, $invoiceId)
+    {
+        $invoice = \App\Models\Invoice::findOrFail($invoiceId);
+
+        $request->validate([
+            'amount_paid' => 'required|numeric|min:0.01',
+            'payment_method' => 'required|string|max:100',
+            'payment_reference' => 'nullable|string|max:100',
+            'notes' => 'nullable|string',
+        ]);
+
+        $newAmountPaid = $invoice->amount_paid + floatval($request->amount_paid);
+
+        if ($newAmountPaid > $invoice->amount) {
+            return redirect()->back()->withErrors(['amount_paid' => 'Recorded payment exceeds the outstanding invoice balance.']);
+        }
+
+        $paymentStatus = 'Unpaid';
+        if ($newAmountPaid >= $invoice->amount) {
+            $paymentStatus = 'Paid';
+        } elseif ($newAmountPaid > 0) {
+            $paymentStatus = 'Partially Paid';
+        }
+
+        $invoice->update([
+            'amount_paid' => $newAmountPaid,
+            'payment_status' => $paymentStatus,
+            'paid_at' => $paymentStatus === 'Paid' ? now() : null,
+            'payment_method' => $request->payment_method,
+            'payment_reference' => $request->payment_reference,
+            'notes' => $request->notes,
+        ]);
+
+        // Send confirmation notification to Talent
+        if ($invoice->user_id) {
+            Notification::create([
+                'user_id' => $invoice->user_id,
+                'type' => 'package_payment_confirmed',
+                'title' => "✅ Package Payment Confirmed: {$invoice->package_name}",
+                'message' => "Your payment of TZS " . number_format($request->amount_paid) . " for package '{$invoice->package_name}' has been confirmed by Customer Care.",
+                'link' => route('dashboard') . '#billing',
+            ]);
+        }
+
+        return redirect()->back()->with('success', "Payment for invoice '{$invoice->invoice_number}' logged successfully.");
     }
 }

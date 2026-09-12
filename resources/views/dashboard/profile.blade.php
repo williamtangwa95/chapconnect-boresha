@@ -139,13 +139,7 @@
                     <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; background: #f8fafc; padding: 16px; border-radius: 14px; border: 1px solid #cbd5e1;">
                         <!-- Current Avatar Display -->
                         <div style="position: relative; width: 68px; height: 68px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 3px solid var(--primary); box-shadow: 0 4px 12px rgba(99,102,241,0.25);">
-                            @if($user->profile_image)
-                                <img id="current-avatar-img" src="{{ asset($user->profile_image) }}" alt="{{ $user->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
-                            @else
-                                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 1.6rem;">
-                                    <i class="bi bi-person-fill"></i>
-                                </div>
-                            @endif
+                            <img id="current-avatar-img" src="{{ $user->avatar_url }}" alt="{{ $user->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
                         </div>
 
                         <!-- Avatar Controls -->
@@ -220,6 +214,30 @@
                         <input type="url" id="social_youtube" name="social_youtube" class="form-control @error('social_youtube') is-invalid @enderror" value="{{ old('social_youtube', $user->social_youtube) }}" placeholder="https://youtube.com/channel" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
                         <div id="social_youtube_status" style="display: none; margin-top: 4px; font-size: 0.78rem; font-weight: 600;"></div>
                         @error('social_youtube')
+                            <span style="color: #ef4444; font-size: 0.78rem; font-weight: 600; margin-top: 4px; display: block;">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                <h4 style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-top: 25px; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-shield-lock-fill" style="color: #6366f1;"></i> Security Verification Question & Answer (Optional)
+                </h4>
+
+                <div class="form-grid-2col" style="margin-bottom: 25px;">
+                    <div class="form-group">
+                        <label for="security_question" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Security Question</label>
+                        <input type="text" id="security_question" name="security_question" class="form-control @error('security_question') is-invalid @enderror" value="{{ old('security_question', $user->security_question) }}" placeholder="e.g. What is the name of your first school or favorite pet?" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                        <span style="font-size: 0.76rem; color: #64748b; margin-top: 4px; display: block;">Used for identity verification when resetting passwords or contacting support.</span>
+                        @error('security_question')
+                            <span style="color: #ef4444; font-size: 0.78rem; font-weight: 600; margin-top: 4px; display: block;">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="security_answer" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Security Answer</label>
+                        <input type="text" id="security_answer" name="security_answer" class="form-control @error('security_answer') is-invalid @enderror" value="{{ old('security_answer', $user->decrypted_security_answer) }}" placeholder="Enter your confidential security answer..." style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                        <span style="font-size: 0.76rem; color: #64748b; margin-top: 4px; display: block;">Keep your security answer memorable and confidential.</span>
+                        @error('security_answer')
                             <span style="color: #ef4444; font-size: 0.78rem; font-weight: 600; margin-top: 4px; display: block;">{{ $message }}</span>
                         @enderror
                     </div>

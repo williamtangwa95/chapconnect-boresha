@@ -335,11 +335,7 @@
             @auth
             <div class="drawer-user-info">
                 <div class="drawer-avatar">
-                    @if(auth()->user()->profile_image)
-                    <img src="{{ asset(auth()->user()->profile_image) }}" alt="{{ auth()->user()->name }}">
-                    @else
-                    <i class="bi bi-person-circle"></i>
-                    @endif
+                    <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}">
                 </div>
                 <div class="drawer-user-text">
                     <span class="drawer-user-name">{{ auth()->user()->name }}</span>
@@ -684,11 +680,7 @@
                 @auth
                 <div class="drawer-user-info">
                     <div class="drawer-avatar">
-                        @if(auth()->user()->profile_image)
-                        <img src="{{ asset(auth()->user()->profile_image) }}" alt="{{ auth()->user()->name }}">
-                        @else
-                        <i class="bi bi-person-circle"></i>
-                        @endif
+                        <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}">
                     </div>
                     <div class="drawer-user-text">
                         <span class="drawer-user-name">{{ auth()->user()->name }}</span>
@@ -788,11 +780,7 @@
         <aside class="admin-sidebar" id="adminSidebar">
             <div class="admin-sidebar-header">
                 <div class="sidebar-user-avatar">
-                    @if(auth()->user()->profile_image)
-                    <img src="{{ asset(auth()->user()->profile_image) }}" alt="{{ auth()->user()->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; border-radius: 10px;">
-                    @else
-                    <i class="bi bi-person-circle"></i>
-                    @endif
+                    <img src="{{ auth()->user()->avatar_url }}" alt="{{ auth()->user()->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: 10px;">
                 </div>
                 <div class="sidebar-user-info">
                     <span class="sidebar-user-name">{{ auth()->user()->name }}</span>
@@ -834,6 +822,9 @@
                 </a>
                 <a href="{{ route('customer-care.dashboard') }}#payments" class="sidebar-link cc-tab-link" data-cctab="payments">
                     <i class="bi bi-wallet2"></i> <span>Talent Payment Requests</span>
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#invoices" class="sidebar-link cc-tab-link" data-cctab="invoices">
+                    <i class="bi bi-receipt-cutoff" style="color:#10b981;"></i> <span>Invoices & Package Payments</span>
                 </a>
 
                 <div class="sidebar-group-label">SETTINGS & PROFILES</div>

@@ -1,7 +1,144 @@
 <!-- ==========================================
      TAB: User Activity Logs Tab
      ========================================== -->
-<div id="tab-activity-logs" class="tab-content" style="display: none;">
+<div id="tab-activity-logs" class="tab-content" style="box-sizing: border-box; width: 100%; max-width: 100%;">
+    <style>
+        #tab-activity-logs,
+        #tab-activity-logs * {
+            box-sizing: border-box;
+        }
+
+        .activity-filter-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color, #e2e8f0);
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .activity-filter-form {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .activity-filter-inputs {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .activity-filter-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .activity-filter-field label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+
+        .activity-filter-field select,
+        .activity-filter-field input[type="date"] {
+            background: #f8fafc;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .activity-export-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .activity-table-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color, #e2e8f0);
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .activity-table-wrapper {
+            overflow-x: auto;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #admin-activity-logs-table_wrapper {
+            width: 100% !important;
+            overflow-x: auto;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 991px) {
+            .activity-filter-inputs {
+                width: 100%;
+            }
+            .activity-export-buttons {
+                width: 100%;
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .activity-filter-card {
+                padding: 16px;
+            }
+            .activity-filter-inputs {
+                flex-direction: column;
+                align-items: stretch;
+                width: 100%;
+                gap: 12px;
+            }
+            .activity-filter-field {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 5px;
+                width: 100%;
+            }
+            .activity-filter-field select,
+            .activity-filter-field input[type="date"] {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .activity-btn-apply {
+                width: 100%;
+                justify-content: center;
+            }
+            .activity-export-buttons {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+            }
+            .activity-export-buttons a {
+                width: 100%;
+                justify-content: center;
+            }
+            .activity-table-card {
+                padding: 16px;
+            }
+        }
+    </style>
     
     <!-- Title & Intro -->
     <div style="margin-bottom: 25px;">
@@ -12,17 +149,17 @@
     </div>
 
     <!-- Filters & Action Bar -->
-    <div style="background: #ffffff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); margin-bottom: 25px;">
-        <form method="GET" action="{{ route('admin.dashboard') }}" id="activity-logs-filter-form" style="margin: 0; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+    <div class="activity-filter-card">
+        <form method="GET" action="{{ route('admin.dashboard') }}" id="activity-logs-filter-form" class="activity-filter-form">
             <input type="hidden" name="tab" value="activity-logs">
 
-            <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div class="activity-filter-inputs">
                 <!-- User dropdown -->
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <label for="activity_user" style="font-size: 0.85rem; font-weight: 700; color: #475569; display: flex; align-items: center; gap: 5px;">
+                <div class="activity-filter-field">
+                    <label for="activity_user" style="display: flex; align-items: center; gap: 5px;">
                         <i class="bi bi-person-fill" style="color: #6366f1;"></i> User:
                     </label>
-                    <select name="activity_user" id="activity_user" style="background: #f8fafc; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 8px 14px; font-size: 0.86rem; font-weight: 600; cursor: pointer; outline: none;">
+                    <select name="activity_user" id="activity_user">
                         <option value="all" {{ ($selectedActivityUser ?? 'all') == 'all' ? 'selected' : '' }}>All Users</option>
                         @foreach($allUsersWithActivity as $u)
                             <option value="{{ $u->id }}" {{ ($selectedActivityUser ?? '') == $u->id ? 'selected' : '' }}>{{ $u->name }} ({{ ucfirst($u->role) }})</option>
@@ -31,11 +168,11 @@
                 </div>
 
                 <!-- Timeframe Dropdown -->
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <label for="activity_timeframe" style="font-size: 0.85rem; font-weight: 700; color: #475569; display: flex; align-items: center; gap: 5px;">
+                <div class="activity-filter-field">
+                    <label for="activity_timeframe" style="display: flex; align-items: center; gap: 5px;">
                         <i class="bi bi-calendar3" style="color: #0284c7;"></i> Timeframe:
                     </label>
-                    <select name="activity_timeframe" id="activity_timeframe" onchange="toggleActivityDatePickers()" style="background: #f8fafc; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 8px 14px; font-size: 0.86rem; font-weight: 600; cursor: pointer; outline: none;">
+                    <select name="activity_timeframe" id="activity_timeframe" onchange="toggleActivityDatePickers()">
                         <option value="all_time" {{ ($activityTimeframe ?? 'all_time') == 'all_time' ? 'selected' : '' }}>All Time</option>
                         <option value="today" {{ ($activityTimeframe ?? '') == 'today' ? 'selected' : '' }}>Today</option>
                         <option value="last_7_days" {{ ($activityTimeframe ?? '') == 'last_7_days' ? 'selected' : '' }}>Last 7 Days</option>
@@ -45,19 +182,19 @@
                 </div>
 
                 <!-- Date pickers -->
-                <div id="activity-custom-dates" style="display: {{ ($activityTimeframe ?? '') == 'custom' ? 'flex' : 'none' }}; align-items: center; gap: 8px;">
-                    <input type="date" name="activity_start_date" value="{{ $activityStart ?? '' }}" style="background: #f8fafc; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 7px 12px; font-size: 0.86rem; font-weight: 600; outline: none;">
+                <div id="activity-custom-dates" style="display: {{ ($activityTimeframe ?? '') == 'custom' ? 'flex' : 'none' }}; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <input type="date" name="activity_start_date" value="{{ $activityStart ?? '' }}">
                     <span style="font-size: 0.85rem; color: #64748b; font-weight: bold;">to</span>
-                    <input type="date" name="activity_end_date" value="{{ $activityEnd ?? '' }}" style="background: #f8fafc; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 7px 12px; font-size: 0.86rem; font-weight: 600; outline: none;">
+                    <input type="date" name="activity_end_date" value="{{ $activityEnd ?? '' }}">
                 </div>
 
-                <button type="submit" style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: #6366f1; color: #ffffff; border: none; border-radius: 10px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: all 0.2s ease;">
+                <button type="submit" class="activity-btn-apply" style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: #6366f1; color: #ffffff; border: none; border-radius: 10px; font-weight: 700; font-size: 0.86rem; cursor: pointer; transition: all 0.2s ease;">
                     <i class="bi bi-funnel-fill"></i> Apply Filter
                 </button>
             </div>
 
             <!-- Export Buttons -->
-            <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="activity-export-buttons">
                 <a href="{{ route('admin.activity-logs.export-excel', request()->all()) }}" style="display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; background: #15803d; color: #ffffff; border: none; border-radius: 10px; font-weight: 700; font-size: 0.86rem; text-decoration: none; transition: all 0.2s ease; box-shadow: 0 4px 10px rgba(21,128,61,0.2);">
                     <i class="bi bi-file-earmark-excel-fill"></i> Export to Excel
                 </a>
@@ -69,12 +206,12 @@
     </div>
 
     <!-- Timeline Log Table -->
-    <div style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+    <div class="activity-table-card">
         <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 1.15rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
             <i class="bi bi-clock-history" style="color: #6366f1;"></i> System Activity Timeline (Last 1000 logs)
         </h3>
 
-        <div class="table-responsive" style="overflow-x: auto; width: 100%;">
+        <div class="activity-table-wrapper">
             <table class="admin-table display nowrap" id="admin-activity-logs-table" style="width: 100%;">
                 <thead>
                     <tr>
@@ -149,7 +286,7 @@
                             </div>
 
                             @if($log->properties && isset($log->properties['diff']))
-                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-top: 8px; max-width: 580px;">
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-top: 8px; max-width: 100%; overflow-x: auto;">
                                     <table style="width: 100%; border-collapse: collapse; font-size: 0.8rem; text-align: left;">
                                         <thead>
                                             <tr style="border-bottom: 1px solid #e2e8f0;">
@@ -204,10 +341,12 @@
     function toggleActivityDatePickers() {
         const select = document.getElementById('activity_timeframe');
         const container = document.getElementById('activity-custom-dates');
-        if (select.value === 'custom') {
-            container.style.display = 'flex';
-        } else {
-            container.style.display = 'none';
+        if (select && container) {
+            if (select.value === 'custom') {
+                container.style.display = 'flex';
+            } else {
+                container.style.display = 'none';
+            }
         }
     }
 </script>

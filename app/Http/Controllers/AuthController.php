@@ -46,6 +46,7 @@ class AuthController extends Controller
             'phone' => 'required_without:email|nullable|string|max:30',
             'security_question' => 'required|string|max:255',
             'security_answer' => 'required|string|max:255',
+            'phone_visibility' => 'required|string|in:Yes,No',
         ], [
             'email.unique' => __('Email already taken'),
             'email.email' => __('Please enter a valid email address'),
@@ -78,6 +79,7 @@ class AuthController extends Controller
 
         $category = $request->input('category');
         $categoryLabel = self::categories()[$category];
+        $phoneVisibility = $request->input('phone_visibility', 'Yes');
 
         $normalizedPhone = $request->filled('phone') ? PhoneHelper::normalizeToLocal($request->phone) : null;
 
@@ -94,15 +96,80 @@ class AuthController extends Controller
             'security_answer' => \Illuminate\Support\Facades\Crypt::encryptString(\Illuminate\Support\Str::lower($a)),
         ]);
 
-        // Notify Admin and Customer Care of New Talent Registration
+        // Auto-match Package based on phone visibility choice
+        // 'Yes' -> Standard Package (Visible Contacts), 'No' -> VIP Package (Hidden Contacts)
+        $matchedPackage = \App\Models\Package::where('status', 'Active')
+            ->where('phone_visibility', $phoneVisibility)
+            ->first();
+
+        if (!$matchedPackage) {
+            $matchedPackage = \App\Models\Package::where('status', 'Active')->first();
+        }
+
+        if ($matchedPackage) {
+            $startDate = now()->toDateString();
+            if ($matchedPackage->duration_unit === 'lifetime' || $matchedPackage->duration == -1) {
+                $endDate = '2099-12-31';
+            } else {
+                $baseDays = intval($matchedPackage->duration);
+                if ($matchedPackage->duration_unit === 'months') {
+                    $baseDays = $baseDays * 30;
+                } elseif ($matchedPackage->duration_unit === 'years') {
+                    $baseDays = $baseDays * 365;
+                }
+                $endDate = date('Y-m-d', strtotime($startDate . " + {$baseDays} days"));
+            }
+
+            // Create UserPackage subscription
+            $userPackage = \App\Models\UserPackage::create([
+                'user_id' => $user->id,
+                'package_id' => $matchedPackage->id,
+                'package_name_snapshot' => $matchedPackage->name,
+                'price_snapshot' => $matchedPackage->price,
+                'duration_snapshot' => $matchedPackage->duration,
+                'duration_unit_snapshot' => $matchedPackage->duration_unit,
+                'phone_visibility_snapshot' => $matchedPackage->phone_visibility,
+                'max_images_snapshot' => $matchedPackage->max_images,
+                'max_videos_snapshot' => $matchedPackage->max_videos,
+                'max_news_snapshot' => $matchedPackage->max_news,
+                'package_type_snapshot' => $matchedPackage->package_type,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'status' => 'active',
+            ]);
+
+            // Generate Invoice if package is "To Pay" or price > 0
+            if ($matchedPackage->package_type === 'To Pay' || $matchedPackage->price > 0) {
+                $invoiceNumber = \App\Models\Invoice::generateInvoiceNumber();
+                \App\Models\Invoice::create([
+                    'invoice_number' => $invoiceNumber,
+                    'user_id' => $user->id,
+                    'user_package_id' => $userPackage->id,
+                    'package_id' => $matchedPackage->id,
+                    'package_name' => $matchedPackage->name,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'duration' => $matchedPackage->duration,
+                    'duration_unit' => $matchedPackage->duration_unit,
+                    'amount' => $matchedPackage->price,
+                    'amount_paid' => 0.00,
+                    'payment_status' => 'Unpaid',
+                    'invoice_date' => $startDate,
+                    'due_date' => date('Y-m-d', strtotime($startDate . ' + 7 days')),
+                ]);
+            }
+        }
+
+        // Notify Admin and Customer Care of New Talent Registration and Package Invoice
+        $pkgName = $matchedPackage ? $matchedPackage->name : 'Standard';
         $staffMembers = User::whereIn('role', ['admin', 'customer_care'])->get();
         foreach ($staffMembers as $staff) {
             Notification::create([
                 'user_id' => $staff->id,
                 'type' => 'new_talent_registration',
                 'title' => "🌟 New Talent Registered: {$user->name}",
-                'message' => "Talent '{$user->name}' registered under '{$user->category_label}'.",
-                'link' => ($staff->role === 'admin') ? route('admin.dashboard') . '#talents' : route('customer-care.dashboard') . '#talents',
+                'message' => "Talent '{$user->name}' registered under '{$user->category_label}' with '{$pkgName}' package (Contact Visibility: {$phoneVisibility}).",
+                'link' => ($staff->role === 'admin') ? route('admin.dashboard') . '#invoices' : route('customer-care.dashboard') . '#invoices',
             ]);
         }
 
@@ -342,20 +409,31 @@ class AuthController extends Controller
             ]);
         }
 
-        // Verify security answer (case-insensitive check, supports both Encrypted and old Hashed formats)
+        // Verify security answer (case-insensitive check, supports Encrypted, Bcrypt Hash, and Plain Text formats)
         $isCorrect = false;
-        try {
-            $decryptedAnswer = \Illuminate\Support\Facades\Crypt::decryptString($user->security_answer);
-            $isCorrect = ($decryptedAnswer === \Illuminate\Support\Str::lower($answer));
-        } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
-            $isCorrect = Hash::check(\Illuminate\Support\Str::lower($answer), $user->security_answer);
+        $cleanAnswer = trim(\Illuminate\Support\Str::lower($answer));
+
+        if (!empty($user->security_answer)) {
+            try {
+                $decryptedAnswer = \Illuminate\Support\Facades\Crypt::decryptString($user->security_answer);
+                $isCorrect = (trim(\Illuminate\Support\Str::lower($decryptedAnswer)) === $cleanAnswer);
+            } catch (\Illuminate\Contracts\Encryption\DecryptException $e) {
+                if (\Illuminate\Support\Str::startsWith($user->security_answer, ['$2y$', '$2a$', '$2b$'])) {
+                    $isCorrect = Hash::check($cleanAnswer, $user->security_answer);
+                } else {
+                    $isCorrect = (trim(\Illuminate\Support\Str::lower($user->security_answer)) === $cleanAnswer);
+                }
+            }
         }
 
         if (!$isCorrect) {
             throw ValidationException::withMessages([
-                'security_answer' => 'The security answer provided is incorrect.',
+                'security_answer' => __('The security answer provided is incorrect.'),
             ]);
         }
+
+        // Upgrade security answer to encrypted format
+        $user->security_answer = \Illuminate\Support\Facades\Crypt::encryptString($cleanAnswer);
 
         // Reset password
         $user->password = Hash::make($request->password);

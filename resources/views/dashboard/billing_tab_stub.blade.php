@@ -17,7 +17,7 @@
                     </span>
                 </div>
 
-                @php $isLifetime = ($packageDetails['duration_unit'] === 'lifetime'); @endphp
+                @php $isLifetime = ($packageDetails['duration_unit'] === 'lifetime' || $packageDetails['duration'] == -1); @endphp
 
                 @if($isLifetime)
                 {{-- ===== LIFETIME PACKAGE DISPLAY ===== --}}

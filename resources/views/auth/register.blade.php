@@ -44,6 +44,23 @@
                         </select>
                     </div>
 
+                    <div class="form-group" style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 14px; border-radius: 12px; margin-bottom: 18px;">
+                        <label for="phone-visibility" style="font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-telephone-fill" style="color: #6366f1;"></i> {{ __('Phone Number Visibility') }} <span style="font-size: 0.8rem; color: #ef4444;">*</span>
+                        </label>
+                        <select name="phone_visibility" id="phone-visibility" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; margin-top: 6px; font-weight: 600; font-size: 0.88rem; color: #1e293b;">
+                            <option value="Yes" {{ old('phone_visibility', 'Yes') === 'Yes' ? 'selected' : '' }}>
+                                {{ __('Yes — Show Phone Number Publicly') }}
+                            </option>
+                            <option value="No" {{ old('phone_visibility') === 'No' ? 'selected' : '' }}>
+                                {{ __('No — Keep Phone Number Private / Hidden') }}
+                            </option>
+                        </select>
+                        <div id="pkg-info-badge" style="margin-top: 10px; font-size: 0.8rem; padding: 8px 12px; border-radius: 8px; font-weight: 600; background: rgba(99,102,241,0.1); color: #4338ca; border: 1px solid rgba(99,102,241,0.2);">
+                            <i class="bi bi-shield-check"></i> <span id="pkg-info-text">{{ __('Public visitors can view your contact details.') }}</span>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="reg-password">{{ __('Password') }} <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 400;">*</span></label>
                         <div class="password-wrapper">
@@ -91,6 +108,14 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
+        $('#phone-visibility').on('change', function() {
+            if ($(this).val() === 'No') {
+                $('#pkg-info-text').text('{{ __("Phone number will be kept hidden/private from public visitors.") }}');
+            } else {
+                $('#pkg-info-text').text('{{ __("Public visitors can view your contact details.") }}');
+            }
+        });
+
         $('#categories').select2({
             width: '100%',
             placeholder: '-- {{ __("Select Category") }} --',
@@ -131,12 +156,12 @@
             str2 = str2.trim().toLowerCase();
             if (str1 === "" || str2 === "") return 0;
             if (str1 === str2) return 100;
-            
+
             let longer = str1.length > str2.length ? str1 : str2;
             let shorter = str1.length > str2.length ? str2 : str1;
             let longerLength = longer.length;
             if (longerLength === 0) return 100;
-            
+
             let editDistance = getEditDistance(longer, shorter);
             return ((longerLength - editDistance) / longerLength) * 100;
         }

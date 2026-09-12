@@ -195,9 +195,13 @@ class DashboardController extends Controller
             }
         }
 
+        $rules['security_question'] = 'nullable|string|max:255';
+        $rules['security_answer'] = 'nullable|string|max:255';
+
         $data = $request->only([
             'name', 'email', 'country', 'description',
-            'social_instagram', 'social_facebook', 'social_tiktok', 'social_youtube'
+            'social_instagram', 'social_facebook', 'social_tiktok', 'social_youtube',
+            'security_question', 'security_answer'
         ]);
 
         $data['phone'] = $request->filled('phone') ? PhoneHelper::normalizeToLocal($request->phone) : null;
@@ -249,7 +253,7 @@ class DashboardController extends Controller
             return redirect()->route('dashboard')->with('info', 'Staff accounts manage administrative controls directly from the Admin Panel.');
         }
 
-        $photos = $user->media()->where('type', 'photo')->latest()->get();
+        $photos = $user->media()->where('type', 'photo')->withCount(['likes', 'comments', 'shares'])->latest()->get();
 
         return view('dashboard.photos', [
             'photos' => $photos
@@ -282,6 +286,29 @@ class DashboardController extends Controller
         }
 
         if (empty($files)) {
+            if (isset($_SERVER['CONTENT_LENGTH']) && intval($_SERVER['CONTENT_LENGTH']) > 0 && empty($_POST) && empty($_FILES)) {
+                $maxSize = ini_get('post_max_size') ?: '128M';
+                return redirect()->back()->withInput()->withErrors([
+                    'photos' => "The selected image payload exceeds the server upload limit ({$maxSize}). Please select a smaller photo or compress it first."
+                ]);
+            }
+
+            $rawFiles = $request->file('photos') ?? $request->file('photo');
+            if ($rawFiles) {
+                $rawList = is_array($rawFiles) ? $rawFiles : [$rawFiles];
+                foreach ($rawList as $rawFile) {
+                    if ($rawFile && !$rawFile->isValid()) {
+                        $errCode = $rawFile->getError();
+                        if ($errCode === UPLOAD_ERR_INI_SIZE || $errCode === UPLOAD_ERR_FORM_SIZE) {
+                            $maxSize = ini_get('upload_max_filesize') ?: '128M';
+                            return redirect()->back()->withInput()->withErrors([
+                                'photos' => "The selected image file exceeds the PHP server upload limit ({$maxSize}). Please select a smaller photo or compress it first."
+                            ]);
+                        }
+                    }
+                }
+            }
+
             return redirect()->back()->withInput()->withErrors(['photos' => 'Please select at least one image file to upload.']);
         }
 
@@ -442,7 +469,7 @@ class DashboardController extends Controller
     public function videos()
     {
         $user = auth()->user();
-        $videos = $user->media()->where('type', 'video')->latest()->get();
+        $videos = $user->media()->where('type', 'video')->withCount(['likes', 'comments', 'shares'])->latest()->get();
 
         return view('dashboard.videos', [
             'videos' => $videos
@@ -554,6 +581,31 @@ class DashboardController extends Controller
         }
 
         if (empty($files)) {
+            // Check for post_max_size overflow (when upload exceeds post_max_size, $_FILES and $_POST are empty)
+            if (isset($_SERVER['CONTENT_LENGTH']) && intval($_SERVER['CONTENT_LENGTH']) > 0 && empty($_POST) && empty($_FILES)) {
+                $maxSize = ini_get('post_max_size') ?: '128M';
+                return redirect()->back()->withInput()->withErrors([
+                    'videos' => "The selected video file exceeds the PHP server upload limit ({$maxSize}). Please upload a smaller clip or embed a video link (YouTube, TikTok, Instagram, Facebook, Vimeo)."
+                ]);
+            }
+
+            // Check if user actually attempted to upload a file that failed due to PHP upload limits
+            $rawFiles = $request->file('videos') ?? $request->file('video');
+            if ($rawFiles) {
+                $rawList = is_array($rawFiles) ? $rawFiles : [$rawFiles];
+                foreach ($rawList as $rawFile) {
+                    if ($rawFile && !$rawFile->isValid()) {
+                        $errCode = $rawFile->getError();
+                        if ($errCode === UPLOAD_ERR_INI_SIZE || $errCode === UPLOAD_ERR_FORM_SIZE) {
+                            $maxSize = ini_get('upload_max_filesize') ?: '128M';
+                            return redirect()->back()->withInput()->withErrors([
+                                'videos' => "The selected video file exceeds the PHP server upload limit ({$maxSize}). Please upload a smaller clip or embed a video link (YouTube, TikTok, Instagram, Facebook, Vimeo)."
+                            ]);
+                        }
+                    }
+                }
+            }
+
             return redirect()->back()->withInput()->withErrors(['videos' => 'Please select at least one video file to upload or enter a video link.']);
         }
 

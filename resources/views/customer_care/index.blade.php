@@ -695,13 +695,7 @@
                                 <td style="font-weight: 700; color: #64748b; font-size: 0.82rem; text-align: center;">{{ $loop->iteration }}</td>
                                 <td style="font-weight: 700; color: #0f172a; font-size: 0.9rem;">
                                     <div style="display: flex; align-items: center; gap: 10px;">
-                                        @if($req->user->profile_image)
-                                        <img src="{{ asset($req->user->profile_image) }}" alt="{{ $req->user->name }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
-                                        @else
-                                        <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem;">
-                                            {{ strtoupper(substr($req->user->name, 0, 1)) }}
-                                        </div>
-                                        @endif
+                                        <img src="{{ $req->user->avatar_url }}" alt="{{ $req->user->name }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
                                         <div>
                                             <span style="display: block;">{{ $req->user->name }}</span>
                                             <span style="font-size: 0.75rem; color: #64748b; font-weight: 400;">{{ $req->user->email }}</span>
@@ -760,6 +754,114 @@
                             @empty
                             <tr>
                                 <td colspan="8" style="text-align: center; color: #94a3b8; padding: 30px; font-style: italic;">No talent payment requests registered in the system.</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>{{-- /tab-payments --}}
+
+        <!-- Tab: Invoices & Package Payments -->
+        <div id="tab-invoices" class="tab-content">
+            <!-- Invoices Statistics Cards Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; width: 100%; margin-bottom: 20px;">
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(99,102,241,0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-receipt"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #0f172a;">{{ $invoices->count() }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Total Invoices</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(239,68,68,0.12); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #ef4444;">{{ $invoices->where('payment_status', 'Unpaid')->count() }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Unpaid Invoices</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="background: #ffffff; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16,185,129,0.12); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: #10b981;">{{ $invoices->where('payment_status', 'Paid')->count() }}</div>
+                        <div style="font-size: 0.8rem; color: #64748b; font-weight: 600;">Confirmed Payments</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoices Table -->
+            <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <h2 style="margin: 0 0 4px 0; font-size: 1.15rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-receipt-cutoff" style="color: #10b981;"></i> Membership Package Invoices &amp; Payment Confirmation
+                        </h2>
+                        <p style="margin: 0; color: #64748b; font-size: 0.85rem;">Review talent subscription package invoices and record / confirm incoming payments.</p>
+                    </div>
+                </div>
+
+                <div class="admin-table-container">
+                    <table class="admin-table display nowrap" id="cc-invoices-table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Talent Name</th>
+                                <th>Package Name</th>
+                                <th>Total Amount</th>
+                                <th>Amount Paid</th>
+                                <th>Outstanding</th>
+                                <th>Subscription Period</th>
+                                <th>Status</th>
+                                <th style="text-align: right; width: 140px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($invoices as $inv)
+                            <tr>
+                                <td>
+                                    <span style="font-family: monospace; font-weight: 800; font-size: 0.82rem; color: #4338ca; background: rgba(99,102,241,0.1); padding: 4px 9px; border-radius: 6px; border: 1px solid rgba(99,102,241,0.2);">
+                                        {{ $inv->invoice_number }}
+                                    </span>
+                                </td>
+                                <td style="font-weight: 700; color: #0f172a;">{{ $inv->user ? $inv->user->name : 'N/A' }}</td>
+                                <td>{{ $inv->package_name }}</td>
+                                <td style="font-weight: 700;">TZS {{ number_format($inv->amount) }}</td>
+                                <td style="font-weight: 700; color: #10b981;">TZS {{ number_format($inv->amount_paid) }}</td>
+                                <td style="font-weight: 700; color: #ef4444;">TZS {{ number_format($inv->amount - $inv->amount_paid) }}</td>
+                                <td style="font-size: 0.8rem; color: #475569;">
+                                    {{ date('M d, Y', strtotime($inv->start_date)) }} - {{ date('M d, Y', strtotime($inv->end_date)) }}
+                                </td>
+                                <td>
+                                    <span style="font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 20px; {{ $inv->payment_status === 'Paid' ? 'background: rgba(16,185,129,0.1); color: #10b981;' : ($inv->payment_status === 'Unpaid' ? 'background: rgba(239,68,68,0.1); color: #ef4444;' : 'background: rgba(100,100,100,0.1); color: #64748b;') }}">
+                                        {{ $inv->payment_status }}
+                                    </span>
+                                </td>
+                                <td style="text-align: right;">
+                                    @if($inv->payment_status !== 'Paid')
+                                    <button type="button" class="btn-cc-record-payment"
+                                        data-id="{{ $inv->id }}"
+                                        data-number="{{ $inv->invoice_number }}"
+                                        data-name="{{ $inv->user ? $inv->user->name : '' }}"
+                                        data-outstanding="{{ $inv->amount - $inv->amount_paid }}"
+                                        style="padding: 6px 10px; font-size: 0.75rem; border: none; color: #fff; border-radius: 8px; font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                        <i class="bi bi-wallet2"></i> Confirm Payment
+                                    </button>
+                                    @else
+                                    <span style="font-size: 0.78rem; color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                                        <i class="bi bi-check-circle-fill"></i> Paid
+                                    </span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="9" style="text-align: center; color: #94a3b8; padding: 30px; font-style: italic;">No package invoices registered.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -1301,10 +1403,27 @@
             $("#see-qa-modal").fadeIn(200);
         });
 
+        // Open Record Payment Modal
+        $(document).on('click', '.btn-cc-record-payment', function() {
+            const $btn = $(this);
+            const id = $btn.data('id');
+            const number = $btn.data('number');
+            const name = $btn.data('name');
+            const outstanding = $btn.data('outstanding');
+
+            $('#cc-record-payment-form').attr('action', '/customer-care/invoices/' + id + '/pay');
+            $('#cc_pay_invoice_num').text(number);
+            $('#cc_pay_user_name').text(name);
+            $('#cc_pay_outstanding').text(Number(outstanding).toLocaleString());
+            $('#cc_pay_amount').val(outstanding);
+
+            $('#cc-record-payment-modal').fadeIn(200);
+        });
+
         // -------------------------------------------------------
-        // CC Page Tab Navigation (tickets | blocked | requests | talents | payments)
+        // CC Page Tab Navigation (tickets | blocked | requests | talents | payments | invoices)
         // -------------------------------------------------------
-        const ccTabs = ['tickets', 'blocked', 'requests', 'payments', 'talents'];
+        const ccTabs = ['tickets', 'blocked', 'requests', 'payments', 'talents', 'invoices'];
 
         function ccSwitchTab(tabId) {
             // Hide all tab panels
@@ -1337,7 +1456,7 @@
         }
 
         // Read initial tab from URL hash
-        const ccValidTabs = ['tickets', 'blocked', 'requests', 'payments', 'talents'];
+        const ccValidTabs = ['tickets', 'blocked', 'requests', 'payments', 'talents', 'invoices'];
         let ccDefaultTab = 'tickets';
         if (window.location.hash) {
             const h = window.location.hash.substring(1);
@@ -1354,4 +1473,67 @@
 
     });
 </script>
+
+<!-- Modal: Record / Confirm Invoice Payment (Customer Care) -->
+<div id="cc-record-payment-modal" class="admin-modal">
+    <div class="admin-modal-content" style="border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-width: 500px; width: 90%; margin: auto;">
+        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-wallet2" style="color: #10b981;"></i> Confirm Package Payment
+            </h3>
+            <button type="button" class="admin-modal-close" onclick="$('#cc-record-payment-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+        <form id="cc-record-payment-form" action="" method="POST">
+            @csrf
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 18px; font-size: 0.88rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #64748b;">Invoice #:</span>
+                    <strong id="cc_pay_invoice_num" style="color: #4338ca;"></strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                    <span style="color: #64748b;">Talent Name:</span>
+                    <strong id="cc_pay_user_name" style="color: #0f172a;"></strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                    <span style="color: #64748b;">Outstanding Balance:</span>
+                    <strong style="color: #ef4444;">TZS <span id="cc_pay_outstanding"></span></strong>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Amount Paid (TZS)</label>
+                <input type="number" step="0.01" id="cc_pay_amount" name="amount_paid" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Payment Method</label>
+                <select name="payment_method" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <option value="M-Pesa">M-Pesa</option>
+                    <option value="Tigo Pesa">Tigo Pesa</option>
+                    <option value="Airtel Money">Airtel Money</option>
+                    <option value="HaloPesa">HaloPesa</option>
+                    <option value="Bank Transfer">Bank Transfer / CRDB / NMB</option>
+                    <option value="Cash">Cash</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Payment Reference / Transaction ID</label>
+                <input type="text" name="payment_reference" class="form-control" placeholder="e.g. QGH4782910" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Notes / Customer Care Remarks</label>
+                <textarea name="notes" rows="2" class="form-control" placeholder="Optional notes regarding this payment..." style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; font-size: 0.88rem;"></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                <button type="button" onclick="$('#cc-record-payment-modal').fadeOut(200);" style="padding: 10px 20px; border-radius: 10px; font-weight: 600; background: #e2e8f0; border: none; color: #475569; cursor: pointer;">Cancel</button>
+                <button type="submit" style="padding: 10px 24px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(16,185,129,0.35); cursor: pointer;">
+                    Confirm & Save Payment
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection

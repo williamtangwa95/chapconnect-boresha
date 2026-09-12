@@ -213,6 +213,36 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the resolved avatar URL for the user.
+     */
+    public function getAvatarUrlAttribute()
+    {
+        if (!empty($this->profile_image)) {
+            if (\Illuminate\Support\Str::startsWith($this->profile_image, ['http://', 'https://'])) {
+                return $this->profile_image;
+            }
+            return asset($this->profile_image);
+        }
+        return asset('images/default-avatar.png');
+    }
+
+    /**
+     * Get the decrypted security answer if available.
+     */
+    public function getDecryptedSecurityAnswerAttribute()
+    {
+        if (empty($this->security_answer)) {
+            return '';
+        }
+
+        try {
+            return \Illuminate\Support\Facades\Crypt::decryptString($this->security_answer);
+        } catch (\Exception $e) {
+            return $this->security_answer;
+        }
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

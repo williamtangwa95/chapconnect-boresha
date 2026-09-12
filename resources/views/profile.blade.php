@@ -15,28 +15,24 @@
         <!-- Sidebar -->
         <div class="profile-sidebar" style="padding: 16px 12px;">
             <div class="pimage">
-                @if($talent->profile_image)
-                <img src="{{ asset($talent->profile_image) }}" alt="{{ $talent->name }}">
-                @else
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop" alt="{{ $talent->name }}">
-                @endif
+                <img src="{{ $talent->avatar_url }}" alt="{{ $talent->name }}">
             </div>
             <h2>{{ $talent->name }}</h2>
             <p style="color: var(--text-muted); font-size: 14px; font-weight: 500; margin-bottom: 12px;">{{ __($talent->category_label) }}</p>
 
             <div class="like-container" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 18px; gap: 4px; flex-wrap: nowrap; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; padding: 12px 0;">
                 <div class="like" style="text-align: center; flex: 1;">
-                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;">{{ __('Like') }} 🤍</button>
+                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;"><i class="bi bi-heart" style="margin-right: 4px;"></i>{{ __('Like') }}</button>
                     <span class="like-count" id="likeCount_{{ $talent->id }}" style="display: block; font-size: 0.95rem; font-weight: 800; margin-top: 2px;">{{ $talent->likes_received_count ?? 0 }}</span>
                 </div>
                 <div class="comment" style="text-align: center; flex: 1;">
                     <a href="#comments-tab" style="text-decoration:none;" onclick="$('.menu a[href=\'#comments-tab\']').click();">
-                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;">{{ __('Comments 💬') }}</button>
+                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;"><i class="bi bi-chat-dots" style="margin-right: 4px; color: #0284c7;"></i>{{ __('Comments') }}</button>
                     </a>
                     <span class="comment-count {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentCount_{{ $talent->id }}" style="display: block; font-size: 0.95rem; font-weight: 800; margin-top: 2px;">{{ $talent->comments_received_count ?? 0 }}</span>
                 </div>
                 <div class="follow" style="text-align: center; flex: 1;">
-                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;">{{ __('Followers') }}</button>
+                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;"><i class="bi bi-person-plus" style="margin-right: 4px;"></i>{{ __('Followers') }}</button>
                     <span class="followers-count" id="followersCount_{{ $talent->id }}" style="display: block; font-size: 0.95rem; font-weight: 800; margin-top: 2px;">{{ $talent->followers_received_count ?? 0 }}</span>
                 </div>
             </div>
@@ -205,7 +201,7 @@
                         @forelse($miniPhotos as $photo)
                         <div class="profile-photo-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; transition: transform 0.2s ease, box-shadow 0.2s ease;">
                             <div style="width: 100%; aspect-ratio: 4/3; overflow: hidden; position: relative; background: #0f172a; cursor: pointer;" onclick="openPhotoViewer('{{ asset($photo->file_path) }}', '{{ addslashes($photo->title ?: 'Portfolio Asset') }}', '{{ addslashes($photo->content ?: '') }}')">
-                                <img src="{{ asset($photo->file_path) }}" alt="{{ $photo->title ?: $talent->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; transition: transform 0.3s ease;">
+                                <img src="{{ asset($photo->file_path) }}" alt="{{ $photo->title ?: $talent->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;">
                                 <div style="position: absolute; top: 10px; right: 10px; display: flex; gap: 6px;">
                                     <button type="button" onclick="event.stopPropagation(); openReportModal({{ $photo->id }});" title="{{ __('Report Inappropriate Content') }}" style="background: rgba(239, 68, 68, 0.85); backdrop-filter: blur(4px); padding: 4px 8px; border: none; border-radius: 12px; font-size: 0.72rem; font-weight: 700; color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;">
                                         <i class="bi bi-flag"></i>
@@ -324,11 +320,7 @@
                                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <div style="width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 1.5px solid #6366f1; flex-shrink: 0; background: #f1f5f9;">
-                                            @if($talent->profile_image)
-                                            <img src="{{ asset($talent->profile_image) }}" alt="{{ $talent->name }}" style="width:100%; height:100%; object-fit:cover; object-position: top center;">
-                                            @else
-                                            <i class="bi bi-person-fill" style="color: #64748b; margin: 4px; font-size: 0.8rem;"></i>
-                                            @endif
+                                            <img src="{{ $talent->avatar_url }}" alt="{{ $talent->name }}" style="width:100%; height:100%; object-fit:cover; object-position: center;">
                                         </div>
                                         <div>
                                             <span style="font-weight: 700; font-size: 0.8rem; color: #0f172a;">{{ $talent->name }}</span>

@@ -340,100 +340,107 @@
     </div>
 </div>
 <style>
-.maintenance-marquee-bar {
-    max-width: 1550px;
-    width: 98%;
-    margin: 10px auto 14px auto;
-    background: linear-gradient(135deg, #7c2d12 0%, #b45309 50%, #d97706 100%);
-    color: #ffffff;
-    padding: 10px 16px;
-    border-radius: 12px;
-    box-shadow: 0 4px 18px rgba(180, 83, 9, 0.35);
-    border: 1px solid rgba(251, 191, 36, 0.4);
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    overflow: hidden;
-}
-
-.maintenance-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 5px 12px;
-    border-radius: 20px;
-    flex-shrink: 0;
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0.6px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    text-transform: uppercase;
-}
-
-.maintenance-icon {
-    color: #fbbf24;
-    font-size: 1rem;
-    animation: wrenchPulse 1.8s infinite ease-in-out;
-}
-
-.badge-text-desktop {
-    display: inline;
-}
-
-.badge-text-mobile {
-    display: none;
-}
-
-.maintenance-marquee-content {
-    flex: 1;
-    overflow: hidden;
-    white-space: nowrap;
-    min-width: 0;
-}
-
-.maintenance-marquee-content marquee {
-    font-weight: 600;
-    font-size: 0.92rem;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-    vertical-align: middle;
-}
-
-@keyframes wrenchPulse {
-    0%, 100% { transform: scale(1) rotate(0deg); }
-    50% { transform: scale(1.15) rotate(-10deg); }
-}
-
-@media (max-width: 680px) {
     .maintenance-marquee-bar {
-        padding: 6px 10px;
-        margin: 6px auto 10px auto;
-        gap: 8px;
-        border-radius: 10px;
+        max-width: 1550px;
+        width: 98%;
+        margin: 10px auto 14px auto;
+        background: linear-gradient(135deg, #7c2d12 0%, #b45309 50%, #d97706 100%);
+        color: #ffffff;
+        padding: 10px 16px;
+        border-radius: 12px;
+        box-shadow: 0 4px 18px rgba(180, 83, 9, 0.35);
+        border: 1px solid rgba(251, 191, 36, 0.4);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        overflow: hidden;
     }
 
     .maintenance-badge {
-        padding: 3px 8px;
-        gap: 5px;
-        font-size: 0.7rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0, 0, 0, 0.3);
+        padding: 5px 12px;
+        border-radius: 20px;
+        flex-shrink: 0;
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        text-transform: uppercase;
     }
 
     .maintenance-icon {
-        font-size: 0.85rem;
+        color: #fbbf24;
+        font-size: 1rem;
+        animation: wrenchPulse 1.8s infinite ease-in-out;
     }
 
     .badge-text-desktop {
-        display: none;
-    }
-
-    .badge-text-mobile {
         display: inline;
     }
 
-    .maintenance-marquee-content marquee {
-        font-size: 0.84rem;
+    .badge-text-mobile {
+        display: none;
     }
-}
+
+    .maintenance-marquee-content {
+        flex: 1;
+        overflow: hidden;
+        white-space: nowrap;
+        min-width: 0;
+    }
+
+    .maintenance-marquee-content marquee {
+        font-weight: 600;
+        font-size: 0.92rem;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+        vertical-align: middle;
+    }
+
+    @keyframes wrenchPulse {
+
+        0%,
+        100% {
+            transform: scale(1) rotate(0deg);
+        }
+
+        50% {
+            transform: scale(1.15) rotate(-10deg);
+        }
+    }
+
+    @media (max-width: 680px) {
+        .maintenance-marquee-bar {
+            padding: 6px 10px;
+            margin: 6px auto 10px auto;
+            gap: 8px;
+            border-radius: 10px;
+        }
+
+        .maintenance-badge {
+            padding: 3px 8px;
+            gap: 5px;
+            font-size: 0.7rem;
+        }
+
+        .maintenance-icon {
+            font-size: 0.85rem;
+        }
+
+        .badge-text-desktop {
+            display: none;
+        }
+
+        .badge-text-mobile {
+            display: inline;
+        }
+
+        .maintenance-marquee-content marquee {
+            font-size: 0.84rem;
+        }
+    }
 </style>
 @endif
 
@@ -505,28 +512,24 @@
                 @forelse($talents as $talent)
                 <div class="container">
                     <div class="imagea">
-                        @if($talent->profile_image)
-                        <img src="{{ asset($talent->profile_image) }}" alt="{{ $talent->name }}" loading="lazy">
-                        @else
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80" alt="{{ $talent->name }}" loading="lazy">
-                        @endif
+                        <img src="{{ $talent->avatar_url }}" alt="{{ $talent->name }}" loading="lazy">
                         <div class="details">
                             <h2 title="{{ $talent->name }}">{{ $talent->name }}</h2>
                             <h5>{{ __($talent->category_label) }}</h5>
 
                             <div class="like-container">
                                 <div class="like">
-                                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})">{{ __('Like') }} 🤍</button>
+                                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})"><i class="bi bi-heart" style="margin-right: 4px;"></i>{{ __('Like') }}</button>
                                     <span class="like-count" id="likeCount_{{ $talent->id }}">{{ $talent->likes_received_count ?? 0 }}</span>
                                 </div>
                                 <div class="comment">
-                                    <a href="{{ route('profile', $talent->id) }}#info-tab" style="text-decoration:none;">
-                                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}">{{ __('Comments') }} 💬</button>
+                                    <a href="{{ route('profile', $talent->id) }}#comments-tab" style="text-decoration:none;">
+                                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}"><i class="bi bi-chat-dots" style="margin-right: 4px; color: #0284c7;"></i>{{ __('Comments') }}</button>
                                     </a>
                                     <span class="comment-count {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentCount_{{ $talent->id }}">{{ $talent->comments_received_count ?? 0 }}</span>
                                 </div>
                                 <div class="follow">
-                                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})">{{ __('Followers') }}</button>
+                                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})"><i class="bi bi-person-plus" style="margin-right: 4px;"></i>{{ __('Followers') }}</button>
                                     <span class="followers-count" id="followersCount_{{ $talent->id }}">{{ $talent->followers_received_count ?? 0 }}</span>
                                 </div>
                             </div>
@@ -586,60 +589,16 @@
                         <i class="bi bi-search" style="font-size: 2.5rem; color: #cbd5e1; display: block; margin-bottom: 8px;"></i>
                         <p style="font-size: 0.88rem; font-weight: 500; margin: 0;">{{ __('No matching previews found.') }}</p>
                     </div>
-                    @forelse($recentMedia as $media)
-                    <div class="media-feed-item">
-                        <!-- User Info Header -->
-                        <div class="media-feed-user">
-                            @if($media->user->profile_image)
-                            <img class="media-feed-avatar" src="{{ asset($media->user->profile_image) }}" alt="{{ $media->user->name }}" loading="lazy">
-                            @else
-                            <img class="media-feed-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=60&auto=format&fit=crop&q=80" alt="{{ $media->user->name }}" loading="lazy">
-                            @endif
-                            <div class="media-feed-user-info">
-                                <a class="media-feed-username" href="{{ route('profile', $media->user->id) }}">
-                                    {{ $media->user->name }}
-                                </a>
-                                <span class="media-feed-userrole">{{ $media->user->category_label }}</span>
-                            </div>
-                        </div>
+                    @include('partials.media-feed-items', ['recentMedia' => $recentMedia])
 
-                        <!-- Media Content (Photo or Video) -->
-                        <div class="media-feed-content">
-                            @if($media->type === 'photo')
-                            <a href="{{ route('profile', $media->user->id) }}#photos-tab">
-                                <img class="media-feed-image" src="{{ asset($media->file_path) }}" alt="{{ $media->title ?: 'Portfolio image' }}" loading="lazy">
-                            </a>
-                            @elseif($media->type === 'video')
-                            <div class="media-feed-video">
-                                {!! \App\Helpers\VideoHelper::renderEmbed($media->file_path) !!}
-                            </div>
-                            @endif
-                        </div>
-
-                        <!-- Text Details & Caption -->
-                        <div class="media-feed-info">
-                            @if($media->title)
-                            <h4 class="media-feed-title">{{ $media->title }}</h4>
-                            @endif
-
-                            @if($media->content)
-                            <p class="media-feed-caption">{{ $media->content }}</p>
-                            @endif
-
-                            <div class="media-feed-meta">
-                                <span class="media-feed-badge {{ $media->type }}">
-                                    <i class="bi bi-{{ $media->type === 'photo' ? 'image' : 'film' }}"></i> {{ $media->type }}
-                                </span>
-                                <span>{{ $media->created_at->diffForHumans() }}</span>
-                            </div>
-                        </div>
+                    @if(count($recentMedia) >= 20)
+                    <div id="viewMoreMediaContainer" style="text-align: center; padding: 20px 10px 15px 10px;">
+                        <button type="button" id="loadMoreMediaBtn" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; border: none; padding: 10px 24px; border-radius: 30px; font-weight: 600; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3); transition: all 0.25s ease-in-out;">
+                            <i class="bi bi-arrow-down-circle-fill" id="loadMoreMediaIcon" style="font-size: 1rem;"></i>
+                            <span id="loadMoreMediaText">{{ __('View More') }}</span>
+                        </button>
                     </div>
-                    @empty
-                    <div style="text-align: center; padding: 30px 10px; color: var(--text-muted);">
-                        <i class="bi bi-images" style="font-size: 2.5rem; color: #cbd5e1; display: block; margin-bottom: 8px;"></i>
-                        <p style="font-size: 0.88rem; font-weight: 500;">No photos or videos uploaded yet.</p>
-                    </div>
-                    @endforelse
+                    @endif
                 </div>
             </div>
         </div>
@@ -1081,15 +1040,14 @@
 
         // Live search/filter for Recent Upload Previews sidebar
         const $mediaSearch = $('#mediaSearch');
-        const $mediaFeedItems = $('.media-feed-item');
         const $noResultsPlaceholder = $('#no-media-search-results');
 
-        if ($mediaSearch.length && $mediaFeedItems.length) {
+        if ($mediaSearch.length) {
             $mediaSearch.on('input', function() {
                 const query = $(this).val().toLowerCase().trim();
                 let visibleCount = 0;
 
-                $mediaFeedItems.each(function() {
+                $('.media-feed-item').each(function() {
                     const $item = $(this);
 
                     // Extract text details
@@ -1143,6 +1101,104 @@
             });
         }
 
+        // AJAX Load More Recent Media Posts
+        let currentMediaOffset = {{ count($recentMedia) }};
+
+        $('#loadMoreMediaBtn').on('click', function() {
+            const $btn = $(this);
+            const $icon = $('#loadMoreMediaIcon');
+            const $text = $('#loadMoreMediaText');
+
+            // If button is transformed to 'Move to Beginning', scroll smoothly to top
+            if ($btn.data('action') === 'top') {
+                const sidebar = document.querySelector('.media-preview-sidebar');
+                if (sidebar) {
+                    sidebar.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                return;
+            }
+
+            if ($btn.prop('disabled')) return;
+
+            $btn.prop('disabled', true);
+            $icon.attr('class', 'spinner-border spinner-border-sm me-1').attr('role', 'status');
+            $text.text("{{ __('Loading...') }}");
+
+            $.ajax({
+                url: '{{ route("media.load-more") }}',
+                type: 'GET',
+                data: { offset: currentMediaOffset },
+                success: function(res) {
+                    if (res.success && res.html && res.count > 0) {
+                        $('#viewMoreMediaContainer').before(res.html);
+                        currentMediaOffset += res.count;
+
+                        // Fetch interaction statuses for newly appended media items
+                        if (res.media_ids && res.media_ids.length > 0) {
+                            $.get('{{ route("media.interactions.status") }}', {
+                                media_ids: res.media_ids.join(',')
+                            }, function(statusRes) {
+                                if (statusRes.success && statusRes.statuses) {
+                                    $.each(statusRes.statuses, function(id, data) {
+                                        const likeBtn = document.getElementById('mediaLikeBtn_' + id);
+                                        const likeIcon = document.querySelector('.media-like-icon_' + id);
+                                        const likeCount = document.getElementById('mediaLikeCount_' + id);
+                                        const commentCount = document.getElementById('mediaCommentCount_' + id);
+                                        const shareCount = document.getElementById('mediaShareCount_' + id);
+
+                                        if (likeCount) likeCount.textContent = data.likes_count;
+                                        if (commentCount) commentCount.textContent = data.comments_count;
+                                        if (shareCount) shareCount.textContent = data.shares_count;
+
+                                        if (data.is_liked) {
+                                            if (likeBtn) likeBtn.style.color = '#ef4444';
+                                            if (likeIcon) {
+                                                likeIcon.classList.remove('bi-heart');
+                                                likeIcon.classList.add('bi-heart-fill');
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        }
+
+                        // Re-observe videos/iframes for auto-pause on scroll
+                        document.querySelectorAll('.media-preview-sidebar video').forEach(v => sidebarObserver.observe(v));
+                        document.querySelectorAll('.media-preview-sidebar iframe').forEach(iframe => sidebarObserver.observe(iframe));
+
+                        // Re-trigger live search filter if query exists
+                        if ($mediaSearch.length && $mediaSearch.val().trim() !== '') {
+                            $mediaSearch.trigger('input');
+                        }
+
+                        if (!res.has_more) {
+                            // Reached the end -> change button to "Move to Beginning"
+                            $btn.prop('disabled', false);
+                            $btn.data('action', 'top');
+                            $icon.attr('class', 'bi bi-arrow-up-circle-fill');
+                            $text.text("{{ __('Move to Beginning') }}");
+                        } else {
+                            $btn.prop('disabled', false);
+                            $icon.attr('class', 'bi bi-arrow-down-circle-fill');
+                            $text.text("{{ __('View More') }}");
+                        }
+                    } else {
+                        // Reached the end (no more items) -> change button to "Move to Beginning"
+                        $btn.prop('disabled', false);
+                        $btn.data('action', 'top');
+                        $icon.attr('class', 'bi bi-arrow-up-circle-fill');
+                        $text.text("{{ __('Move to Beginning') }}");
+                    }
+                },
+                error: function() {
+                    $btn.prop('disabled', false);
+                    $icon.attr('class', 'bi bi-arrow-down-circle-fill');
+                    $text.text("{{ __('View More') }}");
+                }
+            });
+        });
+
         sidebarVideos.forEach(v => sidebarObserver.observe(v));
         sidebarIframes.forEach(iframe => {
             // Append JS API support parameters dynamically to YouTube source URLs if not already present
@@ -1153,6 +1209,13 @@
             sidebarObserver.observe(iframe);
         });
     });
+
+    const i18nCard = {
+        like: "{{ __('Like') }}",
+        liked: "{{ __('Liked') }}",
+        followers: "{{ __('Followers') }}",
+        following: "{{ __('Following') }}"
+    };
 
     function toggleCardLike(id) {
         const btn = document.getElementById('likeBtn_' + id);
@@ -1171,10 +1234,10 @@
                 if (res.success) {
                     if (res.liked) {
                         btn.classList.add('liked');
-                        btn.textContent = i18n.liked;
+                        btn.innerHTML = `<i class="bi bi-heart-fill" style="margin-right: 4px; color: #ef4444;"></i> ${i18nCard.liked}`;
                     } else {
                         btn.classList.remove('liked');
-                        btn.textContent = i18n.like;
+                        btn.innerHTML = `<i class="bi bi-heart" style="margin-right: 4px;"></i> ${i18nCard.like}`;
                     }
                     count.textContent = res.count;
                 }
@@ -1202,10 +1265,10 @@
                 if (res.success) {
                     if (res.following) {
                         btn.classList.add('following');
-                        btn.textContent = i18n.following;
+                        btn.innerHTML = `<i class="bi bi-person-check-fill" style="margin-right: 4px; color: #10b981;"></i> ${i18nCard.following}`;
                     } else {
                         btn.classList.remove('following');
-                        btn.textContent = i18n.followers;
+                        btn.innerHTML = `<i class="bi bi-person-plus" style="margin-right: 4px;"></i> ${i18nCard.followers}`;
                     }
                     count.textContent = res.count;
                 }
@@ -1215,5 +1278,335 @@
             }
         });
     }
+
+    // Media Interactions JS (Like, Comment, Share)
+    let currentShareData = {
+        id: null,
+        title: '',
+        url: ''
+    };
+
+    function toggleMediaLike(id) {
+        const btn = document.getElementById('mediaLikeBtn_' + id);
+        const icon = document.querySelector('.media-like-icon_' + id);
+        const countEl = document.getElementById('mediaLikeCount_' + id);
+        if (!btn || !countEl) return;
+
+        btn.disabled = true;
+        $.ajax({
+            url: '/media/' + id + '/like',
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(res) {
+                btn.disabled = false;
+                if (res.success) {
+                    countEl.textContent = res.count;
+                    if (res.liked) {
+                        btn.style.color = '#ef4444';
+                        if (icon) icon.className = 'bi bi-heart-fill media-like-icon_' + id;
+                    } else {
+                        btn.style.color = '#64748b';
+                        if (icon) icon.className = 'bi bi-heart media-like-icon_' + id;
+                    }
+                }
+            },
+            error: function() {
+                btn.disabled = false;
+            }
+        });
+    }
+
+    function openMediaCommentsModal(id, title) {
+        $('#activeMediaId').val(id);
+        $('#activeParentId').val('');
+        $('#mediaCommentsModalTitle').text(title || 'Post Comments');
+        $('#mediaCommentText').val('');
+        $('#mediaCommentsList').html('<div style="text-align: center; padding: 30px; color: #94a3b8;"><i class="bi bi-hourglass-split"></i> Loading comments...</div>');
+        $('#mediaCommentsModal').css('display', 'flex').hide().fadeIn(200);
+
+        $.ajax({
+            url: '/media/' + id + '/comments',
+            type: 'GET',
+            success: function(res) {
+                if (res.success) {
+                    renderMediaComments(res.comments);
+                    $('#mediaCommentCount_' + id).text(res.count);
+                }
+            }
+        });
+    }
+
+    function renderMediaComments(comments) {
+        const list = $('#mediaCommentsList');
+        if (!comments || comments.length === 0) {
+            list.html('<div style="text-align: center; padding: 30px 10px; color: #94a3b8;"><i class="bi bi-chat-left-text" style="font-size: 2rem; display: block; margin-bottom: 6px;"></i>No comments yet. Be the first to comment!</div>');
+            return;
+        }
+
+        let html = '';
+        comments.forEach(c => {
+            const avatar = c.user_avatar || "{{ asset('images/default-avatar.png') }}";
+            html += `
+                <div style="background: #f8fafc; border-radius: 12px; padding: 10px 14px; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <img src="${avatar}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover;">
+                            <span style="font-weight: 700; font-size: 0.84rem; color: #0f172a;">${c.author_name}</span>
+                        </div>
+                        <span style="font-size: 0.72rem; color: #94a3b8;">${c.created_at_human}</span>
+                    </div>
+                    <p style="margin: 0; font-size: 0.84rem; color: #334155; line-height: 1.4;">${c.comment}</p>
+                </div>
+            `;
+        });
+        list.html(html);
+    }
+
+    function submitMediaComment(e) {
+        e.preventDefault();
+        const id = $('#activeMediaId').val();
+        const text = $('#mediaCommentText').val().trim();
+        const author = $('#mediaCommentAuthor').val() ? $('#mediaCommentAuthor').val().trim() : '';
+
+        if (!text) return;
+        const btn = $('#btnSubmitMediaComment');
+        btn.prop('disabled', true).html('<i class="bi bi-hourglass-split"></i>');
+
+        $.ajax({
+            url: '/media/' + id + '/comment',
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                comment: text,
+                author_name: author
+            },
+            success: function(res) {
+                btn.prop('disabled', false).html('<i class="bi bi-send-fill"></i>');
+                if (res.success) {
+                    $('#mediaCommentText').val('');
+                    $('#mediaCommentCount_' + id).text(res.count);
+                    openMediaCommentsModal(id, $('#mediaCommentsModalTitle').text());
+                }
+            },
+            error: function() {
+                btn.prop('disabled', false).html('<i class="bi bi-send-fill"></i>');
+            }
+        });
+    }
+
+    function openMediaShareModal(id, title, url) {
+        currentShareData = {
+            id: id,
+            title: title,
+            url: url
+        };
+        $('#mediaShareTitle').text(title);
+        if (navigator.share) {
+            $('#btnNativeShare').css('display', 'flex');
+        } else {
+            $('#btnNativeShare').hide();
+        }
+        $('#mediaShareModal').css('display', 'flex').hide().fadeIn(200);
+    }
+
+    function recordMediaShare(id, platform) {
+        $.ajax({
+            url: '/media/' + id + '/share',
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                platform: platform
+            },
+            success: function(res) {
+                if (res.success) {
+                    $('#mediaShareCount_' + id).text(res.count);
+                }
+            }
+        });
+    }
+
+    function shareToPlatform(platform) {
+        if (!currentShareData.id) return;
+        const url = encodeURIComponent(currentShareData.url);
+        const title = encodeURIComponent(currentShareData.title);
+        recordMediaShare(currentShareData.id, platform);
+
+        let shareUrl = '';
+        if (platform === 'whatsapp') {
+            shareUrl = `https://api.whatsapp.com/send?text=${title}%20${url}`;
+        } else if (platform === 'facebook') {
+            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        } else if (platform === 'twitter') {
+            shareUrl = `https://twitter.com/intent/tweet?text=${title}&url=${url}`;
+        }
+        if (shareUrl) {
+            window.open(shareUrl, '_blank', 'width=600,height=500');
+        }
+        $('#mediaShareModal').fadeOut(200);
+    }
+
+    function copyMediaLink() {
+        if (!currentShareData.url) return;
+        const textToCopy = currentShareData.url;
+
+        function onCopySuccess() {
+            recordMediaShare(currentShareData.id, 'copy_link');
+            alert('Link copied to clipboard!');
+            $('#mediaShareModal').fadeOut(200);
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(textToCopy)
+                .then(onCopySuccess)
+                .catch(() => fallbackCopyText(textToCopy, onCopySuccess));
+        } else {
+            fallbackCopyText(textToCopy, onCopySuccess);
+        }
+    }
+
+    function fallbackCopyText(text, callback) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.width = "2em";
+        textArea.style.height = "2em";
+        textArea.style.padding = "0";
+        textArea.style.border = "none";
+        textArea.style.outline = "none";
+        textArea.style.boxShadow = "none";
+        textArea.style.background = "transparent";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            const successful = document.execCommand('copy');
+            if (successful && callback) {
+                callback();
+            } else {
+                prompt('Copy this link:', text);
+            }
+        } catch (err) {
+            prompt('Copy this link:', text);
+        }
+        document.body.removeChild(textArea);
+    }
+
+    function shareNative() {
+        if (navigator.share && currentShareData.url) {
+            navigator.share({
+                title: currentShareData.title,
+                url: currentShareData.url
+            }).then(() => {
+                recordMediaShare(currentShareData.id, 'native');
+                $('#mediaShareModal').fadeOut(200);
+            }).catch(() => {});
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const mediaIds = [];
+        $('.media-feed-item').each(function() {
+            const mid = $(this).data('media-id');
+            if (mid) mediaIds.push(mid);
+        });
+
+        if (mediaIds.length > 0) {
+            $.ajax({
+                url: '/media/interactions/status',
+                type: 'GET',
+                data: {
+                    media_ids: mediaIds
+                },
+                success: function(res) {
+                    if (res.success && res.statuses) {
+                        Object.keys(res.statuses).forEach(id => {
+                            const st = res.statuses[id];
+                            $('#mediaLikeCount_' + id).text(st.likes_count);
+                            $('#mediaCommentCount_' + id).text(st.comments_count);
+                            $('#mediaShareCount_' + id).text(st.shares_count);
+                            if (st.is_liked) {
+                                const btn = document.getElementById('mediaLikeBtn_' + id);
+                                const icon = document.querySelector('.media-like-icon_' + id);
+                                if (btn) btn.style.color = '#ef4444';
+                                if (icon) icon.className = 'bi bi-heart-fill media-like-icon_' + id;
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    });
 </script>
+
+<!-- Media Comments Modal HTML -->
+<div id="mediaCommentsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.65); backdrop-filter: blur(5px); z-index: 99999; justify-content: center; align-items: center; padding: 15px;">
+    <div style="background: #ffffff; border-radius: 18px; width: 100%; max-width: 520px; padding: 22px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); position: relative; max-height: 90vh; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 1.08rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-chat-dots-fill" style="color: #0284c7;"></i> <span id="mediaCommentsModalTitle">Post Comments</span>
+            </h3>
+            <button type="button" onclick="$('#mediaCommentsModal').fadeOut(200);" style="background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer;">&times;</button>
+        </div>
+
+        <div id="mediaCommentsList" style="flex-grow: 1; overflow-y: auto; max-height: 360px; padding-right: 6px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px;">
+            <div style="text-align: center; padding: 30px; color: #94a3b8;"><i class="bi bi-hourglass-split"></i> Loading comments...</div>
+        </div>
+
+        <form id="mediaCommentForm" onsubmit="submitMediaComment(event)" style="border-top: 1px solid #e2e8f0; padding-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+            <input type="hidden" id="activeMediaId" value="">
+            <input type="hidden" id="activeParentId" value="">
+
+            @guest
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="text" id="mediaCommentAuthor" placeholder="Your Name (Optional)" style="width: 100%; padding: 8px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 0.82rem; color: #0f172a; outline: none;">
+            </div>
+            @endguest
+
+            <div style="display: flex; gap: 8px;">
+                <textarea id="mediaCommentText" placeholder="Write a comment..." rows="2" required style="flex: 1; padding: 9px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.86rem; color: #0f172a; outline: none; resize: none; line-height: 1.4;"></textarea>
+                <button type="submit" id="btnSubmitMediaComment" style="padding: 0 18px; border-radius: 10px; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #fff; border: none; font-weight: 700; font-size: 0.86rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Media Share Modal HTML -->
+<div id="mediaShareModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.65); backdrop-filter: blur(5px); z-index: 99999; justify-content: center; align-items: center; padding: 15px;">
+    <div style="background: #ffffff; border-radius: 18px; width: 100%; max-width: 440px; padding: 22px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); position: relative;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-share-fill" style="color: #6366f1;"></i> Share Post
+            </h3>
+            <button type="button" onclick="$('#mediaShareModal').fadeOut(200);" style="background: none; border: none; font-size: 1.4rem; color: #64748b; cursor: pointer;">&times;</button>
+        </div>
+
+        <p id="mediaShareTitle" style="font-size: 0.88rem; font-weight: 700; color: #334155; margin-bottom: 16px; text-align: center;"></p>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 18px;">
+            <button type="button" onclick="shareToPlatform('whatsapp')" style="padding: 12px; border-radius: 12px; background: #25D366; color: #ffffff; border: none; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="bi bi-whatsapp" style="font-size: 1.2rem;"></i> WhatsApp
+            </button>
+            <button type="button" onclick="shareToPlatform('facebook')" style="padding: 12px; border-radius: 12px; background: #1877F2; color: #ffffff; border: none; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="bi bi-facebook" style="font-size: 1.2rem;"></i> Facebook
+            </button>
+            <button type="button" onclick="shareToPlatform('twitter')" style="padding: 12px; border-radius: 12px; background: #000000; color: #ffffff; border: none; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="bi bi-twitter-x" style="font-size: 1.2rem;"></i> X (Twitter)
+            </button>
+            <button type="button" onclick="copyMediaLink()" style="padding: 12px; border-radius: 12px; background: #6366f1; color: #ffffff; border: none; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="bi bi-link-45deg" style="font-size: 1.2rem;"></i> Copy Link
+            </button>
+        </div>
+
+        <button type="button" id="btnNativeShare" onclick="shareNative()" style="display: none; width: 100%; padding: 12px; border-radius: 12px; background: #f1f5f9; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 700; font-size: 0.86rem; cursor: pointer; align-items: center; justify-content: center; gap: 8px;">
+            <i class="bi bi-box-arrow-up"></i> More Share Options
+        </button>
+    </div>
+</div>
 @endsection

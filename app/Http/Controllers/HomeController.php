@@ -30,8 +30,17 @@ class HomeController extends Controller
             });
         }
 
-        // Paginate profiles (12 per page) preserving query parameters
-        $talents = $query->latest()->paginate(12)->withQueryString();
+        // Manage random seed in session so pagination across pages (e.g. Page 1 -> Page 2) remains consistent
+        // without duplicate items, while generating a fresh random seed whenever Page 1 is reloaded.
+        if (!$request->has('page') || (int)$request->input('page') <= 1) {
+            $seed = rand(1, 999999);
+            session(['talent_seed' => $seed]);
+        } else {
+            $seed = session('talent_seed', rand(1, 999999));
+        }
+
+        // Paginate profiles (12 per page) in seeded random order (duplicate-free across pages), preserving query parameters
+        $talents = $query->orderByRaw("(id * {$seed} + 17) % 999983")->paginate(12)->withQueryString();
 
         $currentUser = auth()->user();
         $isStaff = $currentUser && in_array($currentUser->role, ['admin', 'customer_care', 'staff']);
@@ -71,6 +80,7 @@ class HomeController extends Controller
               ->where('is_published', true);
         })
         ->with('user')
+        ->withCount(['likes', 'comments', 'shares'])
         ->latest()
         ->take(20)
         ->get();
@@ -201,7 +211,7 @@ class HomeController extends Controller
                 $talent->phone = null;
             }
         }
-        $photos = $talent->media()->publiclyVisible()->where('type', 'photo')->latest()->get();
+        $photos = $talent->media()->publiclyVisible()->where('type', 'photo')->withCount(['likes', 'comments', 'shares'])->latest()->get();
 
         return view('profile-photos', [
             'talent' => $talent,
@@ -219,7 +229,7 @@ class HomeController extends Controller
                 $talent->phone = null;
             }
         }
-        $videos = $talent->media()->publiclyVisible()->where('type', 'video')->latest()->get();
+        $videos = $talent->media()->publiclyVisible()->where('type', 'video')->withCount(['likes', 'comments', 'shares'])->latest()->get();
 
         return view('profile-videos', [
             'talent' => $talent,

@@ -345,6 +345,20 @@
                             <p style="font-size: 0.78rem; color: #475569; margin: 0 0 4px 0; line-height: 1.35;">{{ $video->content }}</p>
                             @endif
                         </div>
+
+                        <!-- Owner Engagement Metrics Bar -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 6px; border-top: 1px solid #f1f5f9; font-size: 0.76rem; font-weight: 700;">
+                            <span style="display: flex; align-items: center; gap: 4px; color: #ef4444;" title="Likes">
+                                <i class="bi bi-heart-fill"></i> {{ $video->likes_count ?? 0 }}
+                            </span>
+                            <span style="display: flex; align-items: center; gap: 4px; color: #0284c7; cursor: pointer;" onclick="openOwnerMediaCommentsModal({{ $video->id }}, '{{ addslashes($video->title ?: 'Video Comments') }}')" title="View Comments">
+                                <i class="bi bi-chat-dots-fill"></i> {{ $video->comments_count ?? 0 }}
+                            </span>
+                            <span style="display: flex; align-items: center; gap: 4px; color: #6366f1;" title="Shares">
+                                <i class="bi bi-share-fill"></i> {{ $video->shares_count ?? 0 }}
+                            </span>
+                        </div>
+
                         <span style="font-size: 0.72rem; color: #64748b; font-weight: 600;"><i class="bi bi-clock"></i> {{ $video->created_at->diffForHumans() }}</span>
                     </div>
                 </div>
@@ -641,5 +655,75 @@
             });
         }
     });
+
+    function openOwnerMediaCommentsModal(id, title) {
+        $('#ownerCommentsModalTitle').text(title || 'Video Comments');
+        $('#ownerCommentsList').html('<div style="text-align: center; padding: 25px; color: #94a3b8;"><i class="bi bi-hourglass-split"></i> Loading comments...</div>');
+        $('#ownerCommentsModal').css('display', 'flex').hide().fadeIn(200);
+
+        $.ajax({
+            url: '/media/' + id + '/comments',
+            type: 'GET',
+            success: function(res) {
+                if (res.success) {
+                    const list = $('#ownerCommentsList');
+                    if (!res.comments || res.comments.length === 0) {
+                        list.html('<div style="text-align: center; padding: 25px; color: #94a3b8;"><i class="bi bi-chat-left-text" style="font-size: 1.8rem; display: block; margin-bottom: 6px;"></i>No comments left on this video yet.</div>');
+                        return;
+                    }
+                    let html = '';
+                    res.comments.forEach(c => {
+                        const avatar = c.user_avatar || "{{ asset('images/default-avatar.png') }}";
+                        html += `
+                            <div style="background: #f8fafc; border-radius: 10px; padding: 10px 12px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                                <div style="flex-grow: 1;">
+                                    <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 3px;">
+                                        <img src="${avatar}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                                        <span style="font-weight: 700; font-size: 0.82rem; color: #0f172a;">${c.author_name}</span>
+                                        <span style="font-size: 0.70rem; color: #94a3b8;">${c.created_at_human}</span>
+                                    </div>
+                                    <p style="margin: 0; font-size: 0.82rem; color: #334155;">${c.comment}</p>
+                                </div>
+                                <button type="button" onclick="deleteOwnerComment(${c.id}, ${id})" style="background: rgba(239,68,68,0.1); color: #ef4444; border: none; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; cursor: pointer;" title="Delete Comment">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+                    list.html(html);
+                }
+            }
+        });
+    }
+
+    function deleteOwnerComment(commentId, mediaId) {
+        if (!confirm('Delete this comment?')) return;
+        $.ajax({
+            url: '/media/comment/' + commentId,
+            type: 'DELETE',
+            data: { _token: '{{ csrf_token() }}' },
+            success: function(res) {
+                if (res.success) {
+                    openOwnerMediaCommentsModal(mediaId, $('#ownerCommentsModalTitle').text());
+                }
+            }
+        });
+    }
 </script>
+
+<!-- Owner Media Comments Modal -->
+<div id="ownerCommentsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.65); backdrop-filter: blur(5px); z-index: 99999; justify-content: center; align-items: center; padding: 15px;">
+    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 480px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); position: relative; max-height: 85vh; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+            <h3 style="margin: 0; font-size: 1.02rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                <i class="bi bi-chat-dots-fill" style="color: #0284c7;"></i> <span id="ownerCommentsModalTitle">Video Comments</span>
+            </h3>
+            <button type="button" onclick="$('#ownerCommentsModal').fadeOut(200);" style="background: none; border: none; font-size: 1.3rem; color: #64748b; cursor: pointer;">&times;</button>
+        </div>
+
+        <div id="ownerCommentsList" style="flex-grow: 1; overflow-y: auto; max-height: 400px; display: flex; flex-direction: column; gap: 10px;">
+            <div style="text-align: center; padding: 25px; color: #94a3b8;"><i class="bi bi-hourglass-split"></i> Loading comments...</div>
+        </div>
+    </div>
+</div>
 @endsection

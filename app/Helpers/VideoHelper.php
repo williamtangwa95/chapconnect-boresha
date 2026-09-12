@@ -61,12 +61,12 @@ class VideoHelper
         $wrapperEnd = '</div>';
 
         // YouTube (enablejsapi=1 for postMessage pause control)
-        if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=|shorts\/)|youtu\.be\/)([^"&?\/\s]{11})/', $trimmedUrl, $matches)) {
+        if (preg_match('/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts|live)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/', $trimmedUrl, $matches)) {
             $youtubeId = $matches[1];
-            $embedSrc = 'https://www.youtube.com/embed/' . $youtubeId . '?enablejsapi=1';
-            return $wrapper .
-                '<iframe class="cc-managed-video" data-platform="youtube" data-video-src="' . $embedSrc . '" src="' . $embedSrc . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:10px;"></iframe>' .
-                $wrapperEnd;
+            $embedSrc = 'https://www.youtube.com/embed/' . $youtubeId . '?enablejsapi=1&rel=0';
+            return '<div class="video-container" style="position:relative; width:100%; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:10px; background:#000;">' .
+                '<iframe class="cc-managed-video" data-platform="youtube" data-video-src="' . $embedSrc . '" src="' . $embedSrc . '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;border-radius:10px;"></iframe>' .
+                '</div>';
         }
 
         // Vimeo
@@ -134,14 +134,18 @@ class VideoHelper
         // Local file or direct URL
         $srcUrl = $trimmedUrl;
         if (!str_starts_with($trimmedUrl, 'http://') && !str_starts_with($trimmedUrl, 'https://')) {
-            $srcUrl = asset(ltrim($trimmedUrl, '/'));
+            $path = ltrim($trimmedUrl, '/');
+            if (!str_starts_with($path, 'storage/')) {
+                $path = 'storage/' . $path;
+            }
+            $srcUrl = asset($path);
         }
 
-        return '<div class="video-wrapper" style="position:relative;width:100%;background:#000;border-radius:10px 10px 0 0;overflow:visible;">
-                    <video class="cc-managed-video" data-platform="local" controls playsinline preload="metadata" style="width:100%; height:auto; display:block; border-radius:10px 10px 0 0; max-height:450px;">
-                        <source src="' . e($srcUrl) . '">
-                        Your browser does not support the video tag.
-                    </video>
-                </div>';
+        return '<div class="video-container" style="position:relative; width:100%; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:10px; background:#000;">' .
+            '<video class="cc-managed-video" data-platform="local" controls playsinline preload="metadata" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; border-radius:10px; background:#000;">' .
+                '<source src="' . e($srcUrl) . '">' .
+                'Your browser does not support the video tag.' .
+            '</video>' .
+        '</div>';
     }
 }

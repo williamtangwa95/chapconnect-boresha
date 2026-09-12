@@ -289,7 +289,7 @@
                     <option value="">-- Choose Active Package --</option>
                     @foreach($packages->where('status', 'Active') as $p)
                     <option value="{{ $p->id }}">
-                        {{ $p->name }} (TZS {{ number_format($p->price) }} / {{ $p->duration }} {{ $p->duration_unit }})
+                        {{ $p->name }} (TZS {{ number_format($p->price) }} / {{ ($p->duration_unit === 'lifetime' || $p->duration == -1) ? 'Lifetime' : $p->duration . ' ' . $p->duration_unit }})
                     </option>
                     @endforeach
                 </select>

@@ -59,4 +59,28 @@ class Media extends Model
     {
         return $this->hasMany(MediaReport::class);
     }
+
+    /**
+     * Get likes for this media post.
+     */
+    public function likes()
+    {
+        return $this->hasMany(MediaLike::class);
+    }
+
+    /**
+     * Get comments for this media post.
+     */
+    public function comments()
+    {
+        return $this->hasMany(MediaComment::class);
+    }
+
+    /**
+     * Get shares for this media post.
+     */
+    public function shares()
+    {
+        return $this->hasMany(MediaShare::class);
+    }
 }

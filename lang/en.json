@@ -245,5 +245,10 @@
     "HD Video": "HD Video",
     "Please enter a valid Tanzanian phone number starting with 06, 07, +255, or 255 (e.g. 0678429492 or +255678429492).": "Please enter a valid Tanzanian phone number starting with 06, 07, +255, or 255 (e.g. 0678429492 or +255678429492).",
     "Allowed formats: 06XXXXXXXX, 07XXXXXXXX, +255..., or 255...": "Allowed formats: 06XXXXXXXX, 07XXXXXXXX, +255..., or 255...",
-    "Phone number already taken": "Phone number already taken"
+    "Phone number already taken": "Phone number already taken",
+    "Phone Number Visibility": "Phone Number Visibility",
+    "Yes — Show Phone Number Publicly": "Yes — Show Phone Number Publicly",
+    "No — Keep Phone Number Private / Hidden": "No — Keep Phone Number Private / Hidden",
+    "Public visitors can view your contact details.": "Public visitors can view your contact details.",
+    "Phone number will be kept hidden/private from public visitors.": "Phone number will be kept hidden/private from public visitors."
 }

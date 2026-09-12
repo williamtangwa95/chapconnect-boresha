@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 use App\Http\Controllers\InteractionController;
+use App\Http\Controllers\MediaInteractionController;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -34,6 +35,15 @@ Route::post('/talent/{id}/follow', [InteractionController::class, 'toggleFollow'
 Route::post('/talent/{id}/comment', [InteractionController::class, 'storeComment'])->name('talent.comment');
 Route::delete('/comment/{id}', [InteractionController::class, 'deleteComment'])->name('talent.comment.delete');
 Route::get('/interactions/status', [InteractionController::class, 'getStatuses'])->name('talent.interactions.status');
+
+// Public Media Post Interaction Routes (Likes, Comments, Shares)
+Route::post('/media/{id}/like', [MediaInteractionController::class, 'toggleLike'])->name('media.like');
+Route::post('/media/{id}/comment', [MediaInteractionController::class, 'storeComment'])->name('media.comment');
+Route::get('/media/{id}/comments', [MediaInteractionController::class, 'fetchComments'])->name('media.comments');
+Route::delete('/media/comment/{id}', [MediaInteractionController::class, 'deleteComment'])->name('media.comment.delete');
+Route::post('/media/{id}/share', [MediaInteractionController::class, 'recordShare'])->name('media.share');
+Route::get('/media/load-more', [MediaInteractionController::class, 'loadMore'])->name('media.load-more');
+Route::get('/media/interactions/status', [MediaInteractionController::class, 'getStatuses'])->name('media.interactions.status');
 
 // Authentication Routes
 Route::get('/register', [AuthController::class, 'showRegister'])->middleware('maintenance:register')->name('register');
@@ -112,6 +122,7 @@ Route::middleware(['auth', 'customer_care'])->group(function () {
     Route::post('/customer-care/tickets/{id}/update', [\App\Http\Controllers\CustomerCareController::class, 'update'])->name('customer-care.tickets.update');
     Route::delete('/customer-care/tickets/{id}', [\App\Http\Controllers\CustomerCareController::class, 'destroy'])->name('customer-care.tickets.delete');
     Route::post('/customer-care/unblock/{id}', [\App\Http\Controllers\CustomerCareController::class, 'unblockAccount'])->name('customer-care.unblock');
+    Route::post('/customer-care/invoices/{id}/pay', [\App\Http\Controllers\CustomerCareController::class, 'recordInvoicePayment'])->name('customer-care.invoices.pay');
 
     // Staff Talent Management Routes (Accessible to Super Admin and Customer Care)
     Route::get('/staff/talents/{id}/manage', [\App\Http\Controllers\StaffTalentManagementController::class, 'manage'])->name('staff.talent.manage');
