@@ -409,8 +409,8 @@
                         </div>
 
                         <!-- Dynamic Green Animated Progress Bar -->
-                        <div style="background: #cbd5e1; border-radius: 10px; height: 16px; overflow: hidden; position: relative; margin-bottom: 8px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);">
-                            <div id="inlineVideoProgressBar" class="progress-bar-green-animated" style="width: 0%; height: 100%;"></div>
+                        <div style="background: #e2e8f0; border-radius: 10px; height: 16px; overflow: hidden; position: relative; margin-bottom: 8px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);">
+                            <div id="inlineVideoProgressBar" class="progress-bar-green-animated" style="width: 0%; height: 100%; background-color: #10b981 !important; background-image: linear-gradient(90deg, #10b981 0%, #059669 100%) !important; border-radius: 10px;"></div>
                         </div>
 
                         <!-- Progress Counters -->
@@ -443,11 +443,11 @@
                                     <button type="button" class="video-action-btn" onclick="openEditVideoModal({{ $video->id }}, '{{ addslashes($video->title ?? '') }}', '{{ addslashes($video->content ?? '') }}', '{{ str_starts_with($video->file_path, 'http') ? addslashes($video->file_path) : '' }}')" style="padding: 4px 10px; font-size: 0.74rem; font-weight: 700; background: #6366f1; color: #ffffff; border: none; border-radius: 7px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(99,102,241,0.25);" title="Edit Video">
                                         <i class="bi bi-pencil-square"></i> Edit
                                     </button>
-                                    <form action="{{ route('dashboard.videos.delete', $video->id) }}" method="POST" onsubmit="return confirm('Delete this video?');" style="margin: 0;">
+                                    <form action="{{ route('dashboard.videos.delete', $video->id) }}" method="POST" onsubmit="return confirmDelete(this, event, '{{ __('Delete this video?') }}', '{{ __('Deleting...') }}');" style="margin: 0;">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="video-action-btn" style="padding: 4px 10px; font-size: 0.74rem; font-weight: 700; background: #ef4444; color: #ffffff; border: none; border-radius: 7px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(239,68,68,0.25);" title="Delete Video">
-                                            <i class="bi bi-trash"></i> Delete
+                                        <button type="submit" class="video-action-btn" style="padding: 4px 10px; font-size: 0.74rem; font-weight: 700; background: #ef4444; color: #ffffff; border: none; border-radius: 7px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(239,68,68,0.25);" title="{{ __('Delete Video') }}">
+                                            <i class="bi bi-trash"></i> {{ __('Delete') }}
                                         </button>
                                     </form>
                                 </div>
@@ -728,10 +728,10 @@
                     document.body.appendChild(modal);
                 }
 
-                const progressBar = document.getElementById('loaderProgressBar');
-                const progressPercent = document.getElementById('loaderProgressPercent');
-                const modalTitle = document.getElementById('loaderModalTitle');
-                const modalMsg = document.getElementById('loaderModalMessage');
+                const progressBar = document.getElementById('videoLoaderProgressBar');
+                const progressPercent = document.getElementById('videoLoaderProgressPercent');
+                const modalTitle = document.getElementById('videoLoaderModalTitle');
+                const modalMsg = document.getElementById('videoLoaderModalMessage');
 
                 const inlineBox = document.getElementById('inlineVideoUploadProgressBox');
                 const inlineProgressBar = document.getElementById('inlineVideoProgressBar');
@@ -739,17 +739,28 @@
                 const inlinePercentBadge = document.getElementById('inlineVideoPercentBadge');
                 const inlineTitle = document.getElementById('inlineVideoTitle');
 
-                const greenProgressStyle = "background: linear-gradient(90deg, #10b981 0%, #059669 100%) !important; background-color: #10b981 !important; border-radius: 10px; transition: width 0.2s ease;";
+                function applyGreenBarStyle(el, percent) {
+                    if (!el) return;
+                    const p = Math.max(percent, 2);
+                    el.style.setProperty('width', p + '%', 'important');
+                    el.style.setProperty('height', '100%', 'important');
+                    el.style.setProperty('background-color', '#10b981', 'important');
+                    el.style.setProperty('background-image', 'linear-gradient(90deg, #10b981 0%, #059669 100%)', 'important');
+                    el.style.setProperty('border-radius', '10px', 'important');
+                    el.style.setProperty('display', 'block', 'important');
+                    el.style.setProperty('opacity', '1', 'important');
+                    el.style.setProperty('visibility', 'visible', 'important');
+                }
 
                 modalTitle.textContent = "Uploading & Processing Video...";
                 modalMsg.innerHTML = "Please wait while your video file is being uploaded.<br>Large files may take a few moments. Do not refresh this page.";
-                if (progressBar) progressBar.style.cssText = greenProgressStyle + " width: 0%; height: 100%;";
+                applyGreenBarStyle(progressBar, 0);
                 progressPercent.textContent = "0% (0 MB / 0 MB)";
                 modal.style.display = 'flex';
 
                 if (inlineBox) {
                     inlineBox.style.display = 'block';
-                    if (inlineProgressBar) inlineProgressBar.style.cssText = greenProgressStyle + " width: 0%; height: 100%;";
+                    applyGreenBarStyle(inlineProgressBar, 0);
                     inlinePercentBadge.textContent = '0%';
                     inlinePercentBadge.style.background = 'rgba(16,185,129,0.15)';
                     inlinePercentBadge.style.color = '#047857';
@@ -785,20 +796,15 @@
                                 const totalMB = (evt.total / (1024 * 1024)).toFixed(1);
                                 const remainingMB = Math.max(0, (evt.total - evt.loaded) / (1024 * 1024)).toFixed(1);
 
-                                const curModalProgressBar = document.getElementById('loaderProgressBar');
-                                const curModalProgressPercent = document.getElementById('loaderProgressPercent');
+                                const curModalProgressBar = document.getElementById('videoLoaderProgressBar');
+                                const curModalProgressPercent = document.getElementById('videoLoaderProgressPercent');
                                 const curInlineProgressBar = document.getElementById('inlineVideoProgressBar');
                                 const curInlineProgressDetails = document.getElementById('inlineVideoProgressDetails');
                                 const curInlinePercentBadge = document.getElementById('inlineVideoPercentBadge');
 
-                                const widthVal = Math.max(percentComplete, 2) + '%';
+                                applyGreenBarStyle(curModalProgressBar, percentComplete);
+                                applyGreenBarStyle(curInlineProgressBar, percentComplete);
 
-                                if (curModalProgressBar) {
-                                    curModalProgressBar.style.cssText = greenProgressStyle + " width: " + widthVal + "; height: 100%;";
-                                }
-                                if (curInlineProgressBar) {
-                                    curInlineProgressBar.style.cssText = greenProgressStyle + " width: " + widthVal + "; height: 100%;";
-                                }
                                 if (curInlinePercentBadge) {
                                     curInlinePercentBadge.textContent = percentComplete + '%';
                                     curInlinePercentBadge.style.background = 'rgba(16,185,129,0.15)';
@@ -891,10 +897,10 @@
                     return false;
                 }
                 const modal = document.getElementById('videoUploadLoaderModal');
-                const modalTitle = document.getElementById('loaderModalTitle');
-                const modalMsg = document.getElementById('loaderModalMessage');
-                const progressBar = document.getElementById('loaderProgressBar');
-                const progressPercent = document.getElementById('loaderProgressPercent');
+                const modalTitle = document.getElementById('videoLoaderModalTitle');
+                const modalMsg = document.getElementById('videoLoaderModalMessage');
+                const progressBar = document.getElementById('videoLoaderProgressBar');
+                const progressPercent = document.getElementById('videoLoaderProgressPercent');
 
                 modalTitle.textContent = "Adding Video Link...";
                 modalMsg.textContent = "Validating and adding video link to your portfolio...";
@@ -936,7 +942,7 @@
                                     </div>
                                     <p style="margin: 0; font-size: 0.82rem; color: #334155;">${c.comment}</p>
                                 </div>
-                                <button type="button" onclick="deleteOwnerComment(${c.id}, ${id})" style="background: rgba(239,68,68,0.1); color: #ef4444; border: none; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; cursor: pointer;" title="Delete Comment">
+                                <button type="button" onclick="deleteOwnerComment(${c.id}, ${id}, this)" style="background: rgba(239,68,68,0.1); color: #ef4444; border: none; padding: 3px 8px; border-radius: 6px; font-size: 0.72rem; cursor: pointer;" title="Delete Comment">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
@@ -948,8 +954,31 @@
         });
     }
 
-    function deleteOwnerComment(commentId, mediaId) {
-        if (!confirm('Delete this comment?')) return;
+    function confirmDelete(form, evt, confirmMsg, loadingText) {
+        const msg = confirmMsg || '{{ __("Delete this item?") }}';
+        if (!confirm(msg)) {
+            if (evt) evt.preventDefault();
+            return false;
+        }
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) {
+            btn.innerHTML = `<i class="bi bi-arrow-repeat spin-icon"></i> ${loadingText || '{{ __("Deleting...") }}'}`;
+            btn.style.opacity = '0.75';
+            btn.style.cursor = 'wait';
+            setTimeout(function() {
+                btn.disabled = true;
+            }, 0);
+        }
+        return true;
+    }
+
+    function deleteOwnerComment(commentId, mediaId, btnEl) {
+        if (!confirm('{{ __("Delete this comment?") }}')) return;
+        if (btnEl) {
+            btnEl.disabled = true;
+            btnEl.style.opacity = '0.75';
+            btnEl.innerHTML = `<i class="bi bi-arrow-repeat spin-icon"></i>`;
+        }
         $.ajax({
             url: '/media/comment/' + commentId,
             type: 'DELETE',
@@ -959,7 +988,22 @@
             success: function(res) {
                 if (res.success) {
                     openOwnerMediaCommentsModal(mediaId, $('#ownerCommentsModalTitle').text());
+                } else {
+                    if (btnEl) {
+                        btnEl.disabled = false;
+                        btnEl.style.opacity = '1';
+                        btnEl.innerHTML = `<i class="bi bi-trash"></i>`;
+                    }
+                    alert(res.message || 'Error deleting comment');
                 }
+            },
+            error: function() {
+                if (btnEl) {
+                    btnEl.disabled = false;
+                    btnEl.style.opacity = '1';
+                    btnEl.innerHTML = `<i class="bi bi-trash"></i>`;
+                }
+                alert('Error deleting comment.');
             }
         });
     }
@@ -988,17 +1032,17 @@
             <i class="bi bi-film" style="position: absolute; font-size: 1.8rem; color: #6366f1;"></i>
         </div>
 
-        <h3 id="loaderModalTitle" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">{{ __('Uploading Video File...') }}</h3>
-        <p id="loaderModalMessage" style="margin: 10px 0 0 0; font-size: 0.88rem; color: #475569; line-height: 1.5; font-weight: 600;">
+        <h3 id="videoLoaderModalTitle" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">{{ __('Uploading Video File...') }}</h3>
+        <p id="videoLoaderModalMessage" style="margin: 10px 0 0 0; font-size: 0.88rem; color: #475569; line-height: 1.5; font-weight: 600;">
             {!! __('Please wait while your video is uploading and processing.<br>Large files may take a few moments. Do not refresh this page.') !!}
         </p>
 
         <!-- Dynamic Real-time Green Animated Progress Bar -->
-        <div id="loaderProgressBarContainer" style="margin-top: 22px; background: #cbd5e1; border-radius: 12px; height: 16px; overflow: hidden; position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);">
-            <div id="loaderProgressBar" class="progress-bar-green-animated" style="width: 0%; height: 100%;"></div>
+        <div id="videoLoaderProgressBarContainer" style="margin-top: 22px; background: #e2e8f0; border-radius: 12px; height: 16px; overflow: hidden; position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);">
+            <div id="videoLoaderProgressBar" class="progress-bar-green-animated" style="width: 0%; height: 100%; background-color: #10b981 !important; background-image: linear-gradient(90deg, #10b981 0%, #059669 100%) !important; border-radius: 10px;"></div>
         </div>
 
-        <div id="loaderProgressPercent" style="margin-top: 8px; font-size: 0.86rem; font-weight: 800; color: #4f46e5;">
+        <div id="videoLoaderProgressPercent" style="margin-top: 8px; font-size: 0.86rem; font-weight: 800; color: #4f46e5;">
             0% (0 MB / 0 MB)
         </div>
 

@@ -4,6 +4,15 @@
 
 @section('styles')
 <style>
+    @keyframes spinIcon {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .spin-icon {
+        animation: spinIcon 0.9s linear infinite;
+        display: inline-block;
+    }
+
     /* Responsive Spacing & Layout Overrides */
     .news-main-container {
         max-width: 100%;
@@ -250,7 +259,7 @@
                             <button type="button" class="news-action-btn" onclick="openEditNewsModal({{ $news->id }}, '{{ addslashes($news->title ?? '') }}', '{{ addslashes($news->content ?? '') }}', '{{ $news->file_path ? asset($news->file_path) : '' }}')" style="padding: 4px 10px; border-radius: 7px; font-size: 0.74rem; font-weight: 700; background: #6366f1; color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(99,102,241,0.25);" title="{{ __('Edit Article') }}">
                                 <i class="bi bi-pencil-square"></i> {{ __('Edit') }}
                             </button>
-                            <form action="{{ route('dashboard.news.delete', $news->id) }}" method="POST" onsubmit="return confirm('{{ __('Delete this news article?') }}');" style="margin: 0;">
+                            <form action="{{ route('dashboard.news.delete', $news->id) }}" method="POST" onsubmit="return confirmDelete(this, event, '{{ __('Delete this news article?') }}', '{{ __('Deleting...') }}');" style="margin: 0;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="news-action-btn" style="padding: 4px 10px; border-radius: 7px; font-size: 0.74rem; font-weight: 700; background: #ef4444; color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(239,68,68,0.25);" title="{{ __('Delete Article') }}">
@@ -333,6 +342,24 @@
             $('#editNewsCurrentImgContainer').hide();
         }
         $('#editNewsModal').css('display', 'flex').hide().fadeIn(200);
+    }
+
+    function confirmDelete(form, evt, confirmMsg, loadingText) {
+        const msg = confirmMsg || '{{ __("Delete this item?") }}';
+        if (!confirm(msg)) {
+            if (evt) evt.preventDefault();
+            return false;
+        }
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn) {
+            btn.innerHTML = `<i class="bi bi-arrow-repeat spin-icon"></i> ${loadingText || '{{ __("Deleting...") }}'}`;
+            btn.style.opacity = '0.75';
+            btn.style.cursor = 'wait';
+            setTimeout(function() {
+                btn.disabled = true;
+            }, 0);
+        }
+        return true;
     }
 
     document.addEventListener('DOMContentLoaded', function() {
