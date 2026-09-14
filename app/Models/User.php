@@ -129,6 +129,53 @@ class User extends Authenticatable
         return $this->paymentRequests()->where('status', 'paid')->exists();
     }
 
+    /**
+     * Check if the user has a confirmed payment (Paid invoice, paid subscription, or paid request).
+     */
+    public function hasConfirmedPayment(): bool
+    {
+        // Check 1: Invoice marked as Paid
+        if ($this->invoices()->whereIn('payment_status', ['Paid', 'paid'])->exists()) {
+            return true;
+        }
+
+        // Check 2: Confirmed paid payment request
+        if ($this->paymentRequests()->whereIn('status', ['paid', 'Paid'])->exists()) {
+            return true;
+        }
+
+        // Check 3: Active paid package subscription
+        $sub = $this->activeSubscription;
+        if ($sub && ($sub->price_snapshot > 0 || ($sub->package && $sub->package->price > 0))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if this user requires a confirmed payment before their account can be published.
+     * Applies to talent users registered on or after 2026-09-14 who are currently unpublished and haven't confirmed payment.
+     */
+    public function requiresPaymentToPublish(): bool
+    {
+        if ($this->role !== 'user') {
+            return false;
+        }
+
+        // Registration cutoff date: 2026-09-14 00:00:00 (today onwards)
+        $cutoffDate = \Carbon\Carbon::parse('2026-09-14 00:00:00');
+        if ($this->created_at && $this->created_at->lt($cutoffDate)) {
+            return false; // Grandfathered accounts created before cutoff
+        }
+
+        if ($this->is_published) {
+            return false; // Already published
+        }
+
+        return !$this->hasConfirmedPayment();
+    }
+
     public function contactRequestsReceived()
     {
         return $this->hasMany(ContactRequest::class, 'target_user_id');

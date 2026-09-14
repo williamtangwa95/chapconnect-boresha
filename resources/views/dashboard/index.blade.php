@@ -567,9 +567,18 @@
                 <form action="{{ route('dashboard.unpublish') }}" method="POST">
                     @csrf
                     <button type="submit" style="width: 100%; padding: 10px; background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s;">
-                        🔒 {{ __('HIDDEN (Draft)') }}
+                        🔒 {{ __('HIDDEN (Draft - Click to Hide)') }}
                     </button>
                 </form>
+                @elseif($user->requiresPaymentToPublish())
+                <div style="text-align: center;">
+                    <span style="font-size: 0.76rem; font-weight: 800; color: #d97706; background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 10px;">
+                        ⚠️ {{ __('Payment Confirmation Required') }}
+                    </span>
+                    <button type="button" onclick="$('#publish-payment-modal').fadeIn(200);" style="width: 100%; padding: 11px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; border: none; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 14px rgba(245,158,11,0.35); transition: all 0.2s;">
+                        💳 {{ __('PAY TZS 10,000/- TO PUBLISH') }}
+                    </button>
+                </div>
                 @else
                 <form action="{{ route('dashboard.publish') }}" method="POST">
                     @csrf
@@ -866,4 +875,91 @@
         });
     });
 </script>
+
+<!-- Publish Account Payment Modal -->
+@php
+    $activePaymentMethods = \App\Models\PaymentMethod::active()->get();
+    $publishingFee = floatval(\App\Models\SystemSetting::get('payment_amount', 10000.00));
+@endphp
+<div id="publish-payment-modal" class="admin-modal" style="display: {{ session('open_payment_modal') ? 'flex' : 'none' }};">
+    <div class="admin-modal-content" style="border-radius: 20px; max-width: 620px; width: 92%; margin: auto; padding: 25px; box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
+        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px; font-size: 1.15rem;">
+                <i class="bi bi-wallet2" style="color: #6366f1; font-size: 1.3rem;"></i> {{ __('Account Publishing Payment Required') }}
+            </h3>
+            <button type="button" class="admin-modal-close" onclick="$('#publish-payment-modal').fadeOut(200);" style="background: none; border: none; font-size: 26px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+
+        <!-- Payment Notice Banner -->
+        <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; border-radius: 14px; padding: 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 14px;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: #2563eb; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+            <div>
+                <h4 style="margin: 0 0 4px 0; font-size: 1.05rem; font-weight: 800; color: #1e3a8a;">
+                    {{ __('You have to pay:') }} <span style="color: #2563eb;">TZS {{ number_format($publishingFee) }}/-</span>
+                </h4>
+                <p style="margin: 0; font-size: 0.85rem; color: #1e40af; line-height: 1.4;">
+                    {{ __('Please send TZS') }} {{ number_format($publishingFee) }}/- {{ __('to any of the official ChapConnect accounts below to complete payment and make your profile visible to the public.') }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Configured Payment Channels Grid -->
+        <h4 style="font-size: 0.88rem; text-transform: uppercase; font-weight: 800; color: #475569; letter-spacing: 0.5px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            <i class="bi bi-bank2" style="color: #6366f1;"></i> {{ __('Select Payment Account / Channel:') }}
+        </h4>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-bottom: 22px; max-height: 280px; overflow-y: auto; padding-right: 4px;">
+            @forelse($activePaymentMethods as $pm)
+            <div style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px; transition: border-color 0.2s ease; position: relative;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <img src="{{ $pm->logo_url }}" alt="{{ $pm->company }}" style="width: 32px; height: 32px; object-fit: contain; border-radius: 6px; border: 1px solid #e2e8f0; padding: 2px; background: #fff;" onerror="this.onerror=null; this.src='{{ asset('images/default-avatar.png') }}';">
+                    <div>
+                        <strong style="font-size: 0.92rem; color: #0f172a; display: block;">{{ $pm->company }}</strong>
+                        <span style="font-size: 0.74rem; color: #64748b; font-weight: 600;">{{ $pm->account_name }}</span>
+                    </div>
+                </div>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; font-family: monospace; font-size: 0.95rem; font-weight: 800; color: #2563eb; letter-spacing: 0.5px; word-break: break-all;">
+                    {{ $pm->account_number }}
+                </div>
+                @if($pm->instructions)
+                <p style="margin: 6px 0 0 0; font-size: 0.75rem; color: #64748b; line-height: 1.3;">
+                    {{ $pm->instructions }}
+                </p>
+                @endif
+            </div>
+            @empty
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; text-align: center; color: #64748b; font-size: 0.88rem; grid-column: 1/-1;">
+                {{ __('No payment channels configured yet. Please contact Customer Care for payment details.') }}
+            </div>
+            @endforelse
+        </div>
+
+        <!-- Submit Payment Reference Confirmation Form -->
+        <form action="{{ route('dashboard.submit-payment-confirmation') }}" method="POST" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px;">
+            @csrf
+            <h4 style="margin: 0 0 12px 0; font-size: 0.88rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                <i class="bi bi-check2-circle" style="color: #10b981; font-size: 1.1rem;"></i> {{ __('Submit Payment Reference for Instant Confirmation') }}
+            </h4>
+
+            <div class="form-group" style="margin-bottom: 12px;">
+                <label style="display: block; font-weight: 700; color: #334155; font-size: 0.82rem; margin-bottom: 4px;">{{ __('Transaction Reference No. / Receipt ID') }} *</label>
+                <input type="text" name="transaction_reference" placeholder="e.g. CRDB982019382 or 554433-89102" required style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label style="display: block; font-weight: 700; color: #334155; font-size: 0.82rem; margin-bottom: 4px;">{{ __('Sender Phone / Payment Notes (Optional)') }}</label>
+                <input type="text" name="notes" placeholder="e.g. Sent from 0712345678 - John Doe" style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.88rem; box-sizing: border-box;">
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="$('#publish-payment-modal').fadeOut(200);" style="padding: 10px 18px; border-radius: 8px; background: #e2e8f0; border: none; color: #475569; font-weight: 600; font-size: 0.85rem; cursor: pointer;">{{ __('Close') }}</button>
+                <button type="submit" style="padding: 10px 22px; border-radius: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: #ffffff; font-weight: 800; font-size: 0.88rem; cursor: pointer; box-shadow: 0 4px 14px rgba(16,185,129,0.35);">
+                    🚀 {{ __('Submit Confirmation') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 @endsection

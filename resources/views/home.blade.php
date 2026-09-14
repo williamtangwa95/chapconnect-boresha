@@ -344,12 +344,12 @@
         max-width: 1550px;
         width: 98%;
         margin: 10px auto 14px auto;
-        background: linear-gradient(135deg, #7c2d12 0%, #b45309 50%, #d97706 100%);
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
         color: #ffffff;
         padding: 10px 16px;
         border-radius: 12px;
-        box-shadow: 0 4px 18px rgba(180, 83, 9, 0.35);
-        border: 1px solid rgba(251, 191, 36, 0.4);
+        box-shadow: 0 4px 18px rgba(220, 38, 38, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.3);
         display: flex;
         align-items: center;
         gap: 14px;
@@ -360,19 +360,21 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: rgba(0, 0, 0, 0.3);
+        background: #ffffff;
+        color: #dc2626;
         padding: 5px 12px;
         border-radius: 20px;
         flex-shrink: 0;
         font-size: 0.78rem;
         font-weight: 800;
         letter-spacing: 0.6px;
-        border: 1px solid rgba(255, 255, 255, 0.25);
+        border: 1px solid rgba(255, 255, 255, 0.9);
         text-transform: uppercase;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     .maintenance-icon {
-        color: #fbbf24;
+        color: #dc2626;
         font-size: 1rem;
         animation: wrenchPulse 1.8s infinite ease-in-out;
     }

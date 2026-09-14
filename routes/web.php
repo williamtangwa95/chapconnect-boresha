@@ -111,8 +111,9 @@ Route::get('/dashboard/support/submit', function () {
     // Administrative action route (Admin / Customer Care)
     Route::post('/admin/contact-requests/{id}/action', [\App\Http\Controllers\ContactRequestController::class, 'adminAction'])->name('admin.contact-requests.action');
 
-    // Talent Payment Request submission
+    // Talent Payment Request submission & Publishing Payment Confirmation
     Route::post('/dashboard/request-payment', [DashboardController::class, 'requestPayment'])->name('dashboard.request-payment');
+    Route::post('/dashboard/submit-payment-confirmation', [DashboardController::class, 'submitPaymentConfirmation'])->name('dashboard.submit-payment-confirmation');
 });
 
 // Customer Care Dashboard & Support Ticket Management (Protected by auth and customer_care middleware)
@@ -168,6 +169,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/packages/{id}/update', [AdminController::class, 'updatePackage']);
     Route::delete('/admin/packages/{id}', [AdminController::class, 'deletePackage'])->name('admin.packages.delete');
     Route::post('/admin/user/{id}/assign-package', [AdminController::class, 'assignPackage']);
+
+    // Payment Methods Management Routes (Super Admin)
+    Route::post('/admin/payment-methods', [AdminController::class, 'storePaymentMethod'])->name('admin.payment-methods.store');
+    Route::post('/admin/payment-methods/{id}/update', [AdminController::class, 'updatePaymentMethod'])->name('admin.payment-methods.update');
+    Route::delete('/admin/payment-methods/{id}', [AdminController::class, 'deletePaymentMethod'])->name('admin.payment-methods.delete');
     Route::post('/admin/invoices/{id}/pay', [AdminController::class, 'recordInvoicePayment']);
 
     // Talent Payment Request Administration Routes

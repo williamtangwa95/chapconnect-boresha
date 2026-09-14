@@ -399,8 +399,10 @@
                                     <td>
                                         @if($u->is_published)
                                         <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;padding:4px 11px;border-radius:20px;background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.25);"><span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block;"></span>Live</span>
+                                        @elseif($u->hasConfirmedPayment())
+                                        <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;padding:4px 11px;border-radius:20px;background:rgba(2,132,199,0.12);color:#0284c7;border:1px solid rgba(2,132,199,0.25);" title="Payment confirmed - Ready to publish"><span style="width:6px;height:6px;border-radius:50%;background:#0284c7;display:inline-block;"></span>Draft (Paid)</span>
                                         @else
-                                        <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;padding:4px 11px;border-radius:20px;background:rgba(100,100,100,0.1);color:#64748b;border:1px solid rgba(200,200,200,0.3);"><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;display:inline-block;"></span>Draft</span>
+                                        <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.75rem;font-weight:700;padding:4px 11px;border-radius:20px;background:rgba(245,158,11,0.12);color:#d97706;border:1px solid rgba(245,158,11,0.25);" title="Payment pending confirmation"><span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;display:inline-block;"></span>Draft (Pending)</span>
                                         @endif
                                     </td>
                                     <td style="font-size: 0.85rem; color: #64748b;">{{ $u->created_at->format('M d, Y') }}</td>
@@ -1483,6 +1485,7 @@
         </div>
 
         @include('admin.packages_tab_stub')
+        @include('admin.payment_methods_tab_stub')
         @include('admin.invoices_tab_stub')
         @include('admin.contact_requests_tab_stub')
         @include('admin.analytics_tab_stub')
@@ -2549,6 +2552,26 @@
             }
 
             $('#manage-user-package-modal').fadeIn(200);
+        });
+
+        // Edit Payment Method Modal trigger
+        $(document).on('click', '.btn-edit-payment-method', function() {
+            const $btn = $(this);
+            const id = $btn.data('id');
+            const company = $btn.data('company');
+            const accountName = $btn.data('account-name');
+            const accountNumber = $btn.data('account-number');
+            const instructions = $btn.data('instructions');
+            const isActive = $btn.data('is-active');
+
+            $('#edit-payment-method-form').attr('action', '/admin/payment-methods/' + id + '/update');
+            $('#edit_pm_company').val(company);
+            $('#edit_pm_account_name').val(accountName);
+            $('#edit_pm_account_number').val(accountNumber);
+            $('#edit_pm_instructions').val(instructions);
+            $('#edit_pm_is_active').prop('checked', parseInt(isActive) === 1);
+
+            $('#edit-payment-method-modal').fadeIn(200);
         });
     });
 </script>

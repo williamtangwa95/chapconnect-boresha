@@ -283,6 +283,8 @@ class DashboardController extends Controller
             $files = is_array($request->file('photos')) ? $request->file('photos') : [$request->file('photos')];
         } elseif ($request->hasFile('photo')) {
             $files = [$request->file('photo')];
+        } elseif ($request->hasFile('photo_file')) {
+            $files = [$request->file('photo_file')];
         }
 
         if (empty($files)) {
@@ -315,7 +317,8 @@ class DashboardController extends Controller
         $batchCount = count($files);
         if ($limits['max_images'] >= 0 && ($photoCount + $batchCount) > $limits['max_images']) {
             $remaining = max(0, $limits['max_images'] - $photoCount);
-            return redirect()->back()->withInput()->withErrors(['photos' => "Uploading {$batchCount} images exceeds your package limit ({$photoCount}/{$limits['max_images']} used). You can only upload {$remaining} more image(s)."]);
+            $msg = "Uploading {$batchCount} images exceeds your package limit ({$photoCount}/{$limits['max_images']} used). You can only upload {$remaining} more image(s).";
+            return redirect()->back()->withInput()->withErrors(['photos' => $msg, 'photo' => $msg]);
         }
 
         $request->validate([
@@ -954,8 +957,62 @@ class DashboardController extends Controller
                 ->with('error', 'Your profile must be at least 60% complete before publishing. Current: ' . $completion . '%.');
         }
 
+        if ($user->requiresPaymentToPublish()) {
+            $amount = floatval(\App\Models\SystemSetting::get('payment_amount', 10000.00));
+            return redirect()->route('dashboard')
+                ->with('open_payment_modal', true)
+                ->with('error', 'Payment confirmation required. You have to pay TZS ' . number_format($amount) . '/- to complete payment before publishing your account.');
+        }
+
         $user->update(['is_published' => true]);
         return redirect()->route('dashboard')->with('success', 'Your profile is now live and visible to the public!');
+    }
+
+    /**
+     * Submit payment confirmation transaction ID / reference for payment verification.
+     */
+    public function submitPaymentConfirmation(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'transaction_reference' => 'required|string|max:255',
+            'payment_method_id' => 'nullable|exists:payment_methods,id',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
+        $amount = floatval(\App\Models\SystemSetting::get('payment_amount', 10000.00));
+
+        // Get unpaid invoice or update notes
+        $invoice = $user->invoices()->where('payment_status', 'Unpaid')->latest()->first();
+        if ($invoice) {
+            $invoice->update([
+                'notes' => 'Transaction Ref: ' . $request->transaction_reference . ($request->notes ? (' - ' . $request->notes) : ''),
+            ]);
+        }
+
+        // Log payment request entry for staff verification
+        \App\Models\TalentPaymentRequest::create([
+            'user_id' => $user->id,
+            'amount' => $amount,
+            'status' => 'pending',
+            'payment_reference' => $request->transaction_reference,
+            'notes' => $request->notes,
+        ]);
+
+        // Notify Admin and Customer Care staff
+        $adminStaff = \App\Models\User::whereIn('role', ['admin', 'customer_care'])->get();
+        foreach ($adminStaff as $staff) {
+            \App\Models\Notification::create([
+                'user_id' => $staff->id,
+                'type' => 'payment_submission',
+                'title' => "💳 Payment Submitted: {$user->name}",
+                'message' => "User {$user->name} submitted payment transaction reference '{$request->transaction_reference}' (TZS " . number_format($amount) . ") for account publishing.",
+                'link' => ($staff->role === 'admin') ? route('admin.dashboard') . '#invoices' : route('customer-care.dashboard') . '#invoices',
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Your payment transaction reference (' . $request->transaction_reference . ') has been submitted successfully! Customer Care will verify and confirm your payment shortly.');
     }
 
     /**

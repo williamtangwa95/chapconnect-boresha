@@ -261,6 +261,8 @@ class AdminController extends Controller
 
         $activityLogs = $activityLogsQuery->limit(1000)->get();
 
+        $paymentMethods = \App\Models\PaymentMethod::orderBy('company')->get();
+
         return view('admin.index', [
             'activityLogs' => $activityLogs,
             'selectedActivityUser' => $selectedActivityUser,
@@ -282,6 +284,7 @@ class AdminController extends Controller
             'invoices' => $invoices,
             'contactRequests' => $contactRequests,
             'paymentRequests' => $paymentRequests,
+            'paymentMethods' => $paymentMethods,
             // Analytics view variables
             'todaysVisits' => $todaysVisits,
             'totalPageViews' => $totalPageViews,
@@ -1014,7 +1017,91 @@ $media->delete();
             'notes' => $request->notes,
         ]);
 
+        if ($paymentStatus === 'Paid' && $invoice->user_id) {
+            \App\Models\Notification::create([
+                'user_id' => $invoice->user_id,
+                'type' => 'payment_confirmed',
+                'title' => "✅ Payment Confirmed: Account Publishing Unlocked",
+                'message' => "Your payment of TZS " . number_format($newAmountPaid) . " for package '{$invoice->package_name}' has been confirmed! You can now publish your account to be visible to the public.",
+                'link' => route('dashboard'),
+            ]);
+        }
+
         return redirect()->back()->with('success', 'Payment logged successfully.');
+    }
+
+    /**
+     * Store new payment method / channel (Super Admin).
+     */
+    public function storePaymentMethod(Request $request)
+    {
+        $request->validate([
+            'company' => 'required|string|max:100',
+            'account_name' => 'required|string|max:255',
+            'account_number' => 'required|string|max:255',
+            'instructions' => 'nullable|string',
+            'logo' => 'nullable|image|max:2048',
+        ]);
+
+        $logoPath = null;
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('payment_methods', 'public');
+            $logoPath = 'storage/' . $path;
+        }
+
+        \App\Models\PaymentMethod::create([
+            'company' => $request->company,
+            'account_name' => $request->account_name,
+            'account_number' => $request->account_number,
+            'logo_path' => $logoPath,
+            'instructions' => $request->instructions,
+            'is_active' => $request->boolean('is_active', true),
+        ]);
+
+        return redirect()->back()->with('success', "Payment channel '{$request->company}' created successfully.");
+    }
+
+    /**
+     * Update existing payment method / channel (Super Admin).
+     */
+    public function updatePaymentMethod(Request $request, $id)
+    {
+        $method = \App\Models\PaymentMethod::findOrFail($id);
+
+        $request->validate([
+            'company' => 'required|string|max:100',
+            'account_name' => 'required|string|max:255',
+            'account_number' => 'required|string|max:255',
+            'instructions' => 'nullable|string',
+            'logo' => 'nullable|image|max:2048',
+        ]);
+
+        $data = [
+            'company' => $request->company,
+            'account_name' => $request->account_name,
+            'account_number' => $request->account_number,
+            'instructions' => $request->instructions,
+            'is_active' => $request->boolean('is_active', true),
+        ];
+
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('payment_methods', 'public');
+            $data['logo_path'] = 'storage/' . $path;
+        }
+
+        $method->update($data);
+
+        return redirect()->back()->with('success', "Payment channel '{$method->company}' updated successfully.");
+    }
+
+    /**
+     * Delete payment method / channel (Super Admin).
+     */
+    public function deletePaymentMethod($id)
+    {
+        $method = \App\Models\PaymentMethod::findOrFail($id);
+        $method->delete();
+        return redirect()->back()->with('success', 'Payment channel removed successfully.');
     }
 
     /**
