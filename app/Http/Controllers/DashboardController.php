@@ -272,9 +272,13 @@ class DashboardController extends Controller
 
         // Catch POST body overflow (post_max_size exceeded)
         if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
+            $msg = 'The uploaded file payload is too large and exceeded server upload limits. Please select smaller images under 20MB each.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['photos' => 'The uploaded file payload is too large and exceeded server upload limits. Please select smaller images under 20MB each.']);
+                ->withErrors(['photos' => $msg]);
         }
 
         // Support both array 'photos' and single file 'photo'
@@ -290,9 +294,11 @@ class DashboardController extends Controller
         if (empty($files)) {
             if (isset($_SERVER['CONTENT_LENGTH']) && intval($_SERVER['CONTENT_LENGTH']) > 0 && empty($_POST) && empty($_FILES)) {
                 $maxSize = ini_get('post_max_size') ?: '128M';
-                return redirect()->back()->withInput()->withErrors([
-                    'photos' => "The selected image payload exceeds the server upload limit ({$maxSize}). Please select a smaller photo or compress it first."
-                ]);
+                $msg = "The selected image payload exceeds the server upload limit ({$maxSize}). Please select a smaller photo or compress it first.";
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $msg], 422);
+                }
+                return redirect()->back()->withInput()->withErrors(['photos' => $msg]);
             }
 
             $rawFiles = $request->file('photos') ?? $request->file('photo');
@@ -303,21 +309,30 @@ class DashboardController extends Controller
                         $errCode = $rawFile->getError();
                         if ($errCode === UPLOAD_ERR_INI_SIZE || $errCode === UPLOAD_ERR_FORM_SIZE) {
                             $maxSize = ini_get('upload_max_filesize') ?: '128M';
-                            return redirect()->back()->withInput()->withErrors([
-                                'photos' => "The selected image file exceeds the PHP server upload limit ({$maxSize}). Please select a smaller photo or compress it first."
-                            ]);
+                            $msg = "The selected image file exceeds the PHP server upload limit ({$maxSize}). Please select a smaller photo or compress it first.";
+                            if ($request->expectsJson() || $request->ajax()) {
+                                return response()->json(['success' => false, 'message' => $msg], 422);
+                            }
+                            return redirect()->back()->withInput()->withErrors(['photos' => $msg]);
                         }
                     }
                 }
             }
 
-            return redirect()->back()->withInput()->withErrors(['photos' => 'Please select at least one image file to upload.']);
+            $msg = 'Please select at least one image file to upload.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return redirect()->back()->withInput()->withErrors(['photos' => $msg]);
         }
 
         $batchCount = count($files);
         if ($limits['max_images'] >= 0 && ($photoCount + $batchCount) > $limits['max_images']) {
             $remaining = max(0, $limits['max_images'] - $photoCount);
             $msg = "Uploading {$batchCount} images exceeds your package limit ({$photoCount}/{$limits['max_images']} used). You can only upload {$remaining} more image(s).";
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
             return redirect()->back()->withInput()->withErrors(['photos' => $msg, 'photo' => $msg]);
         }
 
@@ -344,6 +359,9 @@ class DashboardController extends Controller
             try {
                 $path = ImageCompressor::compressAndStore($file, 'media/photos', 1920, 1920, 82, 'webp');
             } catch (\InvalidArgumentException $e) {
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+                }
                 return redirect()->back()->withInput()->withErrors(['photos' => $e->getMessage()]);
             }
 
@@ -378,14 +396,28 @@ class DashboardController extends Controller
         }
 
         if ($uploadedCount === 0) {
-            return redirect()->back()->withInput()->withErrors(['photos' => 'No valid images were processed.']);
+            $msg = 'No valid images were processed.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return redirect()->back()->withInput()->withErrors(['photos' => $msg]);
         }
 
         if ($flaggedCount > 0) {
-            return redirect()->route('dashboard.photos')->with('warning', __("{$uploadedCount} photo(s) processed. {$flaggedCount} photo(s) flagged for admin review."));
+            $msg = __("{$uploadedCount} photo(s) processed. {$flaggedCount} photo(s) flagged for admin review.");
+            session()->flash('warning', $msg);
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => true, 'message' => $msg]);
+            }
+            return redirect()->route('dashboard.photos')->with('warning', $msg);
         }
 
-        return redirect()->route('dashboard.photos')->with('success', __("{$uploadedCount} photo(s) compressed & uploaded successfully."));
+        $msg = __("{$uploadedCount} photo(s) compressed & uploaded successfully.");
+        session()->flash('success', $msg);
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'message' => $msg]);
+        }
+        return redirect()->route('dashboard.photos')->with('success', $msg);
     }
 
     public function updatePhoto(Request $request, $id)

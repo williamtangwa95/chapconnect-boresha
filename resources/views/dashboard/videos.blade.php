@@ -716,11 +716,18 @@
                         xhr.upload.addEventListener('progress', function(evt) {
                             if (evt.lengthComputable) {
                                 const percentComplete = Math.round((evt.loaded / evt.total) * 100);
+                                const remainingPercent = Math.max(0, 100 - percentComplete);
                                 const loadedMB = (evt.loaded / (1024 * 1024)).toFixed(1);
                                 const totalMB = (evt.total / (1024 * 1024)).toFixed(1);
+                                const remainingMB = Math.max(0, (evt.total - evt.loaded) / (1024 * 1024)).toFixed(1);
 
                                 progressBar.style.width = percentComplete + '%';
-                                progressPercent.textContent = `${percentComplete}% (${loadedMB} MB / ${totalMB} MB)`;
+                                progressPercent.innerHTML = `
+                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; font-weight: 800; color: #0f172a;">
+                                        <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> ${percentComplete}% Uploaded (${loadedMB} MB / ${totalMB} MB)</span>
+                                        <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> ${remainingPercent}% Remaining (${remainingMB} MB left)</span>
+                                    </div>
+                                `;
 
                                 if (percentComplete >= 100) {
                                     modalTitle.textContent = "Processing Video File...";
@@ -742,7 +749,12 @@
                             return;
                         }
                         progressBar.style.width = "100%";
-                        progressPercent.textContent = "100% - Complete!";
+                        progressPercent.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; font-weight: 800;">
+                                <span style="color: #10b981;"><i class="bi bi-check-circle-fill"></i> 100% Upload Complete!</span>
+                                <span style="color: #10b981;"><i class="bi bi-check2-all"></i> 0% Remaining</span>
+                            </div>
+                        `;
                         modalTitle.textContent = "🎉 Upload Successful!";
                         modalMsg.textContent = res.message || "Your video file has been uploaded successfully.";
                         btnSubmitFileUpload.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${'{{ __("Uploaded! Reloading...") }}'}`;

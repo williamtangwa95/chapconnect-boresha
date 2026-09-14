@@ -4,6 +4,15 @@
 
 @section('styles')
 <style>
+    @keyframes spinIcon {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .spin-icon {
+        animation: spinIcon 0.9s linear infinite;
+        display: inline-block;
+    }
+
     /* Responsive Spacing & Layout Overrides */
     .photos-main-container {
         max-width: 100%;
@@ -430,12 +439,115 @@
         }
 
         if (formPhotoUpload && btnSubmitPhoto) {
-            formPhotoUpload.addEventListener('submit', function() {
-                if (!btnSubmitPhoto.disabled) {
-                    btnSubmitPhoto.disabled = true;
-                    btnSubmitPhoto.innerHTML = `<i class="bi bi-hourglass-split"></i> Uploading...`;
-                    btnSubmitPhoto.style.opacity = '0.7';
+            formPhotoUpload.addEventListener('submit', function(e) {
+                const fileInput = document.getElementById('photos');
+                if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                    return;
                 }
+
+                e.preventDefault();
+                const formData = new FormData(formPhotoUpload);
+                const modal = document.getElementById('photoUploadLoaderModal');
+                const progressBar = document.getElementById('photoLoaderProgressBar');
+                const progressPercent = document.getElementById('photoLoaderProgressPercent');
+                const modalTitle = document.getElementById('photoLoaderModalTitle');
+                const modalMsg = document.getElementById('photoLoaderModalMessage');
+
+                modalTitle.textContent = "Uploading Photo(s)...";
+                modalMsg.innerHTML = "Please wait while your image file(s) are being uploaded and compressed.<br>Do not refresh this page.";
+                progressBar.style.width = "0%";
+                progressPercent.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; font-weight: 800;">
+                        <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> 0% Uploaded</span>
+                        <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> 100% Remaining</span>
+                    </div>
+                `;
+                modal.style.display = 'flex';
+
+                btnSubmitPhoto.disabled = true;
+                btnSubmitPhoto.style.opacity = '0.75';
+                btnSubmitPhoto.style.cursor = 'not-allowed';
+                btnSubmitPhoto.innerHTML = `<i class="bi bi-arrow-repeat spin-icon"></i> ${'{{ __("Uploading Photos... Please Wait") }}'}`;
+
+                $.ajax({
+                    url: formPhotoUpload.action,
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    xhr: function() {
+                        const xhr = new window.XMLHttpRequest();
+                        xhr.upload.addEventListener('progress', function(evt) {
+                            if (evt.lengthComputable) {
+                                const percentComplete = Math.round((evt.loaded / evt.total) * 100);
+                                const remainingPercent = Math.max(0, 100 - percentComplete);
+                                const loadedMB = (evt.loaded / (1024 * 1024)).toFixed(1);
+                                const totalMB = (evt.total / (1024 * 1024)).toFixed(1);
+                                const remainingMB = Math.max(0, (evt.total - evt.loaded) / (1024 * 1024)).toFixed(1);
+
+                                progressBar.style.width = percentComplete + '%';
+                                progressPercent.innerHTML = `
+                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; font-weight: 800; color: #0f172a;">
+                                        <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> ${percentComplete}% Uploaded (${loadedMB} MB / ${totalMB} MB)</span>
+                                        <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> ${remainingPercent}% Remaining (${remainingMB} MB left)</span>
+                                    </div>
+                                `;
+
+                                if (percentComplete >= 100) {
+                                    modalTitle.textContent = "Compressing & Processing Photo(s)...";
+                                    modalMsg.innerHTML = "Upload complete! Optimizing images on server...<br>Please wait a moment.";
+                                }
+                            }
+                        }, false);
+                        return xhr;
+                    },
+                    success: function(res) {
+                        if (typeof res === 'string' || !res || res.success === false) {
+                            modal.style.display = 'none';
+                            btnSubmitPhoto.disabled = false;
+                            btnSubmitPhoto.style.opacity = '1';
+                            btnSubmitPhoto.style.cursor = 'pointer';
+                            btnSubmitPhoto.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i> ${'{{ __("Upload Photos") }}'}`;
+                            let msg = (res && res.message) ? res.message : "Server error or upload limit exceeded. Please select smaller images.";
+                            alert("Upload Failed: " + msg);
+                            return;
+                        }
+                        progressBar.style.width = "100%";
+                        progressPercent.innerHTML = `
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; font-weight: 800;">
+                                <span style="color: #10b981;"><i class="bi bi-check-circle-fill"></i> 100% Upload Complete!</span>
+                                <span style="color: #10b981;"><i class="bi bi-check2-all"></i> 0% Remaining</span>
+                            </div>
+                        `;
+                        modalTitle.textContent = "🎉 Upload Successful!";
+                        modalMsg.textContent = res.message || "Your photo(s) have been uploaded successfully.";
+                        btnSubmitPhoto.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${'{{ __("Uploaded! Reloading...") }}'}`;
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 500);
+                    },
+                    error: function(err) {
+                        modal.style.display = 'none';
+                        btnSubmitPhoto.disabled = false;
+                        btnSubmitPhoto.style.opacity = '1';
+                        btnSubmitPhoto.style.cursor = 'pointer';
+                        btnSubmitPhoto.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i> ${'{{ __("Upload Photos") }}'}`;
+                        let errMsg = "An error occurred while uploading your photo file(s).";
+                        if (err.status === 413) {
+                            errMsg = "The image payload exceeds web server limits (HTTP 413). Please select smaller files or ask server administrator to increase upload limits.";
+                        } else if (err.responseJSON && err.responseJSON.message) {
+                            errMsg = err.responseJSON.message;
+                        } else if (err.responseJSON && err.responseJSON.errors) {
+                            errMsg = Object.values(err.responseJSON.errors).flat().join(' ');
+                        }
+                        alert("Upload Failed: " + errMsg);
+                    }
+                });
             });
         }
     });
@@ -506,6 +618,39 @@
 
         <div id="ownerCommentsList" style="flex-grow: 1; overflow-y: auto; max-height: 400px; display: flex; flex-direction: column; gap: 10px;">
             <div style="text-align: center; padding: 25px; color: #94a3b8;"><i class="bi bi-hourglass-split"></i> Loading comments...</div>
+        </div>
+    </div>
+</div>
+
+<!-- Full-Screen Photo Upload Processing Loader Modal Overlay -->
+<div id="photoUploadLoaderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(10px); z-index: 999999; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: #ffffff; width: 100%; max-width: 460px; border-radius: 20px; padding: 32px 24px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.5); border: 2px solid rgba(99,102,241,0.3); position: relative;">
+        <!-- Animated Spinner & Photo Icon -->
+        <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;">
+            <div class="spinner-border text-primary" role="status" style="width: 80px; height: 80px; border-width: 5px; color: #6366f1 !important; border-top-color: #ec4899 !important;"></div>
+            <i class="bi bi-images" style="position: absolute; font-size: 1.8rem; color: #6366f1;"></i>
+        </div>
+
+        <h3 id="photoLoaderModalTitle" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">{{ __('Uploading Photo(s)...') }}</h3>
+        <p id="photoLoaderModalMessage" style="margin: 10px 0 0 0; font-size: 0.88rem; color: #475569; line-height: 1.5; font-weight: 600;">
+            {!! __('Please wait while your image file(s) are being uploaded and compressed.<br>Do not refresh this page.') !!}
+        </p>
+
+        <!-- Dynamic Real-time Progress Bar -->
+        <div id="photoLoaderProgressBarContainer" style="margin-top: 22px; background: #e2e8f0; border-radius: 12px; height: 14px; overflow: hidden; position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+            <div id="photoLoaderProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #6366f1 0%, #ec4899 100%); transition: width 0.2s ease; border-radius: 12px;"></div>
+        </div>
+
+        <div id="photoLoaderProgressPercent" style="margin-top: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; font-weight: 800;">
+                <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> 0% Uploaded</span>
+                <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> 100% Remaining</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 18px; padding: 10px 14px; background: #f1f5f9; border-radius: 10px; border: 1px dashed #cbd5e1; font-size: 0.78rem; color: #64748b; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <i class="bi bi-shield-lock-fill" style="color: #6366f1;"></i>
+            <span>{{ __('Do not close or refresh this browser page') }}</span>
         </div>
     </div>
 </div>
