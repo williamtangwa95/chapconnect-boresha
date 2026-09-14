@@ -381,6 +381,30 @@
                     <button type="submit" id="btnSubmitFileUpload" class="videos-btn-submit" style="padding: 10px 22px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 14px rgba(99,102,241,0.3); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.86rem; transition: opacity 0.2s ease;">
                         <i class="bi bi-upload"></i> {{ __('Upload Video File') }}
                     </button>
+
+                    <!-- Inline Real-Time Upload Progress Box (Always visible in form card during upload) -->
+                    <div id="inlineVideoUploadProgressBox" style="display: none; margin-top: 16px; background: #f8fafc; border: 1.5px solid #6366f1; border-radius: 14px; padding: 16px; box-shadow: 0 4px 14px rgba(99,102,241,0.12);">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                            <span id="inlineVideoTitle" style="font-weight: 800; font-size: 0.88rem; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                                <i class="bi bi-arrow-repeat spin-icon" style="color: #6366f1; font-size: 1.1rem;"></i>
+                                <span>{{ __('Uploading & Processing Video...') }}</span>
+                            </span>
+                            <span id="inlineVideoPercentBadge" style="font-weight: 800; font-size: 0.82rem; color: #4f46e5; background: rgba(99,102,241,0.12); padding: 2px 10px; border-radius: 20px;">
+                                0%
+                            </span>
+                        </div>
+
+                        <!-- Dynamic Progress Bar -->
+                        <div style="background: #e2e8f0; border-radius: 10px; height: 14px; overflow: hidden; position: relative; margin-bottom: 8px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                            <div id="inlineVideoProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #6366f1 0%, #ec4899 100%); transition: width 0.2s ease; border-radius: 10px;"></div>
+                        </div>
+
+                        <!-- Progress Counters -->
+                        <div id="inlineVideoProgressDetails" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 700;">
+                            <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> 0% Uploaded (0 MB / 0 MB)</span>
+                            <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> 100% Remaining (0 MB left)</span>
+                        </div>
+                    </div>
                 </form>
             </div>
 
@@ -676,24 +700,48 @@
 
         if (formFileUpload && btnSubmitFileUpload) {
             formFileUpload.addEventListener('submit', function(e) {
+                e.preventDefault();
+
                 const fileInput = document.getElementById('videos');
                 if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-                    return; // Let standard form submit or browser validation handle empty file
+                    alert("Please click and select a video file to upload.");
+                    return;
                 }
 
-                e.preventDefault();
                 const formData = new FormData(formFileUpload);
                 const modal = document.getElementById('videoUploadLoaderModal');
+                if (modal && modal.parentElement !== document.body) {
+                    document.body.appendChild(modal);
+                }
+
                 const progressBar = document.getElementById('loaderProgressBar');
                 const progressPercent = document.getElementById('loaderProgressPercent');
                 const modalTitle = document.getElementById('loaderModalTitle');
                 const modalMsg = document.getElementById('loaderModalMessage');
+
+                const inlineBox = document.getElementById('inlineVideoUploadProgressBox');
+                const inlineProgressBar = document.getElementById('inlineVideoProgressBar');
+                const inlineProgressDetails = document.getElementById('inlineVideoProgressDetails');
+                const inlinePercentBadge = document.getElementById('inlineVideoPercentBadge');
+                const inlineTitle = document.getElementById('inlineVideoTitle');
 
                 modalTitle.textContent = "Uploading & Processing Video...";
                 modalMsg.innerHTML = "Please wait while your video file is being uploaded.<br>Large files may take a few moments. Do not refresh this page.";
                 progressBar.style.width = "0%";
                 progressPercent.textContent = "0% (0 MB / 0 MB)";
                 modal.style.display = 'flex';
+
+                if (inlineBox) {
+                    inlineBox.style.display = 'block';
+                    inlineProgressBar.style.width = '0%';
+                    inlinePercentBadge.textContent = '0%';
+                    inlinePercentBadge.style.background = 'rgba(99,102,241,0.12)';
+                    inlinePercentBadge.style.color = '#4f46e5';
+                    inlineProgressDetails.innerHTML = `
+                        <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> 0% Uploaded (0 MB / 0 MB)</span>
+                        <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> 100% Remaining (0 MB left)</span>
+                    `;
+                }
 
                 btnSubmitFileUpload.disabled = true;
                 btnSubmitFileUpload.style.opacity = '0.75';
@@ -729,9 +777,21 @@
                                     </div>
                                 `;
 
+                                if (inlineBox) {
+                                    inlineProgressBar.style.width = percentComplete + '%';
+                                    inlinePercentBadge.textContent = percentComplete + '%';
+                                    inlineProgressDetails.innerHTML = `
+                                        <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> ${percentComplete}% Uploaded (${loadedMB} MB / ${totalMB} MB)</span>
+                                        <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> ${remainingPercent}% Remaining (${remainingMB} MB left)</span>
+                                    `;
+                                }
+
                                 if (percentComplete >= 100) {
                                     modalTitle.textContent = "Processing Video File...";
                                     modalMsg.innerHTML = "Upload complete! Finalizing video details on server...<br>Please wait a moment.";
+                                    if (inlineTitle) {
+                                        inlineTitle.innerHTML = `<i class="bi bi-hourglass-split spin-icon" style="color: #6366f1;"></i> <span>Finalizing & Processing Video...</span>`;
+                                    }
                                 }
                             }
                         }, false);
@@ -740,6 +800,7 @@
                     success: function(res) {
                         if (typeof res === 'string' || !res || res.success === false) {
                             modal.style.display = 'none';
+                            if (inlineBox) inlineBox.style.display = 'none';
                             btnSubmitFileUpload.disabled = false;
                             btnSubmitFileUpload.style.opacity = '1';
                             btnSubmitFileUpload.style.cursor = 'pointer';
@@ -755,6 +816,16 @@
                                 <span style="color: #10b981;"><i class="bi bi-check2-all"></i> 0% Remaining</span>
                             </div>
                         `;
+                        if (inlineBox) {
+                            inlineProgressBar.style.width = "100%";
+                            inlinePercentBadge.textContent = "100%";
+                            inlinePercentBadge.style.background = "rgba(16,185,129,0.15)";
+                            inlinePercentBadge.style.color = "#10b981";
+                            inlineProgressDetails.innerHTML = `
+                                <span style="color: #10b981;"><i class="bi bi-check-circle-fill"></i> 100% Upload Complete!</span>
+                                <span style="color: #10b981;"><i class="bi bi-check2-all"></i> 0% Remaining</span>
+                            `;
+                        }
                         modalTitle.textContent = "🎉 Upload Successful!";
                         modalMsg.textContent = res.message || "Your video file has been uploaded successfully.";
                         btnSubmitFileUpload.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${'{{ __("Uploaded! Reloading...") }}'}`;
@@ -764,6 +835,7 @@
                     },
                     error: function(err) {
                         modal.style.display = 'none';
+                        if (inlineBox) inlineBox.style.display = 'none';
                         btnSubmitFileUpload.disabled = false;
                         btnSubmitFileUpload.style.opacity = '1';
                         btnSubmitFileUpload.style.cursor = 'pointer';

@@ -260,6 +260,30 @@
                 <button type="submit" id="btnSubmitPhoto" class="photos-btn-submit" style="padding: 10px 22px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 14px rgba(99,102,241,0.3); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.86rem; transition: opacity 0.2s ease;">
                     <i class="bi bi-upload"></i> {{ __('Upload Photos') }}
                 </button>
+
+                <!-- Inline Real-Time Upload Progress Box -->
+                <div id="inlinePhotoUploadProgressBox" style="display: none; margin-top: 16px; background: #f8fafc; border: 1.5px solid #6366f1; border-radius: 14px; padding: 16px; box-shadow: 0 4px 14px rgba(99,102,241,0.12);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <span id="inlinePhotoTitle" style="font-weight: 800; font-size: 0.88rem; color: #0f172a; display: flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-arrow-repeat spin-icon" style="color: #6366f1; font-size: 1.1rem;"></i>
+                            <span>{{ __('Uploading & Compressing Photos...') }}</span>
+                        </span>
+                        <span id="inlinePhotoPercentBadge" style="font-weight: 800; font-size: 0.82rem; color: #4f46e5; background: rgba(99,102,241,0.12); padding: 2px 10px; border-radius: 20px;">
+                            0%
+                        </span>
+                    </div>
+
+                    <!-- Dynamic Progress Bar -->
+                    <div style="background: #e2e8f0; border-radius: 10px; height: 14px; overflow: hidden; position: relative; margin-bottom: 8px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                        <div id="inlinePhotoProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #6366f1 0%, #ec4899 100%); transition: width 0.2s ease; border-radius: 10px;"></div>
+                    </div>
+
+                    <!-- Progress Counters -->
+                    <div id="inlinePhotoProgressDetails" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 700;">
+                        <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> 0% Uploaded (0 MB / 0 MB)</span>
+                        <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> 100% Remaining (0 MB left)</span>
+                    </div>
+                </div>
             </form>
 
             <h3 style="font-size: 0.98rem; font-weight: 800; color: #0f172a; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
@@ -440,18 +464,30 @@
 
         if (formPhotoUpload && btnSubmitPhoto) {
             formPhotoUpload.addEventListener('submit', function(e) {
+                e.preventDefault();
+
                 const fileInput = document.getElementById('photos');
                 if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                    alert("Please select photo file(s) to upload.");
                     return;
                 }
 
-                e.preventDefault();
                 const formData = new FormData(formPhotoUpload);
                 const modal = document.getElementById('photoUploadLoaderModal');
+                if (modal && modal.parentElement !== document.body) {
+                    document.body.appendChild(modal);
+                }
+
                 const progressBar = document.getElementById('photoLoaderProgressBar');
                 const progressPercent = document.getElementById('photoLoaderProgressPercent');
                 const modalTitle = document.getElementById('photoLoaderModalTitle');
                 const modalMsg = document.getElementById('photoLoaderModalMessage');
+
+                const inlineBox = document.getElementById('inlinePhotoUploadProgressBox');
+                const inlineProgressBar = document.getElementById('inlinePhotoProgressBar');
+                const inlineProgressDetails = document.getElementById('inlinePhotoProgressDetails');
+                const inlinePercentBadge = document.getElementById('inlinePhotoPercentBadge');
+                const inlineTitle = document.getElementById('inlinePhotoTitle');
 
                 modalTitle.textContent = "Uploading Photo(s)...";
                 modalMsg.innerHTML = "Please wait while your image file(s) are being uploaded and compressed.<br>Do not refresh this page.";
@@ -463,6 +499,18 @@
                     </div>
                 `;
                 modal.style.display = 'flex';
+
+                if (inlineBox) {
+                    inlineBox.style.display = 'block';
+                    inlineProgressBar.style.width = '0%';
+                    inlinePercentBadge.textContent = '0%';
+                    inlinePercentBadge.style.background = 'rgba(99,102,241,0.12)';
+                    inlinePercentBadge.style.color = '#4f46e5';
+                    inlineProgressDetails.innerHTML = `
+                        <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> 0% Uploaded (0 MB / 0 MB)</span>
+                        <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> 100% Remaining (0 MB left)</span>
+                    `;
+                }
 
                 btnSubmitPhoto.disabled = true;
                 btnSubmitPhoto.style.opacity = '0.75';
@@ -498,9 +546,21 @@
                                     </div>
                                 `;
 
+                                if (inlineBox) {
+                                    inlineProgressBar.style.width = percentComplete + '%';
+                                    inlinePercentBadge.textContent = percentComplete + '%';
+                                    inlineProgressDetails.innerHTML = `
+                                        <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> ${percentComplete}% Uploaded (${loadedMB} MB / ${totalMB} MB)</span>
+                                        <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> ${remainingPercent}% Remaining (${remainingMB} MB left)</span>
+                                    `;
+                                }
+
                                 if (percentComplete >= 100) {
                                     modalTitle.textContent = "Compressing & Processing Photo(s)...";
                                     modalMsg.innerHTML = "Upload complete! Optimizing images on server...<br>Please wait a moment.";
+                                    if (inlineTitle) {
+                                        inlineTitle.innerHTML = `<i class="bi bi-hourglass-split spin-icon" style="color: #6366f1;"></i> <span>Finalizing & Compressing Photo(s)...</span>`;
+                                    }
                                 }
                             }
                         }, false);
@@ -509,6 +569,7 @@
                     success: function(res) {
                         if (typeof res === 'string' || !res || res.success === false) {
                             modal.style.display = 'none';
+                            if (inlineBox) inlineBox.style.display = 'none';
                             btnSubmitPhoto.disabled = false;
                             btnSubmitPhoto.style.opacity = '1';
                             btnSubmitPhoto.style.cursor = 'pointer';
@@ -524,6 +585,16 @@
                                 <span style="color: #10b981;"><i class="bi bi-check2-all"></i> 0% Remaining</span>
                             </div>
                         `;
+                        if (inlineBox) {
+                            inlineProgressBar.style.width = "100%";
+                            inlinePercentBadge.textContent = "100%";
+                            inlinePercentBadge.style.background = "rgba(16,185,129,0.15)";
+                            inlinePercentBadge.style.color = "#10b981";
+                            inlineProgressDetails.innerHTML = `
+                                <span style="color: #10b981;"><i class="bi bi-check-circle-fill"></i> 100% Upload Complete!</span>
+                                <span style="color: #10b981;"><i class="bi bi-check2-all"></i> 0% Remaining</span>
+                            `;
+                        }
                         modalTitle.textContent = "🎉 Upload Successful!";
                         modalMsg.textContent = res.message || "Your photo(s) have been uploaded successfully.";
                         btnSubmitPhoto.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${'{{ __("Uploaded! Reloading...") }}'}`;
@@ -533,6 +604,7 @@
                     },
                     error: function(err) {
                         modal.style.display = 'none';
+                        if (inlineBox) inlineBox.style.display = 'none';
                         btnSubmitPhoto.disabled = false;
                         btnSubmitPhoto.style.opacity = '1';
                         btnSubmitPhoto.style.cursor = 'pointer';
