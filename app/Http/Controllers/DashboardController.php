@@ -491,9 +491,13 @@ class DashboardController extends Controller
 
         // Catch POST body overflow (post_max_size exceeded)
         if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
+            $msg = 'The uploaded video file is too large and exceeded server payload limits. Please upload clips under 100MB each or embed a YouTube link.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['videos' => 'The uploaded video file is too large and exceeded server payload limits. Please upload clips under 100MB each or embed a YouTube link.']);
+                ->withErrors(['videos' => $msg]);
         }
 
         $request->validate([
@@ -510,7 +514,11 @@ class DashboardController extends Controller
         // 1. If Video URL is provided (must be YouTube, TikTok, Vimeo, etc.)
         if ($request->filled('video_url')) {
             if ($limits['max_videos'] >= 0 && $videoCount >= $limits['max_videos']) {
-                return redirect()->back()->withErrors(['videos' => "You have used {$videoCount} of {$limits['max_videos']} allowed videos. Upgrade your package to upload more videos."]);
+                $msg = "You have used {$videoCount} of {$limits['max_videos']} allowed videos. Upgrade your package to upload more videos.";
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $msg], 422);
+                }
+                return redirect()->back()->withErrors(['videos' => $msg]);
             }
 
             $cleaned = \App\Helpers\VideoHelper::cleanUrl($request->input('video_url'));
@@ -597,9 +605,11 @@ class DashboardController extends Controller
             // Check for post_max_size overflow (when upload exceeds post_max_size, $_FILES and $_POST are empty)
             if (isset($_SERVER['CONTENT_LENGTH']) && intval($_SERVER['CONTENT_LENGTH']) > 0 && empty($_POST) && empty($_FILES)) {
                 $maxSize = ini_get('post_max_size') ?: '128M';
-                return redirect()->back()->withInput()->withErrors([
-                    'videos' => "The selected video file exceeds the PHP server upload limit ({$maxSize}). Please upload a smaller clip or embed a video link (YouTube, TikTok, Instagram, Facebook, Vimeo)."
-                ]);
+                $msg = "The selected video file exceeds the PHP server upload limit ({$maxSize}). Please upload a smaller clip or embed a video link (YouTube, TikTok, Instagram, Facebook, Vimeo).";
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $msg], 422);
+                }
+                return redirect()->back()->withInput()->withErrors(['videos' => $msg]);
             }
 
             // Check if user actually attempted to upload a file that failed due to PHP upload limits
@@ -611,21 +621,31 @@ class DashboardController extends Controller
                         $errCode = $rawFile->getError();
                         if ($errCode === UPLOAD_ERR_INI_SIZE || $errCode === UPLOAD_ERR_FORM_SIZE) {
                             $maxSize = ini_get('upload_max_filesize') ?: '128M';
-                            return redirect()->back()->withInput()->withErrors([
-                                'videos' => "The selected video file exceeds the PHP server upload limit ({$maxSize}). Please upload a smaller clip or embed a video link (YouTube, TikTok, Instagram, Facebook, Vimeo)."
-                            ]);
+                            $msg = "The selected video file exceeds the PHP server upload limit ({$maxSize}). Please upload a smaller clip or embed a video link (YouTube, TikTok, Instagram, Facebook, Vimeo).";
+                            if ($request->expectsJson() || $request->ajax()) {
+                                return response()->json(['success' => false, 'message' => $msg], 422);
+                            }
+                            return redirect()->back()->withInput()->withErrors(['videos' => $msg]);
                         }
                     }
                 }
             }
 
-            return redirect()->back()->withInput()->withErrors(['videos' => 'Please select at least one video file to upload or enter a video link.']);
+            $msg = 'Please select at least one video file to upload or enter a video link.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return redirect()->back()->withInput()->withErrors(['videos' => $msg]);
         }
 
         $batchCount = count($files);
         if ($limits['max_videos'] >= 0 && ($videoCount + $batchCount) > $limits['max_videos']) {
             $remaining = max(0, $limits['max_videos'] - $videoCount);
-            return redirect()->back()->withInput()->withErrors(['videos' => "Uploading {$batchCount} video clip(s) exceeds your package limit ({$videoCount}/{$limits['max_videos']} used). You can only upload {$remaining} more video clip(s)."]);
+            $msg = "Uploading {$batchCount} video clip(s) exceeds your package limit ({$videoCount}/{$limits['max_videos']} used). You can only upload {$remaining} more video clip(s).";
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+            return redirect()->back()->withInput()->withErrors(['videos' => $msg]);
         }
 
         $request->validate([
@@ -652,7 +672,11 @@ class DashboardController extends Controller
                 in_array($ext, ['svg', 'svgz', 'xml', 'html', 'htm', 'php', 'phtml', 'phar', 'exe', 'sh', 'js', 'bat']) ||
                 !in_array($ext, $allowedExts)
             ) {
-                return redirect()->back()->withInput()->withErrors(['videos' => 'One or more files have an invalid or prohibited video format.']);
+                $msg = 'One or more files have an invalid or prohibited video format.';
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $msg], 422);
+                }
+                return redirect()->back()->withInput()->withErrors(['videos' => $msg]);
             }
 
             $safeFilename = \Illuminate\Support\Str::random(40) . '.' . $ext;

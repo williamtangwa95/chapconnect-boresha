@@ -693,6 +693,11 @@
                     data: formData,
                     contentType: false,
                     processData: false,
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
                     xhr: function() {
                         const xhr = new window.XMLHttpRequest();
                         xhr.upload.addEventListener('progress', function(evt) {
@@ -713,6 +718,13 @@
                         return xhr;
                     },
                     success: function(res) {
+                        if (typeof res === 'string' || !res || res.success === false) {
+                            modal.style.display = 'none';
+                            btnSubmitFileUpload.disabled = false;
+                            let msg = (res && res.message) ? res.message : "Server error or upload limit exceeded. Please select a smaller clip.";
+                            alert("Upload Failed: " + msg);
+                            return;
+                        }
                         progressBar.style.width = "100%";
                         progressPercent.textContent = "100% - Complete!";
                         modalTitle.textContent = "🎉 Upload Successful!";
@@ -725,7 +737,9 @@
                         modal.style.display = 'none';
                         btnSubmitFileUpload.disabled = false;
                         let errMsg = "An error occurred while uploading your video file.";
-                        if (err.responseJSON && err.responseJSON.message) {
+                        if (err.status === 413) {
+                            errMsg = "The video file exceeds web server limits (HTTP 413). Please select a smaller clip or ask your server administrator to increase Nginx client_max_body_size / PHP post_max_size.";
+                        } else if (err.responseJSON && err.responseJSON.message) {
                             errMsg = err.responseJSON.message;
                         } else if (err.responseJSON && err.responseJSON.errors) {
                             errMsg = Object.values(err.responseJSON.errors).flat().join(' ');
