@@ -4,6 +4,15 @@
 
 @section('styles')
 <style>
+    @keyframes spinIcon {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    .spin-icon {
+        animation: spinIcon 0.9s linear infinite;
+        display: inline-block;
+    }
+
     /* Responsive Spacing & Layout Overrides */
     .videos-main-container {
         max-width: 100%;
@@ -685,7 +694,11 @@
                 progressBar.style.width = "0%";
                 progressPercent.textContent = "0% (0 MB / 0 MB)";
                 modal.style.display = 'flex';
+
                 btnSubmitFileUpload.disabled = true;
+                btnSubmitFileUpload.style.opacity = '0.75';
+                btnSubmitFileUpload.style.cursor = 'not-allowed';
+                btnSubmitFileUpload.innerHTML = `<i class="bi bi-arrow-repeat spin-icon"></i> ${'{{ __("Uploading Video... Please Wait") }}'}`;
 
                 $.ajax({
                     url: formFileUpload.action,
@@ -721,6 +734,9 @@
                         if (typeof res === 'string' || !res || res.success === false) {
                             modal.style.display = 'none';
                             btnSubmitFileUpload.disabled = false;
+                            btnSubmitFileUpload.style.opacity = '1';
+                            btnSubmitFileUpload.style.cursor = 'pointer';
+                            btnSubmitFileUpload.innerHTML = `<i class="bi bi-upload"></i> ${'{{ __("Upload Video File") }}'}`;
                             let msg = (res && res.message) ? res.message : "Server error or upload limit exceeded. Please select a smaller clip.";
                             alert("Upload Failed: " + msg);
                             return;
@@ -729,6 +745,7 @@
                         progressPercent.textContent = "100% - Complete!";
                         modalTitle.textContent = "🎉 Upload Successful!";
                         modalMsg.textContent = res.message || "Your video file has been uploaded successfully.";
+                        btnSubmitFileUpload.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${'{{ __("Uploaded! Reloading...") }}'}`;
                         setTimeout(function() {
                             window.location.reload();
                         }, 500);
@@ -736,6 +753,9 @@
                     error: function(err) {
                         modal.style.display = 'none';
                         btnSubmitFileUpload.disabled = false;
+                        btnSubmitFileUpload.style.opacity = '1';
+                        btnSubmitFileUpload.style.cursor = 'pointer';
+                        btnSubmitFileUpload.innerHTML = `<i class="bi bi-upload"></i> ${'{{ __("Upload Video File") }}'}`;
                         let errMsg = "An error occurred while uploading your video file.";
                         if (err.status === 413) {
                             errMsg = "The video file exceeds web server limits (HTTP 413). Please select a smaller clip or ask your server administrator to increase Nginx client_max_body_size / PHP post_max_size.";
@@ -769,6 +789,8 @@
                 progressPercent.textContent = "Processing...";
                 modal.style.display = 'flex';
                 btnSubmitUrlUpload.disabled = true;
+                btnSubmitUrlUpload.style.opacity = '0.75';
+                btnSubmitUrlUpload.innerHTML = `<i class="bi bi-arrow-repeat spin-icon"></i> ${'{{ __("Processing Link...") }}'}`;
             });
         }
     });
