@@ -236,4 +236,61 @@ class HomeController extends Controller
             'videos' => $videos
         ]);
     }
+
+    public function loadMoreTalents(Request $request)
+    {
+        $offset = (int) $request->input('offset', 12);
+        $limit = 12;
+        $search = $request->input('search');
+        $category = $request->input('category');
+
+        $query = User::where('role', 'user')
+            ->where('is_published', true)
+            ->with(['activeSubscription.package'])
+            ->withCount(['likesReceived', 'followersReceived', 'commentsReceived']);
+
+        if ($category && $category !== 'all') {
+            $query->where('category', $category);
+        }
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('category_label', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $seed = session('talent_seed', 123456);
+
+        $talents = $query->orderByRaw("(id * {$seed} + 17) % 999983")
+            ->skip($offset)
+            ->take($limit + 1)
+            ->get();
+
+        $hasMore = $talents->count() > $limit;
+        if ($hasMore) {
+            $talents = $talents->slice(0, $limit);
+        }
+
+        $currentUser = auth()->user();
+        $isStaff = $currentUser && in_array($currentUser->role, ['admin', 'customer_care', 'staff']);
+        if (!$isStaff) {
+            foreach ($talents as $t) {
+                if ($t->currentPackageDetails()['phone_visibility'] === 'No') {
+                    $t->phone = null;
+                }
+            }
+        }
+
+        $html = view('partials.talent-card-items', ['talents' => $talents])->render();
+
+        return response()->json([
+            'success' => true,
+            'html' => $html,
+            'count' => $talents->count(),
+            'has_more' => $hasMore,
+            'talent_ids' => $talents->pluck('id')->toArray(),
+        ]);
+    }
 }

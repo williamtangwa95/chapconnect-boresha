@@ -511,54 +511,16 @@
         <!-- Profile View Column (Left - col-9) -->
         <div class="col-9">
             <div class="talent-grid" style="padding-top: 0;">
-                @forelse($talents as $talent)
-                <div class="container">
-                    <div class="imagea">
-                        <img src="{{ $talent->avatar_url }}" alt="{{ $talent->name }}" loading="lazy">
-                        <div class="details">
-                            <h2 title="{{ $talent->name }}">{{ $talent->name }}</h2>
-                            <h5>{{ __($talent->category_label) }}</h5>
-
-                            <div class="like-container">
-                                <div class="like">
-                                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})"><i class="bi bi-heart" style="margin-right: 4px;"></i>{{ __('Like') }}</button>
-                                    <span class="like-count" id="likeCount_{{ $talent->id }}">{{ $talent->likes_received_count ?? 0 }}</span>
-                                </div>
-                                <div class="comment">
-                                    <a href="{{ route('profile', $talent->id) }}#comments-tab" style="text-decoration:none;">
-                                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}"><i class="bi bi-chat-dots" style="margin-right: 4px; color: #0284c7;"></i>{{ __('Comments') }}</button>
-                                    </a>
-                                    <span class="comment-count {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentCount_{{ $talent->id }}">{{ $talent->comments_received_count ?? 0 }}</span>
-                                </div>
-                                <div class="follow">
-                                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})"><i class="bi bi-person-plus" style="margin-right: 4px;"></i>{{ __('Followers') }}</button>
-                                    <span class="followers-count" id="followersCount_{{ $talent->id }}">{{ $talent->followers_received_count ?? 0 }}</span>
-                                </div>
-                            </div>
-
-                            <a href="{{ route('profile', $talent->id) }}" class="vbtn">{{ __('View Full Profile') }}</a>
-
-                            <div class="card-quick-links">
-                                <a href="{{ route('profile', $talent->id) }}#photos-tab"><span class="bi bi-camera"></span> {{ __('Photos') }}</a>
-                                <a href="{{ route('profile', $talent->id) }}#videos-tab"><span class="bi bi-camera-video"></span> {{ __('Videos') }}</a>
-                                <a href="{{ route('profile', $talent->id) }}#news-tab"><span class="bi bi-newspaper"></span> {{ __('News') }}</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @empty
-                <div class="no-results" style="grid-column: 1/-1; text-align: center; padding: 50px 20px; background: white; border-radius: 16px; box-shadow: var(--shadow);">
-                    <i class="bi bi-people" style="font-size: 48px; color: var(--primary); display: block; margin-bottom: 10px;"></i>
-                    <h3 style="color: var(--text-main); margin-bottom: 5px;">{{ __('No Talents Found') }}</h3>
-                    <p style="color: var(--text-muted); font-size: 14px;">{{ __('No talents registered yet under this category selection.') }}</p>
-                </div>
-                @endforelse
+                @include('partials.talent-card-items', ['talents' => $talents])
             </div>
 
-            <!-- Server-Side Pagination Links -->
-            @if($talents->hasPages())
-            <div class="pagination-wrapper" style="margin-top: 25px; margin-bottom: 25px; display: flex; justify-content: center; width: 100%;">
-                {{ $talents->links('pagination::bootstrap-5') }}
+            <!-- AJAX Load More Talent Cards -->
+            @if(count($talents) >= 12 || $talents->hasPages())
+            <div id="viewMoreTalentsContainer" style="text-align: center; padding: 25px 10px 30px 10px; width: 100%;">
+                <button type="button" id="loadMoreTalentsBtn" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color: #ffffff; border: none; padding: 12px 32px; border-radius: 30px; font-weight: 700; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 16px rgba(79, 70, 229, 0.35); transition: all 0.25s ease-in-out;">
+                    <i class="bi bi-arrow-down-circle-fill" id="loadMoreTalentsIcon" style="font-size: 1.1rem;"></i>
+                    <span id="loadMoreTalentsText">{{ __('View More') }}</span>
+                </button>
             </div>
             @endif
         </div>
@@ -1183,22 +1145,89 @@
                         }
 
                         if (!res.has_more) {
-                            // Reached the end -> change button to "Move to Beginning"
+                            // Reached the end -> change button to "MOVE TO TOP"
                             $btn.prop('disabled', false);
                             $btn.data('action', 'top');
                             $icon.attr('class', 'bi bi-arrow-up-circle-fill');
-                            $text.text("{{ __('Move to Beginning') }}");
+                            $text.text("{{ __('MOVE TO TOP') }}");
                         } else {
                             $btn.prop('disabled', false);
                             $icon.attr('class', 'bi bi-arrow-down-circle-fill');
                             $text.text("{{ __('View More') }}");
                         }
                     } else {
-                        // Reached the end (no more items) -> change button to "Move to Beginning"
+                        // Reached the end (no more items) -> change button to "MOVE TO TOP"
                         $btn.prop('disabled', false);
                         $btn.data('action', 'top');
                         $icon.attr('class', 'bi bi-arrow-up-circle-fill');
-                        $text.text("{{ __('Move to Beginning') }}");
+                        $text.text("{{ __('MOVE TO TOP') }}");
+                    }
+                },
+                error: function() {
+                    $btn.prop('disabled', false);
+                    $icon.attr('class', 'bi bi-arrow-down-circle-fill');
+                    $text.text("{{ __('View More') }}");
+                }
+            });
+        });
+
+        // AJAX Load More Talent Cards
+        let currentTalentsOffset = {{ count($talents) }};
+        const currentCategory = "{{ request('category', 'all') }}";
+        const currentSearch = "{{ request('search', '') }}";
+
+        $('#loadMoreTalentsBtn').on('click', function() {
+            const $btn = $(this);
+            const $icon = $('#loadMoreTalentsIcon');
+            const $text = $('#loadMoreTalentsText');
+
+            if ($btn.data('action') === 'top') {
+                const talentGrid = document.querySelector('.talent-grid');
+                if (talentGrid) {
+                    talentGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }
+                return;
+            }
+
+            if ($btn.prop('disabled')) return;
+
+            $btn.prop('disabled', true);
+            $icon.attr('class', 'spinner-border spinner-border-sm me-1').attr('role', 'status');
+            $text.text("{{ __('Loading...') }}");
+
+            $.ajax({
+                url: '{{ route("talents.load-more") }}',
+                type: 'GET',
+                data: {
+                    offset: currentTalentsOffset,
+                    category: currentCategory,
+                    search: currentSearch
+                },
+                success: function(res) {
+                    if (res.success && res.html && res.count > 0) {
+                        $('.talent-grid').append(res.html);
+                        currentTalentsOffset += res.count;
+
+                        if (!res.has_more) {
+                            $btn.prop('disabled', false);
+                            $btn.data('action', 'top');
+                            $icon.attr('class', 'bi bi-arrow-up-circle-fill');
+                            $text.text("{{ __('MOVE TO TOP') }}");
+                        } else {
+                            $btn.prop('disabled', false);
+                            $icon.attr('class', 'bi bi-arrow-down-circle-fill');
+                            $text.text("{{ __('View More') }}");
+                        }
+                    } else {
+                        $btn.prop('disabled', false);
+                        $btn.data('action', 'top');
+                        $icon.attr('class', 'bi bi-arrow-up-circle-fill');
+                        $text.text("{{ __('MOVE TO TOP') }}");
                     }
                 },
                 error: function() {

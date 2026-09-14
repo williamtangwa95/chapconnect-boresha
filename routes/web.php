@@ -35,6 +35,7 @@ Route::post('/talent/{id}/follow', [InteractionController::class, 'toggleFollow'
 Route::post('/talent/{id}/comment', [InteractionController::class, 'storeComment'])->name('talent.comment');
 Route::delete('/comment/{id}', [InteractionController::class, 'deleteComment'])->name('talent.comment.delete');
 Route::get('/interactions/status', [InteractionController::class, 'getStatuses'])->name('talent.interactions.status');
+Route::get('/talents/load-more', [HomeController::class, 'loadMoreTalents'])->name('talents.load-more');
 
 // Public Media Post Interaction Routes (Likes, Comments, Shares)
 Route::post('/media/{id}/like', [MediaInteractionController::class, 'toggleLike'])->name('media.like');
