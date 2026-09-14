@@ -296,7 +296,7 @@
                 <div style="margin-bottom: 16px;">
                     <label style="display: block; font-weight: 700; color: #334155; font-size: 0.85rem; margin-bottom: 6px;">Option B: Upload Direct MP4 Video File</label>
                     <input type="file" name="video" accept="video/mp4,video/quicktime,video/webm" style="width: 100%; padding: 8px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; font-size: 0.85rem; box-sizing: border-box;">
-                    <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 4px;">Upload MP4, MOV, WEBM clip (max 50MB).</small>
+                    <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 4px;">Upload MP4, MOV, WEBM clip (max 100MB).</small>
                 </div>
 
                 <div style="margin-bottom: 18px;">

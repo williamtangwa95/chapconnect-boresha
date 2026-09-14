@@ -159,8 +159,8 @@ class StaffTalentManagementController extends Controller
             'title'    => 'nullable|string|max:255',
             'caption'  => 'nullable|string|max:1000',
             'photos'   => 'nullable|array',
-            'photos.*' => 'file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:15360',
-            'photo'    => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:15360',
+            'photos.*' => 'file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:20480',
+            'photo'    => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:20480',
         ]);
 
         $uploadedCount = 0;
@@ -232,7 +232,7 @@ class StaffTalentManagementController extends Controller
         $request->validate([
             'title'   => 'nullable|string|max:255',
             'caption' => 'nullable|string|max:1000',
-            'photo'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:15360',
+            'photo'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:20480',
         ]);
 
         $data = [
@@ -312,7 +312,7 @@ class StaffTalentManagementController extends Controller
         // 2. Video file upload
         if ($request->hasFile('video')) {
             $request->validate([
-                'video' => 'required|file|mimes:mp4,mov,avi,wmv,webm,mkv|max:51200',
+                'video' => 'required|file|mimes:mp4,mov,avi,wmv,webm,mkv|max:102400',
             ]);
 
             $file = $request->file('video');
@@ -391,7 +391,7 @@ class StaffTalentManagementController extends Controller
             $data['file_path'] = $request->video_url;
         } elseif ($request->hasFile('video') && $request->file('video')->isValid()) {
             $request->validate([
-                'video' => 'required|file|mimes:mp4,mov,avi,wmv,webm,mkv|max:51200',
+                'video' => 'required|file|mimes:mp4,mov,avi,wmv,webm,mkv|max:102400',
             ]);
 
             if ($video->file_path && !str_starts_with($video->file_path, 'http')) {

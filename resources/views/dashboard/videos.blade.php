@@ -197,123 +197,187 @@
             <!-- Page Header -->
             <div class="videos-page-header">
                 <h2 class="videos-page-title" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a; border: none; padding: 0; display: flex; align-items: center; gap: 8px;">
-                    <i class="bi bi-film" style="color: var(--primary);"></i> Videos
+                    <i class="bi bi-film" style="color: var(--primary);"></i> {{ __('Videos') }}
                 </h2>
                 <div class="videos-count-badge" style="background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25); padding: 5px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; color: #4f46e5;">
-                    {{ $videos->count() }} Total
+                    {{ $videos->count() }} {{ __('Total') }}
                 </div>
             </div>
 
+            <!-- Flash Message Alerts -->
+            @if(session('success'))
+            <div class="video-flash-alert alert-success" style="background: #ecfdf5; border: 1.5px solid #10b981; border-radius: 14px; padding: 16px 20px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; color: #065f46; box-shadow: 0 4px 14px rgba(16,185,129,0.15);">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; box-shadow: 0 3px 8px rgba(16,185,129,0.3);">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; font-weight: 800; font-size: 1rem; color: #064e3b;">Success!</h4>
+                        <p style="margin: 3px 0 0 0; font-size: 0.86rem; font-weight: 600; color: #047857;">{{ session('success') }}</p>
+                    </div>
+                </div>
+                <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; font-size: 1.4rem; color: #047857; cursor: pointer; line-height: 1; padding: 0 5px;">&times;</button>
+            </div>
+            @endif
+
+            @if(session('warning'))
+            <div class="video-flash-alert alert-warning" style="background: #fffbe6; border: 1.5px solid #f59e0b; border-radius: 14px; padding: 16px 20px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; color: #92400e; box-shadow: 0 4px 14px rgba(245,158,11,0.15);">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: #f59e0b; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; box-shadow: 0 3px 8px rgba(245,158,11,0.3);">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; font-weight: 800; font-size: 1rem; color: #78350f;">Notice</h4>
+                        <p style="margin: 3px 0 0 0; font-size: 0.86rem; font-weight: 600; color: #92400e;">{{ session('warning') }}</p>
+                    </div>
+                </div>
+                <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; font-size: 1.4rem; color: #92400e; cursor: pointer; line-height: 1; padding: 0 5px;">&times;</button>
+            </div>
+            @endif
+
+            @if($errors->any())
+            <div class="video-flash-alert alert-danger" style="background: #fef2f2; border: 1.5px solid #ef4444; border-radius: 14px; padding: 16px 20px; margin-bottom: 22px; color: #991b1b; box-shadow: 0 4px 14px rgba(239,68,68,0.15);">
+                <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 8px;">
+                    <div style="width: 42px; height: 42px; border-radius: 12px; background: #ef4444; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; box-shadow: 0 3px 8px rgba(239,68,68,0.3);">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; font-weight: 800; font-size: 1rem; color: #7f1d1d;">Upload Error</h4>
+                        <p style="margin: 2px 0 0 0; font-size: 0.84rem; font-weight: 600; color: #b91c1c;">Please review the errors below:</p>
+                    </div>
+                </div>
+                <ul style="margin: 6px 0 0 56px; padding: 0; font-size: 0.84rem; color: #991b1b; font-weight: 600;">
+                    @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
             <!-- Upload forms wrapper -->
             <div class="videos-form-wrapper">
-                <!-- Upload Mode Switcher Tabs -->
-                <div class="tab-switcher-box">
-                    <button type="button" id="tabUploadFile" class="btn-tab active-tab" style="padding: 8px 18px; border-radius: 8px; font-size: 0.84rem; font-weight: 700; cursor: pointer; background: #6366f1; color: white; border: none; box-shadow: 0 2px 8px rgba(99,102,241,0.3); transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="bi bi-file-earmark-play-fill"></i> Upload File
-                    </button>
-                    <button type="button" id="tabUploadUrl" class="btn-tab" style="padding: 8px 18px; border-radius: 8px; font-size: 0.84rem; font-weight: 700; cursor: pointer; background: transparent; color: #64748b; border: none; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="bi bi-link-45deg"></i> Embed Link
-                    </button>
+                <!-- Quick Jump / Info Banner -->
+                <div class="tab-switcher-box" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #cbd5e1; border-radius: 14px; padding: 10px 14px; margin-bottom: 22px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 0.84rem; font-weight: 700; color: #1e293b;">
+                        <i class="bi bi-info-circle-fill" style="color: #ec4899; font-size: 1.1rem;"></i>
+                        <span>{{ __('Choose your video submission method below:') }}</span>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="#formUrlUpload" class="btn-tab" style="padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none; background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="bi bi-link-45deg"></i> {{ __('Paste Link') }}
+                        </a>
+                        <a href="#formFileUpload" class="btn-tab" style="padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none; background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; display: inline-flex; align-items: center; gap: 5px;">
+                            <i class="bi bi-file-earmark-arrow-up-fill"></i> {{ __('Upload File') }}
+                        </a>
+                    </div>
                 </div>
 
-                <!-- Option A: File Upload Form -->
-                <form id="formFileUpload" action="{{ route('dashboard.videos.store') }}" method="POST" enctype="multipart/form-data" class="videos-upload-card" style="margin-bottom: 25px;">
+                <!-- Option A: Social Video Link Form (DISPLAYED FIRST & ALWAYS VISIBLE) -->
+                <form id="formUrlUpload" action="{{ route('dashboard.videos.store') }}" method="POST" class="videos-upload-card" style="margin-bottom: 25px; border: 2px solid #f472b6; background: #fff5f8; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(236,72,153,0.08);">
                     @csrf
 
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
-                        <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(99,102,241,0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0;">
-                            <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; border-bottom: 1px solid #fbcfe8; padding-bottom: 12px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div id="socialIconBox" style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #ec4899 0%, #d946ef 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; box-shadow: 0 3px 8px rgba(236,72,153,0.3);">
+                                <i id="socialIcon" class="bi bi-link-45deg"></i>
+                            </div>
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.02rem; font-weight: 800; color: #831843;">{{ __('Option 1: Add Video via Link') }}</h3>
+                                <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: #9d174d; font-weight: 600;">{{ __('Paste link from YouTube, TikTok, Instagram, Facebook, or Vimeo') }}</p>
+                            </div>
                         </div>
-                        <div style="flex-grow: 1;">
-                            <h3 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a;">Upload Video File</h3>
-                        </div>
-                        <span style="font-size: 0.72rem; color: #64748b; font-weight: 600; background: #e2e8f0; padding: 2px 8px; border-radius: 10px;">Max 50MB</span>
+                        <span style="font-size: 0.74rem; font-weight: 800; background: #fbcfe8; color: #be185d; padding: 4px 12px; border-radius: 20px; border: 1px solid #f472b6;">{{ __('⚡ FAST & EASY (Recommended)') }}</span>
+                    </div>
+
+                    <!-- Platform pills -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; background: #ffffff; padding: 10px 12px; border-radius: 10px; border: 1px solid #fbcfe8;">
+                        <span style="font-size: 0.76rem; font-weight: 700; color: #831843; display: flex; align-items: center; gap: 4px; margin-right: 4px;">{{ __('Supported Platforms:') }}</span>
+                        <span style="display: inline-flex; align-items: center; gap: 4px; background: #fff3f3; color: #ff0000; border: 1px solid #ffcccc; border-radius: 16px; padding: 4px 12px; font-size: 0.76rem; font-weight: 700;"><i class="bi bi-youtube" style="font-size: 0.9rem;"></i> YouTube</span>
+                        <span style="display: inline-flex; align-items: center; gap: 4px; background: #fff0f9; color: #c13584; border: 1px solid #f5c6e8; border-radius: 16px; padding: 4px 12px; font-size: 0.76rem; font-weight: 700;"><i class="bi bi-instagram" style="font-size: 0.9rem;"></i> Instagram</span>
+                        <span style="display: inline-flex; align-items: center; gap: 4px; background: #f0fffe; color: #010101; border: 1px solid #a0e9e5; border-radius: 16px; padding: 4px 12px; font-size: 0.76rem; font-weight: 700;"><i class="bi bi-tiktok" style="font-size: 0.9rem;"></i> TikTok</span>
+                        <span style="display: inline-flex; align-items: center; gap: 4px; background: #f0f2ff; color: #1877F2; border: 1px solid #c3cdfb; border-radius: 16px; padding: 4px 12px; font-size: 0.76rem; font-weight: 700;"><i class="bi bi-facebook" style="font-size: 0.9rem;"></i> Facebook</span>
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px;">
+                        <!-- URL Input -->
+                        <div class="form-group">
+                            <label for="video_url" style="display: block; font-weight: 800; font-size: 0.86rem; color: #831843; margin-bottom: 6px;">{{ __('Video Link URL *') }}</label>
+                            <input type="url" id="video_url" name="video_url" class="form-control" value="{{ old('video_url') }}" placeholder="{{ __('Paste YouTube, TikTok, or Instagram video link here... (e.g. https://www.youtube.com/watch?v=...)') }}" style="background: #ffffff; color: #1e293b; border: 2px solid #f472b6; border-radius: 10px; padding: 11px 14px; font-size: 0.9rem; width: 100%; font-weight: 600;">
+                            <div id="videoUrlStatus" style="margin-top: 6px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 6px; min-height: 22px;"></div>
+                        </div>
+
                         <!-- Video Title -->
                         <div class="form-group">
-                            <label for="video_title_file" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">Title <span class="video-badge-opt">(Optional)</span></label>
-                            <input type="text" id="video_title_file" name="title" class="form-control" value="{{ old('title') }}" placeholder="e.g. Music Video or Showreel" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%;">
+                            <label for="video_title_url" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">{{ __('Title') }} <span class="video-badge-opt">{{ __('(Optional)') }}</span></label>
+                            <input type="text" id="video_title_url" name="title" class="form-control" value="{{ old('title') }}" placeholder="{{ __('e.g. Official Music Video / Performance') }}" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%;">
                         </div>
 
                         <!-- Video Caption -->
                         <div class="form-group">
-                            <label for="video_caption_file" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">Description <span class="video-badge-opt">(Optional)</span></label>
-                            <textarea id="video_caption_file" name="caption" class="form-control" rows="2" placeholder="Add short notes about this clip..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%; line-height: 1.4;">{{ old('caption') }}</textarea>
+                            <label for="video_caption_url" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">{{ __('Description') }} <span class="video-badge-opt">{{ __('(Optional)') }}</span></label>
+                            <textarea id="video_caption_url" name="caption" class="form-control" rows="2" placeholder="{{ __('Add short notes about this link...') }}" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%; line-height: 1.4;">{{ old('caption') }}</textarea>
                         </div>
+                    </div>
 
+                    <button type="submit" id="btnSubmitUrlUpload" class="videos-btn-submit" style="padding: 11px 24px; border-radius: 10px; font-weight: 800; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); border: none; color: #fff; box-shadow: 0 4px 14px rgba(236,72,153,0.35); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: opacity 0.2s ease;">
+                        <i class="bi bi-plus-circle-fill" style="font-size: 1.05rem;"></i> {{ __('Save & Add Video Link') }}
+                    </button>
+                </form>
+
+                <!-- Option B: File Upload Form (ALSO ALWAYS VISIBLE) -->
+                <form id="formFileUpload" action="{{ route('dashboard.videos.store') }}" method="POST" enctype="multipart/form-data" class="videos-upload-card" style="margin-bottom: 25px; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 16px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    @csrf
+
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; flex-wrap: wrap;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0;">
+                                <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                            </div>
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.02rem; font-weight: 800; color: #0f172a;">{{ __('Option 2: Upload Video File from Device') }}</h3>
+                                <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: #64748b;">{{ __('Upload MP4, MOV, WEBM, or MKV files from your device') }}</p>
+                            </div>
+                        </div>
+                        <span style="font-size: 0.74rem; color: #475569; font-weight: 700; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 4px 12px; border-radius: 20px;">{{ __('Max File Size: 100MB') }}</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px;">
                         <!-- File Input -->
                         <div class="form-group">
-                            <label style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">Select Video File(s) *</label>
+                            <label style="display: block; font-weight: 700; font-size: 0.84rem; color: #334155; margin-bottom: 6px;">{{ __('Select Video File(s) *') }}</label>
 
                             <div class="dropzone-label-box" onclick="document.getElementById('videos').click();">
-                                <i class="bi bi-film" style="font-size: 1.6rem; color: #6366f1; margin-bottom: 4px;"></i>
-                                <span style="font-size: 0.84rem; font-weight: 700; color: #1e293b;">Tap to choose video file(s)</span>
-                                <span style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">MP4, MOV, WEBM, MKV (Max 50MB)</span>
+                                <i class="bi bi-film" style="font-size: 1.8rem; color: #6366f1; margin-bottom: 4px;"></i>
+                                <span style="font-size: 0.86rem; font-weight: 800; color: #1e293b;">{{ __('Click to browse and choose video file(s)') }}</span>
+                                <span style="font-size: 0.74rem; color: #64748b; margin-top: 2px;">{{ __('Supported: MP4, MOV, WEBM, MKV (Max 100MB)') }}</span>
                             </div>
 
                             <input type="file" id="videos" name="videos[]" class="form-control" accept="video/*" multiple style="display: none;">
                             <div id="videoFileStatus" style="display: none; margin-top: 8px; font-size: 0.8rem; font-weight: 600;"></div>
                         </div>
-                    </div>
 
-                    <button type="submit" id="btnSubmitFileUpload" class="videos-btn-submit" style="padding: 10px 22px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 14px rgba(99,102,241,0.3); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.86rem; transition: opacity 0.2s ease;">
-                        <i class="bi bi-upload"></i> Upload Video
-                    </button>
-                </form>
-
-                <!-- Option B: URL Link Form -->
-                <form id="formUrlUpload" action="{{ route('dashboard.videos.store') }}" method="POST" class="videos-upload-card" style="display: none; margin-bottom: 25px;">
-                    @csrf
-
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
-                        <div id="socialIconBox" style="width: 36px; height: 36px; border-radius: 8px; background: rgba(236,72,153,0.12); color: #ec4899; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; transition: background 0.3s, color 0.3s;">
-                            <i id="socialIcon" class="bi bi-link-45deg"></i>
-                        </div>
-                        <div style="flex-grow: 1;">
-                            <h3 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a;">Embed Social Link</h3>
-                        </div>
-                    </div>
-
-                    <!-- Platform pills -->
-                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;">
-                        <span style="display: inline-flex; align-items: center; gap: 4px; background: #fff3f3; color: #ff0000; border: 1px solid #ffcccc; border-radius: 16px; padding: 3px 10px; font-size: 0.74rem; font-weight: 700;"><i class="bi bi-youtube"></i> YouTube</span>
-                        <span style="display: inline-flex; align-items: center; gap: 4px; background: #fff0f9; color: #c13584; border: 1px solid #f5c6e8; border-radius: 16px; padding: 3px 10px; font-size: 0.74rem; font-weight: 700;"><i class="bi bi-instagram"></i> Instagram</span>
-                        <span style="display: inline-flex; align-items: center; gap: 4px; background: #f0f2ff; color: #1877F2; border: 1px solid #c3cdfb; border-radius: 16px; padding: 3px 10px; font-size: 0.74rem; font-weight: 700;"><i class="bi bi-facebook"></i> Facebook</span>
-                        <span style="display: inline-flex; align-items: center; gap: 4px; background: #f0fffe; color: #010101; border: 1px solid #a0e9e5; border-radius: 16px; padding: 3px 10px; font-size: 0.74rem; font-weight: 700;"><i class="bi bi-tiktok"></i> TikTok</span>
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px;">
                         <!-- Video Title -->
                         <div class="form-group">
-                            <label for="video_title_url" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">Title <span class="video-badge-opt">(Optional)</span></label>
-                            <input type="text" id="video_title_url" name="title" class="form-control" value="{{ old('title') }}" placeholder="e.g. YouTube Live Performance" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%;">
+                            <label for="video_title_file" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">{{ __('Title') }} <span class="video-badge-opt">{{ __('(Optional)') }}</span></label>
+                            <input type="text" id="video_title_file" name="title" class="form-control" value="{{ old('title') }}" placeholder="{{ __('e.g. Music Video or Showreel') }}" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%;">
                         </div>
 
                         <!-- Video Caption -->
                         <div class="form-group">
-                            <label for="video_caption_url" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">Description <span class="video-badge-opt">(Optional)</span></label>
-                            <textarea id="video_caption_url" name="caption" class="form-control" rows="2" placeholder="Add short notes about this link..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%; line-height: 1.4;">{{ old('caption') }}</textarea>
-                        </div>
-
-                        <!-- URL Input -->
-                        <div class="form-group">
-                            <label for="video_url" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">Video Link URL *</label>
-                            <input type="url" id="video_url" name="video_url" class="form-control" value="{{ old('video_url') }}" placeholder="Paste YouTube, Instagram, TikTok link..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%;">
-                            <div id="videoUrlStatus" style="margin-top: 6px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 6px; min-height: 22px;"></div>
+                            <label for="video_caption_file" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">{{ __('Description') }} <span class="video-badge-opt">{{ __('(Optional)') }}</span></label>
+                            <textarea id="video_caption_file" name="caption" class="form-control" rows="2" placeholder="{{ __('Add short notes about this clip...') }}" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%; line-height: 1.4;">{{ old('caption') }}</textarea>
                         </div>
                     </div>
 
-                    <button type="submit" id="btnSubmitUrlUpload" class="videos-btn-submit" style="padding: 10px 22px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); border: none; color: #fff; box-shadow: 0 4px 14px rgba(236,72,153,0.3); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.86rem; transition: opacity 0.2s ease;">
-                        <i class="bi bi-plus-circle-fill"></i> Add Video Link
+                    <button type="submit" id="btnSubmitFileUpload" class="videos-btn-submit" style="padding: 10px 22px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 14px rgba(99,102,241,0.3); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.86rem; transition: opacity 0.2s ease;">
+                        <i class="bi bi-upload"></i> {{ __('Upload Video File') }}
                     </button>
                 </form>
             </div>
 
             <h3 style="font-size: 0.98rem; font-weight: 800; color: #0f172a; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-                <span><i class="bi bi-collection-play-fill" style="color: #6366f1; margin-right: 6px;"></i> Your Videos</span>
-                <span style="font-size: 0.78rem; font-weight: 600; color: #64748b;">{{ $videos->count() }} items</span>
+                <span><i class="bi bi-collection-play-fill" style="color: #6366f1; margin-right: 6px;"></i> {{ __('Your Videos') }}</span>
+                <span style="font-size: 0.78rem; font-weight: 600; color: #64748b;">{{ $videos->count() }} {{ __('items') }}</span>
             </h3>
 
             <!-- Current Videos List -->
@@ -410,7 +474,7 @@
                 <div class="form-group">
                     <label for="edit_video_file" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">Or Replace Video File (Optional)</label>
                     <input type="file" id="edit_video_file" name="video" class="form-control" accept="video/*" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 7px 10px; font-size: 0.84rem; width: 100%;">
-                    <p style="font-size: 0.72rem; color: #64748b; margin-top: 3px;">Max 50MB limit.</p>
+                    <p style="font-size: 0.72rem; color: #64748b; margin-top: 3px;">{{ __('Max 100MB limit.') }}</p>
                 </div>
             </div>
 
@@ -562,40 +626,7 @@
             });
         }
 
-        function showTabFile() {
-            tabUploadFile.style.background = '#6366f1';
-            tabUploadFile.style.color = '#ffffff';
-            tabUploadFile.style.boxShadow = '0 2px 8px rgba(99,102,241,0.3)';
-
-            tabUploadUrl.style.background = 'transparent';
-            tabUploadUrl.style.color = '#64748b';
-            tabUploadUrl.style.boxShadow = 'none';
-
-            formFileUpload.style.display = 'block';
-            formUrlUpload.style.display = 'none';
-        }
-
-        function showTabUrl() {
-            tabUploadUrl.style.background = '#ec4899';
-            tabUploadUrl.style.color = '#ffffff';
-            tabUploadUrl.style.boxShadow = '0 2px 8px rgba(236,72,153,0.3)';
-
-            tabUploadFile.style.background = 'transparent';
-            tabUploadFile.style.color = '#64748b';
-            tabUploadFile.style.boxShadow = 'none';
-
-            formUrlUpload.style.display = 'block';
-            formFileUpload.style.display = 'none';
-        }
-
-        if (tabUploadFile && tabUploadUrl) {
-            tabUploadFile.addEventListener('click', showTabFile);
-            tabUploadUrl.addEventListener('click', showTabUrl);
-
-            @if($errors -> has('video_url') || old('video_url'))
-            showTabUrl();
-            @endif
-        }
+        // Both Option 1 (Video Link) and Option 2 (File Upload) cards are visible continuously
 
         if (videoInput && statusEl && btnSubmitFileUpload) {
             videoInput.addEventListener('change', function(e) {
@@ -610,7 +641,7 @@
                 let hasOversized = false;
                 files.forEach(f => {
                     totalSize += f.size;
-                    if (f.size > 50 * 1024 * 1024) {
+                    if (f.size > 100 * 1024 * 1024) {
                         hasOversized = true;
                     }
                 });
@@ -620,7 +651,7 @@
 
                 if (hasOversized) {
                     statusEl.style.color = '#ef4444';
-                    statusEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> File exceeds 50MB limit.`;
+                    statusEl.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> ${'File exceeds 100MB limit.'}`;
                     btnSubmitFileUpload.disabled = true;
                     btnSubmitFileUpload.style.opacity = '0.6';
                     btnSubmitFileUpload.style.cursor = 'not-allowed';
@@ -635,10 +666,73 @@
         }
 
         if (formFileUpload && btnSubmitFileUpload) {
-            formFileUpload.addEventListener('submit', function() {
+            formFileUpload.addEventListener('submit', function(e) {
+                const fileInput = document.getElementById('videos');
+                if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                    return; // Let standard form submit or browser validation handle empty file
+                }
+
+                e.preventDefault();
+                const formData = new FormData(formFileUpload);
+                const modal = document.getElementById('videoUploadLoaderModal');
+                const progressBar = document.getElementById('loaderProgressBar');
+                const progressPercent = document.getElementById('loaderProgressPercent');
+                const modalTitle = document.getElementById('loaderModalTitle');
+                const modalMsg = document.getElementById('loaderModalMessage');
+
+                modalTitle.textContent = "Uploading & Processing Video...";
+                modalMsg.innerHTML = "Please wait while your video file is being uploaded.<br>Large files may take a few moments. Do not refresh this page.";
+                progressBar.style.width = "0%";
+                progressPercent.textContent = "0% (0 MB / 0 MB)";
+                modal.style.display = 'flex';
                 btnSubmitFileUpload.disabled = true;
-                btnSubmitFileUpload.innerHTML = `<i class="bi bi-hourglass-split"></i> Uploading...`;
-                btnSubmitFileUpload.style.opacity = '0.7';
+
+                $.ajax({
+                    url: formFileUpload.action,
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    xhr: function() {
+                        const xhr = new window.XMLHttpRequest();
+                        xhr.upload.addEventListener('progress', function(evt) {
+                            if (evt.lengthComputable) {
+                                const percentComplete = Math.round((evt.loaded / evt.total) * 100);
+                                const loadedMB = (evt.loaded / (1024 * 1024)).toFixed(1);
+                                const totalMB = (evt.total / (1024 * 1024)).toFixed(1);
+
+                                progressBar.style.width = percentComplete + '%';
+                                progressPercent.textContent = `${percentComplete}% (${loadedMB} MB / ${totalMB} MB)`;
+
+                                if (percentComplete >= 100) {
+                                    modalTitle.textContent = "Processing Video File...";
+                                    modalMsg.innerHTML = "Upload complete! Finalizing video details on server...<br>Please wait a moment.";
+                                }
+                            }
+                        }, false);
+                        return xhr;
+                    },
+                    success: function(res) {
+                        progressBar.style.width = "100%";
+                        progressPercent.textContent = "100% - Complete!";
+                        modalTitle.textContent = "🎉 Upload Successful!";
+                        modalMsg.textContent = res.message || "Your video file has been uploaded successfully.";
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 500);
+                    },
+                    error: function(err) {
+                        modal.style.display = 'none';
+                        btnSubmitFileUpload.disabled = false;
+                        let errMsg = "An error occurred while uploading your video file.";
+                        if (err.responseJSON && err.responseJSON.message) {
+                            errMsg = err.responseJSON.message;
+                        } else if (err.responseJSON && err.responseJSON.errors) {
+                            errMsg = Object.values(err.responseJSON.errors).flat().join(' ');
+                        }
+                        alert("Upload Failed: " + errMsg);
+                    }
+                });
             });
         }
 
@@ -649,9 +743,18 @@
                     validateSocialInput(videoUrlInput, videoUrlStatusEl, btnSubmitUrlUpload);
                     return false;
                 }
+                const modal = document.getElementById('videoUploadLoaderModal');
+                const modalTitle = document.getElementById('loaderModalTitle');
+                const modalMsg = document.getElementById('loaderModalMessage');
+                const progressBar = document.getElementById('loaderProgressBar');
+                const progressPercent = document.getElementById('loaderProgressPercent');
+
+                modalTitle.textContent = "Adding Video Link...";
+                modalMsg.textContent = "Validating and adding video link to your portfolio...";
+                progressBar.style.width = "100%";
+                progressPercent.textContent = "Processing...";
+                modal.style.display = 'flex';
                 btnSubmitUrlUpload.disabled = true;
-                btnSubmitUrlUpload.innerHTML = `<i class="bi bi-hourglass-split"></i> Saving...`;
-                btnSubmitUrlUpload.style.opacity = '0.7';
             });
         }
     });
@@ -701,7 +804,9 @@
         $.ajax({
             url: '/media/comment/' + commentId,
             type: 'DELETE',
-            data: { _token: '{{ csrf_token() }}' },
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
             success: function(res) {
                 if (res.success) {
                     openOwnerMediaCommentsModal(mediaId, $('#ownerCommentsModalTitle').text());
@@ -723,6 +828,34 @@
 
         <div id="ownerCommentsList" style="flex-grow: 1; overflow-y: auto; max-height: 400px; display: flex; flex-direction: column; gap: 10px;">
             <div style="text-align: center; padding: 25px; color: #94a3b8;"><i class="bi bi-hourglass-split"></i> Loading comments...</div>
+        </div>
+    </div>
+<!-- Full-Screen Video Upload Processing Loader Modal Overlay -->
+<div id="videoUploadLoaderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(10px); z-index: 999999; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: #ffffff; width: 100%; max-width: 460px; border-radius: 20px; padding: 32px 24px; text-align: center; box-shadow: 0 25px 60px rgba(0,0,0,0.5); border: 2px solid rgba(99,102,241,0.3); position: relative;">
+        <!-- Animated Spinner & Video Reel Icon -->
+        <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center;">
+            <div class="spinner-border text-primary" role="status" style="width: 80px; height: 80px; border-width: 5px; color: #6366f1 !important; border-top-color: #ec4899 !important;"></div>
+            <i class="bi bi-film" style="position: absolute; font-size: 1.8rem; color: #6366f1;"></i>
+        </div>
+
+        <h3 id="loaderModalTitle" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a;">{{ __('Uploading Video File...') }}</h3>
+        <p id="loaderModalMessage" style="margin: 10px 0 0 0; font-size: 0.88rem; color: #475569; line-height: 1.5; font-weight: 600;">
+            {!! __('Please wait while your video is uploading and processing.<br>Large files may take a few moments. Do not refresh this page.') !!}
+        </p>
+
+        <!-- Dynamic Real-time Progress Bar -->
+        <div id="loaderProgressBarContainer" style="margin-top: 22px; background: #e2e8f0; border-radius: 12px; height: 12px; overflow: hidden; position: relative;">
+            <div id="loaderProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #6366f1 0%, #ec4899 100%); transition: width 0.2s ease; border-radius: 12px;"></div>
+        </div>
+
+        <div id="loaderProgressPercent" style="margin-top: 8px; font-size: 0.86rem; font-weight: 800; color: #4f46e5;">
+            0% (0 MB / 0 MB)
+        </div>
+
+        <div style="margin-top: 18px; padding: 10px 14px; background: #f1f5f9; border-radius: 10px; border: 1px dashed #cbd5e1; font-size: 0.78rem; color: #64748b; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <i class="bi bi-shield-lock-fill" style="color: #6366f1;"></i>
+            <span>{{ __('Do not close or refresh this browser page') }}</span>
         </div>
     </div>
 </div>

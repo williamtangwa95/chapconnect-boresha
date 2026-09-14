@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'ChapConnect - Manage News & Updates')
+@section('title', __('ChapConnect - Manage News & Updates'))
 
 @section('styles')
 <style>
@@ -164,10 +164,10 @@
             <!-- Page Header -->
             <div class="news-page-header">
                 <h2 class="news-page-title" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a; border: none; padding: 0; display: flex; align-items: center; gap: 8px;">
-                    <i class="bi bi-newspaper" style="color: var(--primary);"></i> News &amp; Updates
+                    <i class="bi bi-newspaper" style="color: var(--primary);"></i> {{ __('News & Updates') }}
                 </h2>
                 <div class="news-count-badge" style="background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25); padding: 5px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; color: #4f46e5;">
-                    {{ $newsItems->count() }} Published
+                    {{ $newsItems->count() }} {{ __('Published') }}
                 </div>
             </div>
 
@@ -180,28 +180,28 @@
                         <i class="bi bi-pencil-square"></i>
                     </div>
                     <div style="flex-grow: 1;">
-                        <h3 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a;">Publish Article</h3>
+                        <h3 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a;">{{ __('Publish Article') }}</h3>
                     </div>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px;">
                     <div class="form-group">
-                        <label for="title" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">Headline *</label>
-                        <input type="text" id="title" name="title" class="form-control" placeholder="e.g. New Single Release" required style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%;">
+                        <label for="title" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">{{ __('Headline *') }}</label>
+                        <input type="text" id="title" name="title" class="form-control" placeholder="{{ __('e.g. New Single Release') }}" required style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%;">
                     </div>
 
                     <div class="form-group">
-                        <label for="content" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">Details / Story *</label>
-                        <textarea id="content" name="content" class="form-control" rows="4" placeholder="Write full story or announcement details..." required style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%; line-height: 1.5;"></textarea>
+                        <label for="content" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">{{ __('Details / Story *') }}</label>
+                        <textarea id="content" name="content" class="form-control" rows="4" placeholder="{{ __('Write full story or announcement details...') }}" required style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%; line-height: 1.5;"></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">Cover Image <span class="news-badge-opt">(Optional)</span></label>
+                        <label style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">{{ __('Cover Image') }} <span class="news-badge-opt">({{ __('Optional') }})</span></label>
 
                         <div class="dropzone-label-box" onclick="document.getElementById('image').click();">
                             <i class="bi bi-image" style="font-size: 1.6rem; color: #6366f1; margin-bottom: 4px;"></i>
-                            <span style="font-size: 0.84rem; font-weight: 700; color: #1e293b;">Tap to choose cover image</span>
-                            <span style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">JPEG, PNG, WEBP (Max 10MB)</span>
+                            <span style="font-size: 0.84rem; font-weight: 700; color: #1e293b;">{{ __('Tap to choose cover image') }}</span>
+                            <span style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">{{ __('JPEG, PNG, WEBP (Max 10MB)') }}</span>
                         </div>
 
                         <input type="file" id="image" name="image" class="form-control" accept="image/*" style="display: none;">
@@ -209,7 +209,7 @@
                         <!-- Live Image Preview Box -->
                         <div id="newsImagePreviewContainer" style="display: none; margin-top: 12px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px; width: fit-content;">
                             <div style="font-weight: 700; font-size: 0.78rem; color: #475569; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
-                                <i class="bi bi-eye-fill" style="color: #6366f1;"></i> Preview
+                                <i class="bi bi-eye-fill" style="color: #6366f1;"></i> {{ __('Preview') }}
                             </div>
                             <div style="position: relative; width: 220px; max-height: 130px; border-radius: 10px; overflow: hidden; border: 2px solid #6366f1; box-shadow: 0 3px 12px rgba(99,102,241,0.2); background: #f8fafc;">
                                 <img id="newsImagePreview" src="" alt="Banner Preview" style="width: 100%; height: 100%; object-fit: cover;">
@@ -219,13 +219,13 @@
                 </div>
 
                 <button type="submit" class="news-btn-submit" style="padding: 10px 22px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 14px rgba(99,102,241,0.3); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.86rem; transition: opacity 0.2s ease;">
-                    <i class="bi bi-send-fill"></i> Publish Article
+                    <i class="bi bi-send-fill"></i> {{ __('Publish Article') }}
                 </button>
             </form>
 
             <h3 style="font-size: 0.98rem; font-weight: 800; color: #0f172a; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-                <span><i class="bi bi-journal-richtext" style="color: #6366f1; margin-right: 6px;"></i> Published Articles</span>
-                <span style="font-size: 0.78rem; font-weight: 600; color: #64748b;">{{ $newsItems->count() }} items</span>
+                <span><i class="bi bi-journal-richtext" style="color: #6366f1; margin-right: 6px;"></i> {{ __('Published Articles') }}</span>
+                <span style="font-size: 0.78rem; font-weight: 600; color: #64748b;">{{ $newsItems->count() }} {{ __('items') }}</span>
             </h3>
 
             <!-- Current News Feed -->
@@ -247,14 +247,14 @@
                         </div>
 
                         <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
-                            <button type="button" class="news-action-btn" onclick="openEditNewsModal({{ $news->id }}, '{{ addslashes($news->title ?? '') }}', '{{ addslashes($news->content ?? '') }}', '{{ $news->file_path ? asset($news->file_path) : '' }}')" style="padding: 4px 10px; border-radius: 7px; font-size: 0.74rem; font-weight: 700; background: #6366f1; color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(99,102,241,0.25);" title="Edit Article">
-                                <i class="bi bi-pencil-square"></i> Edit
+                            <button type="button" class="news-action-btn" onclick="openEditNewsModal({{ $news->id }}, '{{ addslashes($news->title ?? '') }}', '{{ addslashes($news->content ?? '') }}', '{{ $news->file_path ? asset($news->file_path) : '' }}')" style="padding: 4px 10px; border-radius: 7px; font-size: 0.74rem; font-weight: 700; background: #6366f1; color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(99,102,241,0.25);" title="{{ __('Edit Article') }}">
+                                <i class="bi bi-pencil-square"></i> {{ __('Edit') }}
                             </button>
-                            <form action="{{ route('dashboard.news.delete', $news->id) }}" method="POST" onsubmit="return confirm('Delete this news article?');" style="margin: 0;">
+                            <form action="{{ route('dashboard.news.delete', $news->id) }}" method="POST" onsubmit="return confirm('{{ __('Delete this news article?') }}');" style="margin: 0;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="news-action-btn" style="padding: 4px 10px; border-radius: 7px; font-size: 0.74rem; font-weight: 700; background: #ef4444; color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(239,68,68,0.25);" title="Delete Article">
-                                    <i class="bi bi-trash"></i> Delete
+                                <button type="submit" class="news-action-btn" style="padding: 4px 10px; border-radius: 7px; font-size: 0.74rem; font-weight: 700; background: #ef4444; color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; box-shadow: 0 2px 6px rgba(239,68,68,0.25);" title="{{ __('Delete Article') }}">
+                                    <i class="bi bi-trash"></i> {{ __('Delete') }}
                                 </button>
                             </form>
                         </div>
@@ -265,7 +265,7 @@
                 @empty
                 <div style="padding: 40px 15px; text-align: center; background: #f8fafc; border-radius: 14px; border: 1px dashed #cbd5e1;">
                     <i class="bi bi-newspaper" style="font-size: 2.2rem; color: #94a3b8; display: block; margin-bottom: 8px;"></i>
-                    <p style="margin: 0; color: #64748b; font-weight: 600; font-size: 0.88rem;">No articles published yet.</p>
+                    <p style="margin: 0; color: #64748b; font-weight: 600; font-size: 0.88rem;">{{ __('No articles published yet.') }}</p>
                 </div>
                 @endforelse
             </div>
@@ -278,7 +278,7 @@
     <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 480px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
             <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 6px;">
-                <i class="bi bi-pencil-square" style="color: #6366f1;"></i> Edit Article
+                <i class="bi bi-pencil-square" style="color: #6366f1;"></i> {{ __('Edit Article') }}
             </h3>
             <button type="button" onclick="$('#editNewsModal').fadeOut(200);" style="background: none; border: none; font-size: 1.3rem; color: #64748b; cursor: pointer;">&times;</button>
         </div>
@@ -289,31 +289,31 @@
             <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px;">
                 <!-- Article Title -->
                 <div class="form-group">
-                    <label for="edit_news_title" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">Headline *</label>
+                    <label for="edit_news_title" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">{{ __('Headline *') }}</label>
                     <input type="text" id="edit_news_title" name="title" class="form-control" required style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%;">
                 </div>
 
                 <!-- Article Content -->
                 <div class="form-group">
-                    <label for="edit_news_content" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">Details / Story *</label>
+                    <label for="edit_news_content" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">{{ __('Details / Story *') }}</label>
                     <textarea id="edit_news_content" name="content" class="form-control" rows="4" required style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%; line-height: 1.5;"></textarea>
                 </div>
 
                 <!-- Banner Image Preview & Replace -->
                 <div class="form-group">
-                    <label for="edit_news_image" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">Replace Cover Image (Optional)</label>
+                    <label for="edit_news_image" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">{{ __('Replace Cover Image (Optional)') }}</label>
                     <div id="editNewsCurrentImgContainer" style="display: none; margin-bottom: 8px;">
-                        <div style="font-weight: 600; font-size: 0.72rem; color: #64748b; margin-bottom: 3px;">Current Banner:</div>
+                        <div style="font-weight: 600; font-size: 0.72rem; color: #64748b; margin-bottom: 3px;">{{ __('Current Banner:') }}</div>
                         <img id="editNewsCurrentImg" src="" alt="Current Banner" style="max-width: 100%; max-height: 120px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: cover;">
                     </div>
                     <input type="file" id="edit_news_image" name="image" class="form-control" accept="image/*" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 7px 10px; font-size: 0.84rem; width: 100%;">
-                    <p style="font-size: 0.72rem; color: #64748b; margin-top: 3px;">Max 10MB limit.</p>
+                    <p style="font-size: 0.72rem; color: #64748b; margin-top: 3px;">{{ __('Max 10MB limit.') }}</p>
                 </div>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                <button type="button" onclick="$('#editNewsModal').fadeOut(200);" style="padding: 8px 16px; border-radius: 8px; font-weight: 700; background: #f1f5f9; color: #475569; border: none; cursor: pointer; font-size: 0.84rem;">Cancel</button>
-                <button type="submit" style="padding: 8px 20px; border-radius: 8px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border: none; cursor: pointer; box-shadow: 0 3px 10px rgba(99,102,241,0.3); font-size: 0.84rem;">Save Changes</button>
+                <button type="button" onclick="$('#editNewsModal').fadeOut(200);" style="padding: 8px 16px; border-radius: 8px; font-weight: 700; background: #f1f5f9; color: #475569; border: none; cursor: pointer; font-size: 0.84rem;">{{ __('Cancel') }}</button>
+                <button type="submit" style="padding: 8px 20px; border-radius: 8px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border: none; cursor: pointer; box-shadow: 0 3px 10px rgba(99,102,241,0.3); font-size: 0.84rem;">{{ __('Save Changes') }}</button>
             </div>
         </form>
     </div>

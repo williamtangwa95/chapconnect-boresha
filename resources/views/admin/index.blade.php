@@ -1095,7 +1095,7 @@
                         <div style="font-size: 0.84rem; color: #64748b; background: #f8fafc; padding: 14px; border-radius: 10px; border: 1px solid #e2e8f0; line-height: 1.4;">
                             <strong style="color: #0f172a;">Media Upload Policies:</strong><br>
                             • Photos auto-compressed to WebP format.<br>
-                            • Videos supported up to 50MB per file.<br>
+                            • Videos supported up to 100MB per file.<br>
                             • Maximum 10 photos &amp; 5 videos per talent.
                         </div>
                     </div>

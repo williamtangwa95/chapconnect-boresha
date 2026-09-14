@@ -189,10 +189,10 @@
             <!-- Page Header -->
             <div class="photos-page-header">
                 <h2 class="photos-page-title" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #0f172a; border: none; padding: 0; display: flex; align-items: center; gap: 8px;">
-                    <i class="bi bi-images" style="color: var(--primary);"></i> Photos
+                    <i class="bi bi-images" style="color: var(--primary);"></i> {{ __('Photos') }}
                 </h2>
                 <div class="photos-count-badge" style="background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25); padding: 5px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; color: #4f46e5;">
-                    {{ $photos->count() }} Uploaded
+                    {{ $photos->count() }} {{ __('Uploaded') }}
                 </div>
             </div>
 
@@ -205,32 +205,32 @@
                         <i class="bi bi-cloud-arrow-up-fill"></i>
                     </div>
                     <div style="flex-grow: 1;">
-                        <h3 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a;">Upload Photos</h3>
+                        <h3 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a;">{{ __('Upload Photos') }}</h3>
                     </div>
-                    <span style="font-size: 0.72rem; color: #64748b; font-weight: 600; background: #e2e8f0; padding: 2px 8px; border-radius: 10px;">Max 15MB</span>
+                    <span style="font-size: 0.72rem; color: #64748b; font-weight: 600; background: #e2e8f0; padding: 2px 8px; border-radius: 10px;">{{ __('Max 20MB') }}</span>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px;">
                     <!-- Photo Title -->
                     <div class="form-group">
-                        <label for="title" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">Title <span class="photo-badge-opt">(Optional)</span></label>
-                        <input type="text" id="title" name="title" class="form-control" value="{{ old('title') }}" placeholder="e.g. Stage Performance" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%;">
+                        <label for="title" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">{{ __('Title') }} <span class="photo-badge-opt">{{ __('(Optional)') }}</span></label>
+                        <input type="text" id="title" name="title" class="form-control" value="{{ old('title') }}" placeholder="{{ __('e.g. Stage Performance') }}" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%;">
                     </div>
 
                     <!-- Photo Caption -->
                     <div class="form-group">
-                        <label for="caption" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">Caption <span class="photo-badge-opt">(Optional)</span></label>
-                        <textarea id="caption" name="caption" class="form-control" rows="2" placeholder="Add short description..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%; line-height: 1.4;">{{ old('caption') }}</textarea>
+                        <label for="caption" style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">{{ __('Caption') }} <span class="photo-badge-opt">{{ __('(Optional)') }}</span></label>
+                        <textarea id="caption" name="caption" class="form-control" rows="2" placeholder="{{ __('Add short description...') }}" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%; line-height: 1.4;">{{ old('caption') }}</textarea>
                     </div>
 
                     <!-- File Selection -->
                     <div class="form-group">
-                        <label style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">Select Photo(s) *</label>
+                        <label style="display: block; font-weight: 700; font-size: 0.82rem; color: #334155; margin-bottom: 5px;">{{ __('Select Photo(s) *') }}</label>
 
                         <div class="dropzone-label-box" onclick="document.getElementById('photos').click();">
                             <i class="bi bi-file-earmark-image" style="font-size: 1.6rem; color: #6366f1; margin-bottom: 4px;"></i>
-                            <span style="font-size: 0.84rem; font-weight: 700; color: #1e293b;">Tap to choose photo(s)</span>
-                            <span style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">JPEG, PNG, WEBP, GIF (Max 15MB)</span>
+                            <span style="font-size: 0.84rem; font-weight: 700; color: #1e293b;">{{ __('Tap to choose photo(s)') }}</span>
+                            <span style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">{{ __('JPEG, PNG, WEBP, GIF (Max 20MB)') }}</span>
                         </div>
 
                         <input type="file" id="photos" name="photos[]" class="form-control" accept="image/*" multiple required style="display: none;">
@@ -240,8 +240,8 @@
                         <!-- Live Multi-Image Preview Box -->
                         <div id="imagePreviewContainer" style="display: none; margin-top: 12px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px; width: 100%;">
                             <div style="font-weight: 700; font-size: 0.8rem; color: #475569; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-                                <span><i class="bi bi-eye-fill" style="color: #6366f1;"></i> Preview</span>
-                                <span id="selectedCountBadge" style="font-size: 0.72rem; background: rgba(99,102,241,0.1); color: #6366f1; padding: 2px 8px; border-radius: 10px; font-weight: 700;">0 selected</span>
+                                <span><i class="bi bi-eye-fill" style="color: #6366f1;"></i> {{ __('Preview') }}</span>
+                                <span id="selectedCountBadge" style="font-size: 0.72rem; background: rgba(99,102,241,0.1); color: #6366f1; padding: 2px 8px; border-radius: 10px; font-weight: 700;">0 {{ __('selected') }}</span>
                             </div>
                             <div id="multiPreviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; max-height: 240px; overflow-y: auto; padding: 2px;"></div>
                         </div>
@@ -249,13 +249,13 @@
                 </div>
 
                 <button type="submit" id="btnSubmitPhoto" class="photos-btn-submit" style="padding: 10px 22px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 14px rgba(99,102,241,0.3); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.86rem; transition: opacity 0.2s ease;">
-                    <i class="bi bi-upload"></i> Upload Photos
+                    <i class="bi bi-upload"></i> {{ __('Upload Photos') }}
                 </button>
             </form>
 
             <h3 style="font-size: 0.98rem; font-weight: 800; color: #0f172a; margin-bottom: 14px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
-                <span><i class="bi bi-grid-3x3-gap-fill" style="color: #6366f1; margin-right: 6px;"></i> Your Photos</span>
-                <span style="font-size: 0.78rem; font-weight: 600; color: #64748b;">{{ $photos->count() }} items</span>
+                <span><i class="bi bi-grid-3x3-gap-fill" style="color: #6366f1; margin-right: 6px;"></i> {{ __('Your Photos') }}</span>
+                <span style="font-size: 0.78rem; font-weight: 600; color: #64748b;">{{ $photos->count() }} {{ __('items') }}</span>
             </h3>
 
             <!-- Current Uploads Grid -->
@@ -267,13 +267,13 @@
 
                         <div style="position: absolute; top: 6px; right: 6px; z-index: 2; display: flex; gap: 4px;">
                             <button type="button" class="photo-action-btn" onclick="openEditPhotoModal({{ $photo->id }}, '{{ addslashes($photo->title ?? '') }}', '{{ addslashes($photo->content ?? '') }}', '{{ asset($photo->file_path) }}')" style="padding: 5px 10px; border-radius: 7px; font-size: 0.74rem; font-weight: 700; background: rgba(99,102,241,0.9); color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; backdrop-filter: blur(4px); box-shadow: 0 2px 6px rgba(0,0,0,0.3);" title="Edit Photo">
-                                <i class="bi bi-pencil-square"></i> <span class="photo-action-btn-text">Edit</span>
+                                <i class="bi bi-pencil-square"></i> <span class="photo-action-btn-text">{{ __('Edit') }}</span>
                             </button>
                             <form action="{{ route('dashboard.photos.delete', $photo->id) }}" method="POST" onsubmit="return confirm('Delete this photo?');" style="margin: 0;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="photo-action-btn" style="padding: 5px 10px; border-radius: 7px; font-size: 0.74rem; font-weight: 700; background: rgba(239,68,68,0.9); color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; backdrop-filter: blur(4px); box-shadow: 0 2px 6px rgba(0,0,0,0.3);" title="Delete Photo">
-                                    <i class="bi bi-trash"></i> <span class="photo-action-btn-text">Delete</span>
+                                    <i class="bi bi-trash"></i> <span class="photo-action-btn-text">{{ __('Delete') }}</span>
                                 </button>
                             </form>
                         </div>
@@ -281,7 +281,7 @@
 
                     <div class="photo-card-info" style="padding: 10px 12px; background: #ffffff; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 8px;">
                         <div>
-                            <h4 class="photo-card-title" style="margin: 0 0 3px 0; font-size: 0.88rem; font-weight: 700; color: #0f172a; line-height: 1.3;">{{ $photo->title ?: 'Untitled' }}</h4>
+                            <h4 class="photo-card-title" style="margin: 0 0 3px 0; font-size: 0.88rem; font-weight: 700; color: #0f172a; line-height: 1.3;">{{ $photo->title ?: __('Untitled') }}</h4>
                             @if($photo->content)
                             <p class="photo-card-caption" style="margin: 0 0 6px 0; font-size: 0.78rem; color: #475569; line-height: 1.35;">{{ $photo->content }}</p>
                             @endif
@@ -306,7 +306,7 @@
                 @empty
                 <div style="grid-column: 1/-1; padding: 40px 15px; text-align: center; background: #f8fafc; border-radius: 14px; border: 1px dashed #cbd5e1;">
                     <i class="bi bi-image" style="font-size: 2.2rem; color: #94a3b8; display: block; margin-bottom: 8px;"></i>
-                    <p style="margin: 0; color: #64748b; font-weight: 600; font-size: 0.88rem;">No photos uploaded yet.</p>
+                    <p style="margin: 0; color: #64748b; font-weight: 600; font-size: 0.88rem;">{{ __('No photos uploaded yet.') }}</p>
                 </div>
                 @endforelse
             </div>
@@ -319,7 +319,7 @@
     <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 480px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
             <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 6px;">
-                <i class="bi bi-pencil-square" style="color: #6366f1;"></i> Edit Photo
+                <i class="bi bi-pencil-square" style="color: #6366f1;"></i> {{ __('Edit Photo') }}
             </h3>
             <button type="button" onclick="$('#editPhotoModal').fadeOut(200);" style="background: none; border: none; font-size: 1.3rem; color: #64748b; cursor: pointer;">&times;</button>
         </div>
@@ -330,7 +330,7 @@
             <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px;">
                 <!-- Current Photo Preview -->
                 <div>
-                    <label style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">Current Image</label>
+                    <label style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">{{ __('Current Image') }}</label>
                     <div style="width: 100px; height: 100px; border-radius: 10px; overflow: hidden; border: 2px solid #6366f1; background: #f8fafc;">
                         <img id="editPhotoCurrentImg" src="" alt="Current Photo" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
@@ -338,27 +338,27 @@
 
                 <!-- Title -->
                 <div class="form-group">
-                    <label for="edit_photo_title" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">Title</label>
-                    <input type="text" id="edit_photo_title" name="title" class="form-control" placeholder="e.g. Stage Performance" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%;">
+                    <label for="edit_photo_title" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">{{ __('Title') }}</label>
+                    <input type="text" id="edit_photo_title" name="title" class="form-control" placeholder="{{ __('e.g. Stage Performance') }}" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%;">
                 </div>
 
                 <!-- Caption -->
                 <div class="form-group">
-                    <label for="edit_photo_caption" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">Caption</label>
-                    <textarea id="edit_photo_caption" name="caption" class="form-control" rows="2" placeholder="Write short description..." style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%; line-height: 1.4;"></textarea>
+                    <label for="edit_photo_caption" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">{{ __('Caption') }}</label>
+                    <textarea id="edit_photo_caption" name="caption" class="form-control" rows="2" placeholder="{{ __('Write short description...') }}" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 9px 12px; font-size: 0.86rem; width: 100%; line-height: 1.4;"></textarea>
                 </div>
 
                 <!-- Replace Image File -->
                 <div class="form-group">
-                    <label for="edit_photo_file" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">Replace Image (Optional)</label>
+                    <label for="edit_photo_file" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">{{ __('Replace Image (Optional)') }}</label>
                     <input type="file" id="edit_photo_file" name="photo" class="form-control" accept="image/*" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 7px 10px; font-size: 0.84rem; width: 100%;">
-                    <p style="font-size: 0.72rem; color: #64748b; margin-top: 3px;">Max 15MB. Leave empty to keep current photo.</p>
+                    <p style="font-size: 0.72rem; color: #64748b; margin-top: 3px;">{{ __('Max 20MB. Leave empty to keep current photo.') }}</p>
                 </div>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                <button type="button" onclick="$('#editPhotoModal').fadeOut(200);" style="padding: 8px 16px; border-radius: 8px; font-weight: 700; background: #f1f5f9; color: #475569; border: none; cursor: pointer; font-size: 0.84rem;">Cancel</button>
-                <button type="submit" style="padding: 8px 20px; border-radius: 8px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border: none; cursor: pointer; box-shadow: 0 3px 10px rgba(99,102,241,0.3); font-size: 0.84rem;">Save Changes</button>
+                <button type="button" onclick="$('#editPhotoModal').fadeOut(200);" style="padding: 8px 16px; border-radius: 8px; font-weight: 700; background: #f1f5f9; color: #475569; border: none; cursor: pointer; font-size: 0.84rem;">{{ __('Cancel') }}</button>
+                <button type="submit" style="padding: 8px 20px; border-radius: 8px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; border: none; cursor: pointer; box-shadow: 0 3px 10px rgba(99,102,241,0.3); font-size: 0.84rem;">{{ __('Save Changes') }}</button>
             </div>
         </form>
     </div>
@@ -393,7 +393,7 @@
                     selectedCountBadge.textContent = `${files.length} selected`;
 
                     files.forEach(file => {
-                        if (file.size > 15 * 1024 * 1024) {
+                        if (file.size > 20 * 1024 * 1024) {
                             hasOversized = true;
                         }
 
@@ -412,7 +412,7 @@
                     if (hasOversized) {
                         photoSizeAlert.style.display = 'block';
                         photoSizeAlert.style.color = '#ef4444';
-                        photoSizeAlert.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Image(s) exceed 15MB limit. Select smaller files.`;
+                        photoSizeAlert.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Image(s) exceed 20MB limit. Select smaller files.`;
                         btnSubmitPhoto.disabled = true;
                         btnSubmitPhoto.style.opacity = '0.6';
                     } else {

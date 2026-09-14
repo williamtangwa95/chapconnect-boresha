@@ -274,7 +274,7 @@ class DashboardController extends Controller
         if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['photos' => 'The uploaded file payload is too large and exceeded server upload limits. Please select smaller images under 15MB each.']);
+                ->withErrors(['photos' => 'The uploaded file payload is too large and exceeded server upload limits. Please select smaller images under 20MB each.']);
         }
 
         // Support both array 'photos' and single file 'photo'
@@ -325,12 +325,12 @@ class DashboardController extends Controller
             'title'    => 'nullable|string|max:255',
             'caption'  => 'nullable|string|max:1000',
             'photos'   => 'nullable|array',
-            'photos.*' => 'file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:15360',
-            'photo'    => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:15360',
+            'photos.*' => 'file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:20480',
+            'photo'    => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:20480',
         ], [
             'photos.*.image' => 'Each file must be a valid image format (JPEG, PNG, JPG, GIF, WEBP, or HEIC).',
             'photos.*.mimes' => 'Each photo must be a file of type: jpeg, png, jpg, gif, webp, heic, heif, bmp.',
-            'photos.*.max'   => 'Individual photo file size cannot exceed 15MB.',
+            'photos.*.max'   => 'Individual photo file size cannot exceed 20MB.',
         ]);
 
         $uploadedCount = 0;
@@ -396,7 +396,7 @@ class DashboardController extends Controller
         if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['photo' => 'The uploaded photo file is too large and exceeded server payload limits. Please select an image under 15MB.']);
+                ->withErrors(['photo' => 'The uploaded photo file is too large and exceeded server payload limits. Please select an image under 20MB.']);
         }
 
         if ($request->file('photo')) {
@@ -406,7 +406,7 @@ class DashboardController extends Controller
                 if ($errorCode === UPLOAD_ERR_INI_SIZE || $errorCode === UPLOAD_ERR_FORM_SIZE) {
                     return redirect()->back()
                         ->withInput()
-                        ->withErrors(['photo' => 'The photo file exceeds the server upload limit. Please select an image under 15MB.']);
+                        ->withErrors(['photo' => 'The photo file exceeds the server upload limit. Please select an image under 20MB.']);
                 }
                 return redirect()->back()
                     ->withInput()
@@ -417,11 +417,11 @@ class DashboardController extends Controller
         $request->validate([
             'title'   => 'nullable|string|max:255',
             'caption' => 'nullable|string|max:1000',
-            'photo'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:15360',
+            'photo'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:20480',
         ], [
             'photo.image' => 'The file must be a valid image format.',
             'photo.mimes' => 'The photo must be a file of type: jpeg, png, jpg, gif, webp, heic, heif, bmp.',
-            'photo.max'   => 'The photo file size cannot exceed 15MB.',
+            'photo.max'   => 'The photo file size cannot exceed 20MB.',
         ]);
 
         $data = [
@@ -493,7 +493,7 @@ class DashboardController extends Controller
         if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['videos' => 'The uploaded video file is too large and exceeded server payload limits. Please upload clips under 50MB each or embed a YouTube link.']);
+                ->withErrors(['videos' => 'The uploaded video file is too large and exceeded server payload limits. Please upload clips under 100MB each or embed a YouTube link.']);
         }
 
         $request->validate([
@@ -569,10 +569,20 @@ class DashboardController extends Controller
                     ]);
                 }
 
-                return redirect()->route('dashboard.videos')->with('warning', __('Video added but flagged for review due to potentially inappropriate content. It will remain hidden from the public until reviewed.'));
+                $msg = __('Video added but flagged for review due to potentially inappropriate content. It will remain hidden from the public until reviewed.');
+                session()->flash('warning', $msg);
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => true, 'message' => $msg]);
+                }
+                return redirect()->route('dashboard.videos')->with('warning', $msg);
             }
 
-            return redirect()->route('dashboard.videos')->with('success', 'Video link added successfully to your portfolio.');
+            $msg = __('Video link added successfully to your portfolio.');
+            session()->flash('success', $msg);
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => true, 'message' => $msg]);
+            }
+            return redirect()->route('dashboard.videos')->with('success', $msg);
         }
 
         // 2. Process file uploads (batch `videos[]` or single `video`)
@@ -620,11 +630,11 @@ class DashboardController extends Controller
 
         $request->validate([
             'videos'   => 'nullable|array',
-            'videos.*' => 'file|mimes:mp4,mov,avi,webm,ogg,mkv,3gp,flv,qt|max:51200',
-            'video'    => 'nullable|file|mimes:mp4,mov,avi,webm,ogg,mkv,3gp,flv,qt|max:51200',
+            'videos.*' => 'file|mimes:mp4,mov,avi,webm,ogg,mkv,3gp,flv,qt|max:102400',
+            'video'    => 'nullable|file|mimes:mp4,mov,avi,webm,ogg,mkv,3gp,flv,qt|max:102400',
         ], [
             'videos.*.mimes' => 'The video format must be: MP4, MOV, AVI, WEBM, OGG, MKV, or 3GP.',
-            'videos.*.max'   => 'Individual video file size cannot exceed 50MB.',
+            'videos.*.max'   => 'Individual video file size cannot exceed 100MB.',
         ]);
 
         $uploadedCount = 0;
@@ -675,14 +685,27 @@ class DashboardController extends Controller
         }
 
         if ($uploadedCount === 0) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'No valid video files were processed.'], 422);
+            }
             return redirect()->back()->withInput()->withErrors(['videos' => 'No valid video files were processed.']);
         }
 
         if ($flaggedCount > 0) {
-            return redirect()->route('dashboard.videos')->with('warning', __("{$uploadedCount} video file(s) uploaded. {$flaggedCount} flagged for review."));
+            $msg = __("{$uploadedCount} video file(s) uploaded. {$flaggedCount} flagged for review.");
+            session()->flash('warning', $msg);
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => true, 'message' => $msg]);
+            }
+            return redirect()->route('dashboard.videos')->with('warning', $msg);
         }
 
-        return redirect()->route('dashboard.videos')->with('success', __("{$uploadedCount} video file(s) uploaded successfully."));
+        $msg = __("{$uploadedCount} video file(s) uploaded successfully.");
+        session()->flash('success', $msg);
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json(['success' => true, 'message' => $msg]);
+        }
+        return redirect()->route('dashboard.videos')->with('success', $msg);
     }
 
     public function updateVideo(Request $request, $id)
@@ -694,7 +717,7 @@ class DashboardController extends Controller
         if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['video' => 'The uploaded video file is too large and exceeded server payload limits. Please upload a clip under 50MB.']);
+                ->withErrors(['video' => 'The uploaded video file is too large and exceeded server payload limits. Please upload a clip under 100MB.']);
         }
 
         $request->validate([
@@ -757,7 +780,7 @@ class DashboardController extends Controller
                 if ($errorCode === UPLOAD_ERR_INI_SIZE || $errorCode === UPLOAD_ERR_FORM_SIZE) {
                     return redirect()->back()
                         ->withInput()
-                        ->withErrors(['video' => 'The video file exceeds the server upload limit. Please select a clip under 50MB.']);
+                        ->withErrors(['video' => 'The video file exceeds the server upload limit. Please select a clip under 100MB.']);
                 }
                 return redirect()->back()
                     ->withInput()
@@ -765,10 +788,10 @@ class DashboardController extends Controller
             }
 
             $request->validate([
-                'video' => 'nullable|file|mimes:mp4,mov,avi,webm,ogg,mkv,3gp,flv,qt|max:51200',
+                'video' => 'nullable|file|mimes:mp4,mov,avi,webm,ogg,mkv,3gp,flv,qt|max:102400',
             ], [
                 'video.mimes' => 'The video format must be: MP4, MOV, AVI, WEBM, OGG, MKV, or 3GP.',
-                'video.max'   => 'The video file size cannot exceed 50MB.',
+                'video.max'   => 'The video file size cannot exceed 100MB.',
             ]);
 
             if ($videoFile->isValid()) {
