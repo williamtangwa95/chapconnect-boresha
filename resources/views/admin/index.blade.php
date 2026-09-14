@@ -385,7 +385,7 @@
                                     <td style="font-weight: 700; color: #64748b; font-size: 0.85rem; text-align: center;">{{ $loop->iteration }}</td>
                                     <td style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">
                                         <div style="display: flex; align-items: center; gap: 10px;">
-                                            <img src="{{ $u->avatar_url }}" alt="{{ $u->name }}" class="zoomable-profile-img" data-full-src="{{ $u->avatar_url }}" data-name="{{ $u->name }}" data-category="{{ $u->category_label }}" title="Click to zoom profile picture" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); cursor: pointer;" onerror="this.onerror=null; this.src='{{ asset('images/default-avatar.png') }}';">
+                                            <img src="{{ $u->avatar_url }}" alt="{{ $u->name }}" class="zoomable-profile-img" data-full-src="{{ $u->avatar_url }}" data-name="{{ $u->name }}" data-category="{{ $u->category_label }}" title="Click to zoom profile picture" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; object-position: top center; border: 1px solid var(--border-color); cursor: pointer;" onerror="this.onerror=null; this.src='{{ asset('images/default-avatar.png') }}';">
                                             <span>{{ $u->name }}</span>
                                         </div>
                                     </td>

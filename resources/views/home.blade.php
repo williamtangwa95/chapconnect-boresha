@@ -329,13 +329,13 @@
 @if(\App\Services\MaintenanceService::isEnabled() || \App\Services\MaintenanceService::isLoginRestrictedFlag() || \App\Services\MaintenanceService::isRegisterRestrictedFlag() || \App\Services\MaintenanceService::isConnectRestrictedFlag())
 <div class="maintenance-marquee-bar">
     <div class="maintenance-badge">
-        <i class="bi bi-tools maintenance-icon"></i>
-        <span class="badge-text-desktop">{{ __('MAINTENANCE NOTICE') }}</span>
+        <i class="bi bi-megaphone-fill maintenance-icon"></i>
+        <span class="badge-text-desktop">{{ __('GENERAL NOTICE') }}</span>
         <span class="badge-text-mobile">{{ __('NOTICE') }}</span>
     </div>
     <div class="maintenance-marquee-content">
         <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();">
-            ⚠️ {{ \App\Services\MaintenanceService::getMessage() }}
+            📢 {{ \App\Services\MaintenanceService::getMessage() }}
         </marquee>
     </div>
 </div>
@@ -1102,7 +1102,11 @@
         }
 
         // AJAX Load More Recent Media Posts
-        let currentMediaOffset = {{ count($recentMedia) }};
+        let currentMediaOffset = {
+            {
+                count($recentMedia)
+            }
+        };
 
         $('#loadMoreMediaBtn').on('click', function() {
             const $btn = $(this);
@@ -1113,9 +1117,15 @@
             if ($btn.data('action') === 'top') {
                 const sidebar = document.querySelector('.media-preview-sidebar');
                 if (sidebar) {
-                    sidebar.scrollTo({ top: 0, behavior: 'smooth' });
+                    sidebar.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
                 }
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
                 return;
             }
 
@@ -1128,7 +1138,9 @@
             $.ajax({
                 url: '{{ route("media.load-more") }}',
                 type: 'GET',
-                data: { offset: currentMediaOffset },
+                data: {
+                    offset: currentMediaOffset
+                },
                 success: function(res) {
                     if (res.success && res.html && res.count > 0) {
                         $('#viewMoreMediaContainer').before(res.html);

@@ -139,7 +139,7 @@
                     <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; background: #f8fafc; padding: 16px; border-radius: 14px; border: 1px solid #cbd5e1;">
                         <!-- Current Avatar Display -->
                         <div style="position: relative; width: 68px; height: 68px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 3px solid var(--primary); box-shadow: 0 4px 12px rgba(99,102,241,0.25);">
-                            <img id="current-avatar-img" src="{{ $user->avatar_url }}" alt="{{ $user->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                            <img id="current-avatar-img" src="{{ $user->avatar_url }}" alt="{{ $user->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
                         </div>
 
                         <!-- Avatar Controls -->

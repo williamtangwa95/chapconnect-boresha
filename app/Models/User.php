@@ -243,6 +243,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Check if the user has an admin or super admin role.
+     */
+    public function isAdmin(): bool
+    {
+        return in_array(strtolower($this->role ?? ''), ['admin', 'super_admin', 'superadmin']);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -256,3 +264,4 @@ class User extends Authenticatable
         ];
     }
 }
+

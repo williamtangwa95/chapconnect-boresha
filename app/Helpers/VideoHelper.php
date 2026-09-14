@@ -141,8 +141,8 @@ class VideoHelper
             $srcUrl = asset($path);
         }
 
-        return '<div class="video-container" style="position:relative; width:100%; padding-bottom:56.25%; height:0; overflow:hidden; border-radius:10px; background:#000;">' .
-            '<video class="cc-managed-video" data-platform="local" controls playsinline preload="metadata" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; border-radius:10px; background:#000;">' .
+        return '<div class="local-video-wrapper" style="position:relative; width:100%; max-height:650px; background:#000000; border-radius:10px; overflow:hidden; display:flex; justify-content:center; align-items:center;">' .
+            '<video class="cc-managed-video local-video-player" data-platform="local" controls playsinline preload="metadata" style="width:100%; max-height:650px; height:auto; object-fit:contain; border-radius:10px; background:#000000; display:block;">' .
                 '<source src="' . e($srcUrl) . '">' .
                 'Your browser does not support the video tag.' .
             '</video>' .

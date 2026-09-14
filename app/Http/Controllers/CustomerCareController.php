@@ -53,6 +53,17 @@ class CustomerCareController extends Controller
         // Fetch staff list for assignment dropdown
         $staffMembers = User::whereIn('role', ['admin', 'customer_care', 'staff'])->orderBy('name')->get();
 
+        // Auto-unblock any admin accounts if found in blocked state
+        $adminUsersToUnblock = User::whereIn('role', ['admin', 'super_admin', 'superadmin'])->where('is_blocked', true)->get();
+        foreach ($adminUsersToUnblock as $adminUser) {
+            $adminUser->update(['is_blocked' => false]);
+            AccountBlock::where('user_id', $adminUser->id)->where('status', 'blocked')->update([
+                'status' => 'unblocked',
+                'unblocked_at' => now(),
+                'issued_by' => 'System (Super Admin Exemption)',
+            ]);
+        }
+
         $blockedAccounts = AccountBlock::with('user')->latest()->get();
         $allUsers = User::where('role', 'user')->orderBy('name')->get(['id', 'name', 'email', 'phone', 'role', 'security_question', 'security_answer']);
         $contactRequests = \App\Models\ContactRequest::with(['targetUser', 'requesterUser'])->latest()->get();

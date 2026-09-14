@@ -210,8 +210,20 @@ class AuthController extends Controller
             ]);
         }
 
-        // Check if the user is blocked
-        if ($user->is_blocked) {
+        // Auto-unblock Super Admin / Admin accounts if they were previously blocked
+        if ($user->isAdmin() && ($user->is_blocked || AccountBlock::where('user_id', $user->id)->where('status', 'blocked')->exists())) {
+            $user->update(['is_blocked' => false]);
+            AccountBlock::where('user_id', $user->id)
+                ->where('status', 'blocked')
+                ->update([
+                    'status' => 'unblocked',
+                    'unblocked_at' => now(),
+                    'issued_by' => 'System (Super Admin Exemption)',
+                ]);
+        }
+
+        // Check if the user is blocked (non-admin users only)
+        if ($user->is_blocked && !$user->isAdmin()) {
             $latestBlock = \App\Models\AccountBlock::where('user_id', $user->id)
                 ->where('status', 'blocked')
                 ->latest()
@@ -266,7 +278,8 @@ class AuthController extends Controller
             ->where('attempted_at', '>=', now()->subMinutes($intervalMinutes))
             ->count();
 
-        if ($failedCount > 3) {
+        // Block non-admin accounts if failed count > 3 (Super Admin/Admin accounts are exempt)
+        if ($failedCount > 3 && !$user->isAdmin()) {
             $user->update(['is_blocked' => true]);
 
             // Create block record

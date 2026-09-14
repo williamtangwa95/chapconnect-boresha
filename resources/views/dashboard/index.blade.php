@@ -307,7 +307,7 @@
         <div class="dash-header-card">
             <div class="dashboard-welcome" style="display: flex; align-items: center; gap: 16px;">
                 <div class="dash-avatar-wrapper">
-                    <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: center;">
+                    <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
                 </div>
                 <div class="dashboard-welcome-text">
                     <h2 class="dash-welcome-title">{{ __('Welcome') }}, {{ $user->name }}</h2>
