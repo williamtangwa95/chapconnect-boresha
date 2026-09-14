@@ -144,12 +144,6 @@ class User extends Authenticatable
             return true;
         }
 
-        // Check 3: Active paid package subscription
-        $sub = $this->activeSubscription;
-        if ($sub && ($sub->price_snapshot > 0 || ($sub->package && $sub->package->price > 0))) {
-            return true;
-        }
-
         return false;
     }
 

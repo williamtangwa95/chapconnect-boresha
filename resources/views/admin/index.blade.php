@@ -1928,11 +1928,13 @@
         function switchTab(tabId) {
             tabContents.forEach(content => {
                 content.classList.remove("active");
+                content.style.display = "none";
             });
 
             const activeContent = document.getElementById("tab-" + tabId);
             if (activeContent) {
                 activeContent.classList.add("active");
+                activeContent.style.display = "block";
             }
 
             tabLinks.forEach(link => {
@@ -1975,7 +1977,7 @@
             defaultTab = "activity-logs";
         } else if (window.location.hash) {
             const hash = window.location.hash.substring(1);
-            if (["dashboard", "talents", "categories", "settings", "staff", "system-settings", "customer-care", "packages", "invoices", "requests", "analytics", "activity-logs", "payments", "maintenance"].includes(hash)) {
+            if (["dashboard", "talents", "categories", "settings", "staff", "system-settings", "customer-care", "packages", "invoices", "requests", "analytics", "activity-logs", "payments", "maintenance", "payment-methods"].includes(hash)) {
                 defaultTab = hash;
             }
         }

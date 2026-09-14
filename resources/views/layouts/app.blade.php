@@ -166,6 +166,10 @@
                     <i class="bi bi-wallet2"></i> Talent Payments
                     <i class="bi bi-chevron-right chevron-arrow"></i>
                 </a>
+                <a href="#payment-methods" class="tab-link nav-mobile-link" data-tab="payment-methods">
+                    <i class="bi bi-credit-card-2-front-fill"></i> Payment Methods Setup
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
                 <a href="#staff" class="tab-link nav-mobile-link" data-tab="staff">
                     <i class="bi bi-person-plus-fill"></i> Registered Staff
                     <i class="bi bi-chevron-right chevron-arrow"></i>
@@ -528,6 +532,10 @@
                         <i class="bi bi-wallet2"></i> Talent Payments
                         <i class="bi bi-chevron-right chevron-arrow"></i>
                     </a>
+                    <a href="#payment-methods" class="tab-link nav-mobile-link" data-tab="payment-methods">
+                        <i class="bi bi-credit-card-2-front-fill"></i> Payment Methods Setup
+                        <i class="bi bi-chevron-right chevron-arrow"></i>
+                    </a>
 
                     <div class="drawer-section-label">MANAGEMENT & SYSTEM</div>
                     <a href="#settings" class="tab-link nav-mobile-link" data-tab="settings">
@@ -856,6 +864,9 @@
                 </a>
                 <a href="{{ Request::is('admin*') ? '#payments' : route('admin.dashboard') . '#payments' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="payments">
                     <i class="bi bi-wallet2"></i> <span>Talent Payments</span>
+                </a>
+                <a href="{{ Request::is('admin*') ? '#payment-methods' : route('admin.dashboard') . '#payment-methods' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="payment-methods">
+                    <i class="bi bi-credit-card-2-front-fill" style="color: #10b981;"></i> <span>Payment Methods Setup</span>
                 </a>
                 <a href="{{ Request::is('admin*') ? '#staff' : route('admin.dashboard') . '#staff' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="staff">
                     <i class="bi bi-person-plus-fill"></i> <span>Registered Staff</span>
@@ -2119,6 +2130,90 @@
             }, 10000);
         }
     </script>
+
+    @auth
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            function loadNotifications() {
+                if (typeof $ === 'undefined') return;
+
+                $.ajax({
+                    url: "{{ route('notifications.unread') }}",
+                    type: "GET",
+                    dataType: "json",
+                    success: function (res) {
+                        const count = res.count || 0;
+                        const $badge = $('#notifBadge');
+                        const $list = $('#notifList');
+
+                        if (count > 0) {
+                            $badge.text(count > 99 ? '99+' : count).show();
+                        } else {
+                            $badge.hide();
+                        }
+
+                        if (!res.notifications || res.notifications.length === 0) {
+                            $list.html('<div style="padding: 24px; text-align: center; color: #94a3b8; font-size: 0.85rem;"><i class="bi bi-bell-slash" style="font-size: 1.5rem; display: block; margin-bottom: 6px; color: #cbd5e1;"></i> {{ __("No unread notifications") }}</div>');
+                            return;
+                        }
+
+                        let html = '';
+                        res.notifications.forEach(function (n) {
+                            const link = n.link || '#';
+                            const title = n.title || '{{ __("Notification") }}';
+                            const msg = n.message || '';
+                            const date = n.created_at ? new Date(n.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '';
+
+                            html += `
+                                <div class="notif-item" onclick="markNotificationRead(${n.id}, '${link.replace(/'/g, "\\'")}')" style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.15s ease; display: flex; gap: 10px; align-items: flex-start;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(99,102,241,0.12); color: #6366f1; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; margin-top: 2px;">
+                                        <i class="bi bi-bell-fill"></i>
+                                    </div>
+                                    <div style="flex: 1; min-width: 0;">
+                                        <div style="font-weight: 700; font-size: 0.84rem; color: #0f172a; word-break: break-word;">${title}</div>
+                                        <div style="font-size: 0.78rem; color: #475569; margin-top: 2px; line-height: 1.35; word-break: break-word;">${msg}</div>
+                                        ${date ? `<div style="font-size: 0.7rem; color: #94a3b8; margin-top: 4px;">${date}</div>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        $list.html(html);
+                    },
+                    error: function () {
+                        $('#notifList').html('<div style="padding: 20px; text-align: center; color: #ef4444; font-size: 0.85rem;">{{ __("Failed to load notifications") }}</div>');
+                    }
+                });
+            }
+
+            window.markNotificationRead = function (id, link) {
+                if (typeof $ === 'undefined') return;
+                $.ajax({
+                    url: "/notifications/" + id + "/mark-read",
+                    type: "POST",
+                    data: { _token: "{{ csrf_token() }}" },
+                    complete: function () {
+                        if (link && link !== '#') {
+                            window.location.href = link;
+                        } else {
+                            loadNotifications();
+                        }
+                    }
+                });
+            };
+
+            // Initial load
+            loadNotifications();
+
+            // Reload when notification bell is clicked
+            $('#notifBellBtn').on('click', function () {
+                loadNotifications();
+            });
+
+            // Auto-poll unread count every 20 seconds
+            setInterval(loadNotifications, 20000);
+        });
+    </script>
+    @endauth
 
     @yield('scripts')
 </body>

@@ -1,7 +1,7 @@
 <!-- ==========================================
      TAB: Payment Methods Settings (Super Admin)
      ========================================== -->
-<div id="tab-payment-methods" class="tab-content" style="display: none;">
+<div id="tab-payment-methods" class="tab-content">
     <div class="admin-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
         <div>
             <h1 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: flex; align-items: center; gap: 10px;">

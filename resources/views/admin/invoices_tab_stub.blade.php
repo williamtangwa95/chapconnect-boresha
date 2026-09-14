@@ -76,7 +76,14 @@
                                         {{ $inv->invoice_number }}
                                     </span>
                                 </td>
-                                <td style="font-weight: 700; color: #0f172a;">{{ $inv->user ? $inv->user->name : 'N/A' }}</td>
+                                <td style="font-weight: 700; color: #0f172a;">
+                                    <div>{{ $inv->user ? $inv->user->name : 'N/A' }}</div>
+                                    @if($inv->notes)
+                                    <div style="font-size: 0.74rem; color: #0284c7; font-weight: 600; margin-top: 3px; max-width: 250px; white-space: normal;">
+                                        <i class="bi bi-credit-card-2-front-fill" style="color: #6366f1;"></i> {{ $inv->notes }}
+                                    </div>
+                                    @endif
+                                </td>
                                 <td>{{ $inv->package_name }}</td>
                                 <td style="font-weight: 700;">TZS {{ number_format($inv->amount) }}</td>
                                 <td style="font-weight: 700; color: #10b981;">TZS {{ number_format($inv->amount_paid) }}</td>

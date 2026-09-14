@@ -983,36 +983,50 @@ class DashboardController extends Controller
         $user = auth()->user();
         $amount = floatval(\App\Models\SystemSetting::get('payment_amount', 10000.00));
 
-        // Get unpaid invoice or update notes
+        $noteText = 'Transaction Ref: ' . $request->transaction_reference . ($request->notes ? (' - ' . $request->notes) : '');
+
+        // Get unpaid invoice or create a publishing fee invoice for this payment
         $invoice = $user->invoices()->where('payment_status', 'Unpaid')->latest()->first();
         if ($invoice) {
             $invoice->update([
-                'notes' => 'Transaction Ref: ' . $request->transaction_reference . ($request->notes ? (' - ' . $request->notes) : ''),
+                'notes' => $noteText,
+            ]);
+        } else {
+            $invoiceNumber = \App\Models\Invoice::generateInvoiceNumber();
+            $startDate = now()->toDateString();
+            $endDate = date('Y-m-d', strtotime($startDate . ' + 365 days'));
+            $activeSub = $user->activeSubscription;
+            $invoice = \App\Models\Invoice::create([
+                'invoice_number' => $invoiceNumber,
+                'user_id' => $user->id,
+                'user_package_id' => $activeSub ? $activeSub->id : 1,
+                'package_name' => 'Profile Publishing Fee',
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'duration' => 365,
+                'duration_unit' => 'days',
+                'amount' => $amount,
+                'amount_paid' => 0.00,
+                'payment_status' => 'Unpaid',
+                'invoice_date' => $startDate,
+                'due_date' => date('Y-m-d', strtotime($startDate . ' + 7 days')),
+                'notes' => $noteText,
             ]);
         }
 
-        // Log payment request entry for staff verification
-        \App\Models\TalentPaymentRequest::create([
-            'user_id' => $user->id,
-            'amount' => $amount,
-            'status' => 'pending',
-            'payment_reference' => $request->transaction_reference,
-            'notes' => $request->notes,
-        ]);
-
-        // Notify Admin and Customer Care staff
+        // Notify Admin and Customer Care staff of payment received notice
         $adminStaff = \App\Models\User::whereIn('role', ['admin', 'customer_care'])->get();
         foreach ($adminStaff as $staff) {
             \App\Models\Notification::create([
                 'user_id' => $staff->id,
                 'type' => 'payment_submission',
-                'title' => "💳 Payment Submitted: {$user->name}",
-                'message' => "User {$user->name} submitted payment transaction reference '{$request->transaction_reference}' (TZS " . number_format($amount) . ") for account publishing.",
+                'title' => "💳 Notice of Payment Received: {$user->name}",
+                'message' => "User {$user->name} submitted payment transaction reference '{$request->transaction_reference}' (TZS " . number_format($amount) . ") for profile publishing. Please verify payment under Invoices.",
                 'link' => ($staff->role === 'admin') ? route('admin.dashboard') . '#invoices' : route('customer-care.dashboard') . '#invoices',
             ]);
         }
 
-        return redirect()->back()->with('success', 'Your payment transaction reference (' . $request->transaction_reference . ') has been submitted successfully! Customer Care will verify and confirm your payment shortly.');
+        return redirect()->back()->with('success', 'Your payment transaction reference (' . $request->transaction_reference . ') has been submitted successfully! Admin / Customer Care will verify payment received under Invoices shortly.');
     }
 
     /**

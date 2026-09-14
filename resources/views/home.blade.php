@@ -1104,11 +1104,7 @@
         }
 
         // AJAX Load More Recent Media Posts
-        let currentMediaOffset = {
-            {
-                count($recentMedia)
-            }
-        };
+        let currentMediaOffset = {{ count($recentMedia) }};
 
         $('#loadMoreMediaBtn').on('click', function() {
             const $btn = $(this);

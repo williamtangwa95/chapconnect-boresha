@@ -567,25 +567,44 @@
                 <form action="{{ route('dashboard.unpublish') }}" method="POST">
                     @csrf
                     <button type="submit" style="width: 100%; padding: 10px; background: rgba(239,68,68,0.12); color: #ef4444; border: 1px solid rgba(239,68,68,0.3); border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; transition: all 0.2s;">
-                        🔒 {{ __('HIDDEN (Draft - Click to Hide)') }}
+                        <i class="bi bi-eye-slash-fill"></i> {{ __('HIDDEN (Draft - Click to Hide)') }}
                     </button>
                 </form>
                 @elseif($user->requiresPaymentToPublish())
+                @php
+                $unpaidInvoice = $user->invoices()->where('payment_status', 'Unpaid')->latest()->first();
+                $hasSubmittedPaymentRef = $unpaidInvoice && !empty($unpaidInvoice->notes);
+                $publishingFeeAmount = number_format(floatval(\App\Models\SystemSetting::get('payment_amount', 10000.00)));
+                @endphp
+                @if($hasSubmittedPaymentRef)
+                <div style="text-align: center;">
+                    <span style="font-size: 0.76rem; font-weight: 800; color: #0284c7; background: rgba(14,165,233,0.12); border: 1px solid rgba(14,165,233,0.3); padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 10px;">
+                        <i class="bi bi-hourglass-split"></i> {{ __('Payment Submitted - Verification Pending') }}
+                    </span>
+                    <button type="button" onclick="$('#helpdesk-contacts-modal').fadeIn(200);" style="width: 100%; padding: 11px; background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%); color: #ffffff; border: none; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 14px rgba(2,132,199,0.35); transition: all 0.2s;">
+                        <i class="bi bi-headset"></i> {{ __('Notify Help Desk / Contact Support') }}
+                    </button>
+                    <small style="display: block; font-size: 0.75rem; color: #64748b; margin-top: 6px;">
+                        {{ __('Submitted Ref:') }} <strong style="color: #0f172a;">{{ str_replace('Transaction Ref: ', '', $unpaidInvoice->notes) }}</strong>
+                    </small>
+                </div>
+                @else
                 <div style="text-align: center;">
                     <span style="font-size: 0.76rem; font-weight: 800; color: #d97706; background: rgba(245,158,11,0.12); border: 1px solid rgba(245,158,11,0.3); padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 10px;">
-                        ⚠️ {{ __('Payment Confirmation Required') }}
+                        <i class="bi bi-wallet2"></i> {{ __('Payment Confirmation Required') }}
                     </span>
                     <button type="button" onclick="$('#publish-payment-modal').fadeIn(200);" style="width: 100%; padding: 11px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; border: none; border-radius: 10px; font-weight: 800; font-size: 14px; cursor: pointer; box-shadow: 0 4px 14px rgba(245,158,11,0.35); transition: all 0.2s;">
-                        💳 {{ __('PAY TZS 10,000/- TO PUBLISH') }}
+                        <i class="bi bi-credit-card"></i> {{ __('PAY TZS') }} {{ $publishingFeeAmount }}/- {{ __('TO PUBLISH') }}
                     </button>
                 </div>
+                @endif
                 @else
                 <form action="{{ route('dashboard.publish') }}" method="POST">
                     @csrf
                     <button type="submit"
                         @if($completion < 60) disabled title="{{ __('Complete at least 60% of your profile to publish') }}" @endif
                         style="width: 100%; padding: 10px; background: {{ $completion >= 60 ? 'var(--primary)' : 'rgba(100,100,100,0.2)' }}; color: {{ $completion >= 60 ? '#fff' : '#888' }}; border: none; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: {{ $completion >= 60 ? 'pointer' : 'not-allowed' }}; transition: all 0.2s;">
-                        🌐 {{ __('LIVE & PUBLIC') }}
+                        <i class="bi bi-broadcast"></i> {{ __('LIVE & PUBLIC') }}
                     </button>
                 </form>
                 @endif
@@ -878,8 +897,8 @@
 
 <!-- Publish Account Payment Modal -->
 @php
-    $activePaymentMethods = \App\Models\PaymentMethod::active()->get();
-    $publishingFee = floatval(\App\Models\SystemSetting::get('payment_amount', 10000.00));
+$activePaymentMethods = \App\Models\PaymentMethod::active()->get();
+$publishingFee = floatval(\App\Models\SystemSetting::get('payment_amount', 10000.00));
 @endphp
 <div id="publish-payment-modal" class="admin-modal" style="display: {{ session('open_payment_modal') ? 'flex' : 'none' }};">
     <div class="admin-modal-content" style="border-radius: 20px; max-width: 620px; width: 92%; margin: auto; padding: 25px; box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
@@ -956,10 +975,66 @@
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
                 <button type="button" onclick="$('#publish-payment-modal').fadeOut(200);" style="padding: 10px 18px; border-radius: 8px; background: #e2e8f0; border: none; color: #475569; font-weight: 600; font-size: 0.85rem; cursor: pointer;">{{ __('Close') }}</button>
                 <button type="submit" style="padding: 10px 22px; border-radius: 8px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: #ffffff; font-weight: 800; font-size: 0.88rem; cursor: pointer; box-shadow: 0 4px 14px rgba(16,185,129,0.35);">
-                    🚀 {{ __('Submit Confirmation') }}
+                    {{ __('Submit Confirmation') }}
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Help Desk Quick Approval Support Modal -->
+<div id="helpdesk-contacts-modal" class="admin-modal" style="display: none;">
+    <div class="admin-modal-content" style="border-radius: 20px; max-width: 520px; width: 92%; margin: auto; padding: 25px; box-shadow: 0 25px 50px rgba(0,0,0,0.25);">
+        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px; font-size: 1.15rem;">
+                <i class="bi bi-headset" style="color: #2563eb; font-size: 1.3rem;"></i> {{ __('Help Desk & Quick Payment Approval Support') }}
+            </h3>
+            <button type="button" class="admin-modal-close" onclick="$('#helpdesk-contacts-modal').fadeOut(200);" style="background: none; border: none; font-size: 26px; cursor: pointer; color: #64748b;">&times;</button>
+        </div>
+
+        <p style="color: #475569; font-size: 0.88rem; margin-top: 0; margin-bottom: 18px; line-height: 1.5;">
+            {{ __('If you have submitted your payment reference and require instant verification and approval, please contact our Help Desk team directly via any of the channels below:') }}
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px;">
+            <!-- WhatsApp Channel -->
+            <a href="https://wa.me/255710383352?text={{ urlencode('Hello ChapConnect Helpdesk, I have submitted my payment reference for profile publishing verification.') }}" target="_blank" style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 14px; background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: #ffffff; text-decoration: none; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(22,163,74,0.3);">
+                <i class="bi bi-whatsapp" style="font-size: 1.5rem;"></i>
+                <div>
+                    <div style="font-size: 0.78rem; opacity: 0.9; text-transform: uppercase;">{{ __('WhatsApp Help Desk (Instant Response)') }}</div>
+                    <div>+255 710 383 352</div>
+                </div>
+                <i class="bi bi-arrow-right-short" style="font-size: 1.4rem; margin-left: auto;"></i>
+            </a>
+
+            <!-- Phone Call Channel -->
+            <a href="tel:+255710383352" style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 14px; background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%); color: #ffffff; text-decoration: none; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 15px rgba(2,132,199,0.3);">
+                <i class="bi bi-telephone-fill" style="font-size: 1.4rem;"></i>
+                <div>
+                    <div style="font-size: 0.78rem; opacity: 0.9; text-transform: uppercase;">{{ __('Direct Phone Line') }}</div>
+                    <div>+255 710 383 352</div>
+                </div>
+                <i class="bi bi-arrow-right-short" style="font-size: 1.4rem; margin-left: auto;"></i>
+            </a>
+
+            <!-- Email Support Channel -->
+            <a href="mailto:support@chapconnect.com?subject=Payment%20Verification%20Request" style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 14px; background: #ffffff; border: 1.5px solid #cbd5e1; color: #1e293b; text-decoration: none; font-weight: 700; font-size: 0.92rem;">
+                <i class="bi bi-envelope-fill" style="font-size: 1.4rem; color: #dc2626;"></i>
+                <div>
+                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase;">{{ __('Support Email Address') }}</div>
+                    <div>support@chapconnect.com</div>
+                </div>
+            </a>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+            <button type="button" onclick="$('#helpdesk-contacts-modal').fadeOut(200); $('#user-support-modal').fadeIn(200);" style="padding: 10px 16px; border-radius: 10px; background: rgba(99,102,241,0.1); border: 1px solid rgba(99,102,241,0.25); color: #4338ca; font-weight: 700; font-size: 0.84rem; cursor: pointer;">
+                💬 {{ __('Open Support Ticket') }}
+            </button>
+            <button type="button" onclick="$('#helpdesk-contacts-modal').fadeOut(200);" style="padding: 10px 20px; border-radius: 10px; background: #e2e8f0; border: none; color: #475569; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+                {{ __('Close') }}
+            </button>
+        </div>
     </div>
 </div>
 @endsection

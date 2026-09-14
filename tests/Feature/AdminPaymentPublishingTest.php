@@ -101,16 +101,37 @@ class AdminPaymentPublishingTest extends TestCase
             'created_at' => now(),
         ]);
 
-        // Create paid payment request for talent
-        TalentPaymentRequest::create([
+        $pkg = \App\Models\UserPackage::create([
             'user_id' => $talent->id,
+            'package_name_snapshot' => 'Standard',
+            'price_snapshot' => 10000.00,
+            'duration_snapshot' => 365,
+            'duration_unit_snapshot' => 'days',
+            'phone_visibility_snapshot' => 'Yes',
+            'max_images_snapshot' => 5,
+            'max_videos_snapshot' => 2,
+            'max_news_snapshot' => 5,
+            'package_type_snapshot' => 'To Pay',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addYear()->toDateString(),
+            'status' => 'active',
+        ]);
+
+        // Create paid invoice for talent
+        \App\Models\Invoice::create([
+            'invoice_number' => \App\Models\Invoice::generateInvoiceNumber(),
+            'user_id' => $talent->id,
+            'user_package_id' => $pkg->id,
+            'package_name' => 'Profile Publishing Fee',
+            'start_date' => now()->toDateString(),
+            'end_date' => now()->addYear()->toDateString(),
+            'duration' => 365,
+            'duration_unit' => 'days',
             'amount' => 10000.00,
-            'status' => 'paid',
-            'payment_reference' => 'REF-PAID-100',
-            'likes_count' => 100,
-            'followers_count' => 50,
-            'comments_count' => 20,
-            'views_count' => 500,
+            'amount_paid' => 10000.00,
+            'payment_status' => 'Paid',
+            'invoice_date' => now()->toDateString(),
+            'due_date' => now()->toDateString(),
         ]);
 
         $this->actingAs($talent);
@@ -124,4 +145,19 @@ class AdminPaymentPublishingTest extends TestCase
         $this->assertTrue((bool)$talent->is_published);
         $response->assertSessionHas('success');
     }
+
+    public function test_media_load_more_endpoint_returns_json_and_html(): void
+    {
+        $response = $this->get(route('media.load-more', ['offset' => 0]));
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'success',
+            'html',
+            'count',
+            'has_more',
+            'media_ids',
+        ]);
+    }
 }
+
