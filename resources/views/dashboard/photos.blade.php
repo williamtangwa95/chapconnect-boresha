@@ -187,6 +187,20 @@
             grid-template-columns: 1fr !important;
         }
     }
+
+    @keyframes progress-bar-stripes {
+        0% { background-position: 1rem 0; }
+        100% { background-position: 0 0; }
+    }
+
+    .progress-bar-green-animated {
+        background-color: #10b981 !important;
+        background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.25) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.25) 50%, rgba(255, 255, 255, 0.25) 75%, transparent 75%, transparent) !important;
+        background-size: 1rem 1rem !important;
+        animation: progress-bar-stripes 1s linear infinite !important;
+        transition: width 0.2s ease !important;
+        border-radius: 10px !important;
+    }
 </style>
 @endsection
 
@@ -262,26 +276,26 @@
                 </button>
 
                 <!-- Inline Real-Time Upload Progress Box -->
-                <div id="inlinePhotoUploadProgressBox" style="display: none; margin-top: 16px; background: #f8fafc; border: 1.5px solid #6366f1; border-radius: 14px; padding: 16px; box-shadow: 0 4px 14px rgba(99,102,241,0.12);">
+                <div id="inlinePhotoUploadProgressBox" style="display: none; margin-top: 16px; background: #f0fdf4; border: 1.5px solid #10b981; border-radius: 14px; padding: 16px; box-shadow: 0 4px 14px rgba(16,185,129,0.15);">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                        <span id="inlinePhotoTitle" style="font-weight: 800; font-size: 0.88rem; color: #0f172a; display: flex; align-items: center; gap: 6px;">
-                            <i class="bi bi-arrow-repeat spin-icon" style="color: #6366f1; font-size: 1.1rem;"></i>
+                        <span id="inlinePhotoTitle" style="font-weight: 800; font-size: 0.88rem; color: #065f46; display: flex; align-items: center; gap: 6px;">
+                            <i class="bi bi-arrow-repeat spin-icon" style="color: #10b981; font-size: 1.1rem;"></i>
                             <span>{{ __('Uploading & Compressing Photos...') }}</span>
                         </span>
-                        <span id="inlinePhotoPercentBadge" style="font-weight: 800; font-size: 0.82rem; color: #4f46e5; background: rgba(99,102,241,0.12); padding: 2px 10px; border-radius: 20px;">
+                        <span id="inlinePhotoPercentBadge" style="font-weight: 800; font-size: 0.82rem; color: #047857; background: rgba(16,185,129,0.15); padding: 2px 10px; border-radius: 20px;">
                             0%
                         </span>
                     </div>
 
-                    <!-- Dynamic Progress Bar -->
-                    <div style="background: #e2e8f0; border-radius: 10px; height: 14px; overflow: hidden; position: relative; margin-bottom: 8px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
-                        <div id="inlinePhotoProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #6366f1 0%, #ec4899 100%); transition: width 0.2s ease; border-radius: 10px;"></div>
+                    <!-- Dynamic Green Animated Progress Bar -->
+                    <div style="background: #cbd5e1; border-radius: 10px; height: 16px; overflow: hidden; position: relative; margin-bottom: 8px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);">
+                        <div id="inlinePhotoProgressBar" class="progress-bar-green-animated" style="width: 0%; height: 100%;"></div>
                     </div>
 
                     <!-- Progress Counters -->
                     <div id="inlinePhotoProgressDetails" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 700;">
-                        <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> 0% Uploaded (0 MB / 0 MB)</span>
-                        <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> 100% Remaining (0 MB left)</span>
+                        <span style="color: #059669;"><i class="bi bi-arrow-up-circle-fill"></i> 0% Uploaded (0 MB / 0 MB)</span>
+                        <span style="color: #d97706;"><i class="bi bi-clock-history"></i> 100% Remaining (0 MB left)</span>
                     </div>
                 </div>
             </form>
@@ -708,9 +722,9 @@
             {!! __('Please wait while your image file(s) are being uploaded and compressed.<br>Do not refresh this page.') !!}
         </p>
 
-        <!-- Dynamic Real-time Progress Bar -->
-        <div id="photoLoaderProgressBarContainer" style="margin-top: 22px; background: #e2e8f0; border-radius: 12px; height: 14px; overflow: hidden; position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
-            <div id="photoLoaderProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #6366f1 0%, #ec4899 100%); transition: width 0.2s ease; border-radius: 12px;"></div>
+        <!-- Dynamic Real-time Green Animated Progress Bar -->
+        <div id="photoLoaderProgressBarContainer" style="margin-top: 22px; background: #cbd5e1; border-radius: 12px; height: 16px; overflow: hidden; position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.12);">
+            <div id="photoLoaderProgressBar" class="progress-bar-green-animated" style="width: 0%; height: 100%;"></div>
         </div>
 
         <div id="photoLoaderProgressPercent" style="margin-top: 10px;">
