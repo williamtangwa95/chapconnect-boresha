@@ -503,26 +503,28 @@
                 const inlinePercentBadge = document.getElementById('inlinePhotoPercentBadge');
                 const inlineTitle = document.getElementById('inlinePhotoTitle');
 
+                const greenProgressStyle = "background: linear-gradient(90deg, #10b981 0%, #059669 100%) !important; background-color: #10b981 !important; border-radius: 10px; transition: width 0.2s ease;";
+
                 modalTitle.textContent = "Uploading Photo(s)...";
                 modalMsg.innerHTML = "Please wait while your image file(s) are being uploaded and compressed.<br>Do not refresh this page.";
-                progressBar.style.width = "0%";
+                if (progressBar) progressBar.style.cssText = greenProgressStyle + " width: 0%; height: 100%;";
                 progressPercent.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; font-weight: 800;">
-                        <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> 0% Uploaded</span>
-                        <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> 100% Remaining</span>
+                        <span style="color: #059669;"><i class="bi bi-arrow-up-circle-fill"></i> 0% Uploaded</span>
+                        <span style="color: #d97706;"><i class="bi bi-clock-history"></i> 100% Remaining</span>
                     </div>
                 `;
                 modal.style.display = 'flex';
 
                 if (inlineBox) {
                     inlineBox.style.display = 'block';
-                    inlineProgressBar.style.width = '0%';
+                    if (inlineProgressBar) inlineProgressBar.style.cssText = greenProgressStyle + " width: 0%; height: 100%;";
                     inlinePercentBadge.textContent = '0%';
-                    inlinePercentBadge.style.background = 'rgba(99,102,241,0.12)';
-                    inlinePercentBadge.style.color = '#4f46e5';
+                    inlinePercentBadge.style.background = 'rgba(16,185,129,0.15)';
+                    inlinePercentBadge.style.color = '#047857';
                     inlineProgressDetails.innerHTML = `
-                        <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> 0% Uploaded (0 MB / 0 MB)</span>
-                        <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> 100% Remaining (0 MB left)</span>
+                        <span style="color: #059669;"><i class="bi bi-arrow-up-circle-fill"></i> 0% Uploaded (0 MB / 0 MB)</span>
+                        <span style="color: #d97706;"><i class="bi bi-clock-history"></i> 100% Remaining (0 MB left)</span>
                     `;
                 }
 
@@ -552,28 +554,41 @@
                                 const totalMB = (evt.total / (1024 * 1024)).toFixed(1);
                                 const remainingMB = Math.max(0, (evt.total - evt.loaded) / (1024 * 1024)).toFixed(1);
 
-                                progressBar.style.width = percentComplete + '%';
-                                progressPercent.innerHTML = `
-                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; font-weight: 800; color: #0f172a;">
-                                        <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> ${percentComplete}% Uploaded (${loadedMB} MB / ${totalMB} MB)</span>
-                                        <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> ${remainingPercent}% Remaining (${remainingMB} MB left)</span>
+                                const curModalProgressBar = document.getElementById('photoLoaderProgressBar');
+                                const curModalProgressPercent = document.getElementById('photoLoaderProgressPercent');
+                                const curInlineProgressBar = document.getElementById('inlinePhotoProgressBar');
+                                const curInlineProgressDetails = document.getElementById('inlinePhotoProgressDetails');
+                                const curInlinePercentBadge = document.getElementById('inlinePhotoPercentBadge');
+
+                                const widthVal = Math.max(percentComplete, 2) + '%';
+
+                                if (curModalProgressBar) {
+                                    curModalProgressBar.style.cssText = greenProgressStyle + " width: " + widthVal + "; height: 100%;";
+                                }
+                                if (curInlineProgressBar) {
+                                    curInlineProgressBar.style.cssText = greenProgressStyle + " width: " + widthVal + "; height: 100%;";
+                                }
+                                if (curInlinePercentBadge) {
+                                    curInlinePercentBadge.textContent = percentComplete + '%';
+                                    curInlinePercentBadge.style.background = 'rgba(16,185,129,0.15)';
+                                    curInlinePercentBadge.style.color = '#047857';
+                                }
+
+                                const detailsHtml = `
+                                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; font-weight: 800; color: #0f172a; gap: 8px; flex-wrap: wrap;">
+                                        <span style="color: #059669;"><i class="bi bi-arrow-up-circle-fill"></i> ${percentComplete}% Uploaded (${loadedMB} MB / ${totalMB} MB)</span>
+                                        <span style="color: #d97706;"><i class="bi bi-clock-history"></i> ${remainingPercent}% Remaining (${remainingMB} MB left)</span>
                                     </div>
                                 `;
 
-                                if (inlineBox) {
-                                    inlineProgressBar.style.width = percentComplete + '%';
-                                    inlinePercentBadge.textContent = percentComplete + '%';
-                                    inlineProgressDetails.innerHTML = `
-                                        <span style="color: #4f46e5;"><i class="bi bi-arrow-up-circle-fill"></i> ${percentComplete}% Uploaded (${loadedMB} MB / ${totalMB} MB)</span>
-                                        <span style="color: #ec4899;"><i class="bi bi-clock-history"></i> ${remainingPercent}% Remaining (${remainingMB} MB left)</span>
-                                    `;
-                                }
+                                if (curModalProgressPercent) curModalProgressPercent.innerHTML = detailsHtml;
+                                if (curInlineProgressDetails) curInlineProgressDetails.innerHTML = detailsHtml;
 
                                 if (percentComplete >= 100) {
                                     modalTitle.textContent = "Compressing & Processing Photo(s)...";
                                     modalMsg.innerHTML = "Upload complete! Optimizing images on server...<br>Please wait a moment.";
                                     if (inlineTitle) {
-                                        inlineTitle.innerHTML = `<i class="bi bi-hourglass-split spin-icon" style="color: #6366f1;"></i> <span>Finalizing & Compressing Photo(s)...</span>`;
+                                        inlineTitle.innerHTML = `<i class="bi bi-hourglass-split spin-icon" style="color: #10b981;"></i> <span>Finalizing & Compressing Photo(s)...</span>`;
                                     }
                                 }
                             }
