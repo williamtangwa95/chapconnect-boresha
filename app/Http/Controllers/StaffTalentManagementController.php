@@ -159,8 +159,8 @@ class StaffTalentManagementController extends Controller
             'title'    => 'nullable|string|max:255',
             'caption'  => 'nullable|string|max:1000',
             'photos'   => 'nullable|array',
-            'photos.*' => 'file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:20480',
-            'photo'    => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:20480',
+            'photos.*' => 'file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:102400',
+            'photo'    => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:102400',
         ]);
 
         $uploadedCount = 0;
@@ -232,7 +232,7 @@ class StaffTalentManagementController extends Controller
         $request->validate([
             'title'   => 'nullable|string|max:255',
             'caption' => 'nullable|string|max:1000',
-            'photo'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:20480',
+            'photo'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:102400',
         ]);
 
         $data = [

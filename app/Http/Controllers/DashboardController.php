@@ -272,7 +272,7 @@ class DashboardController extends Controller
 
         // Catch POST body overflow (post_max_size exceeded)
         if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
-            $msg = 'The uploaded file payload is too large and exceeded server upload limits. Please select smaller images under 20MB each.';
+            $msg = 'The uploaded file payload is too large and exceeded server upload limits. Please select smaller images under 100MB each.';
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json(['success' => false, 'message' => $msg], 422);
             }
@@ -340,12 +340,12 @@ class DashboardController extends Controller
             'title'    => 'nullable|string|max:255',
             'caption'  => 'nullable|string|max:1000',
             'photos'   => 'nullable|array',
-            'photos.*' => 'file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:20480',
-            'photo'    => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:20480',
+            'photos.*' => 'file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:102400',
+            'photo'    => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:102400',
         ], [
             'photos.*.image' => 'Each file must be a valid image format (JPEG, PNG, JPG, GIF, WEBP, or HEIC).',
             'photos.*.mimes' => 'Each photo must be a file of type: jpeg, png, jpg, gif, webp, heic, heif, bmp.',
-            'photos.*.max'   => 'Individual photo file size cannot exceed 20MB.',
+            'photos.*.max'   => 'Individual photo file size cannot exceed 100MB.',
         ]);
 
         $uploadedCount = 0;
@@ -428,7 +428,7 @@ class DashboardController extends Controller
         if ($request->isMethod('post') && empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
             return redirect()->back()
                 ->withInput()
-                ->withErrors(['photo' => 'The uploaded photo file is too large and exceeded server payload limits. Please select an image under 20MB.']);
+                ->withErrors(['photo' => 'The uploaded photo file is too large and exceeded server payload limits. Please select an image under 100MB.']);
         }
 
         if ($request->file('photo')) {
@@ -438,7 +438,7 @@ class DashboardController extends Controller
                 if ($errorCode === UPLOAD_ERR_INI_SIZE || $errorCode === UPLOAD_ERR_FORM_SIZE) {
                     return redirect()->back()
                         ->withInput()
-                        ->withErrors(['photo' => 'The photo file exceeds the server upload limit. Please select an image under 20MB.']);
+                        ->withErrors(['photo' => 'The photo file exceeds the server upload limit. Please select an image under 100MB.']);
                 }
                 return redirect()->back()
                     ->withInput()
@@ -449,11 +449,11 @@ class DashboardController extends Controller
         $request->validate([
             'title'   => 'nullable|string|max:255',
             'caption' => 'nullable|string|max:1000',
-            'photo'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:20480',
+            'photo'   => 'nullable|file|image|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:102400',
         ], [
             'photo.image' => 'The file must be a valid image format.',
             'photo.mimes' => 'The photo must be a file of type: jpeg, png, jpg, gif, webp, heic, heif, bmp.',
-            'photo.max'   => 'The photo file size cannot exceed 20MB.',
+            'photo.max'   => 'The photo file size cannot exceed 100MB.',
         ]);
 
         $data = [

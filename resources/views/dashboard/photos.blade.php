@@ -230,7 +230,7 @@
                     <div style="flex-grow: 1;">
                         <h3 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a;">{{ __('Upload Photos') }}</h3>
                     </div>
-                    <span style="font-size: 0.72rem; color: #64748b; font-weight: 600; background: #e2e8f0; padding: 2px 8px; border-radius: 10px;">{{ __('Max 20MB') }}</span>
+                    <span style="font-size: 0.72rem; color: #64748b; font-weight: 600; background: #e2e8f0; padding: 2px 8px; border-radius: 10px;">{{ __('Max 100MB') }}</span>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 18px;">
@@ -253,7 +253,7 @@
                         <div class="dropzone-label-box" onclick="document.getElementById('photos').click();">
                             <i class="bi bi-file-earmark-image" style="font-size: 1.6rem; color: #6366f1; margin-bottom: 4px;"></i>
                             <span style="font-size: 0.84rem; font-weight: 700; color: #1e293b;">{{ __('Tap to choose photo(s)') }}</span>
-                            <span style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">{{ __('JPEG, PNG, WEBP, GIF (Max 20MB)') }}</span>
+                            <span style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">{{ __('JPEG, PNG, WEBP, GIF (Max 100MB)') }}</span>
                         </div>
 
                         <input type="file" id="photos" name="photos[]" class="form-control" accept="image/*" multiple required style="display: none;">
@@ -399,7 +399,7 @@
                 <div class="form-group">
                     <label for="edit_photo_file" style="display: block; font-weight: 700; font-size: 0.8rem; color: #334155; margin-bottom: 4px;">{{ __('Replace Image (Optional)') }}</label>
                     <input type="file" id="edit_photo_file" name="photo" class="form-control" accept="image/*" style="background: #ffffff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 7px 10px; font-size: 0.84rem; width: 100%;">
-                    <p style="font-size: 0.72rem; color: #64748b; margin-top: 3px;">{{ __('Max 20MB. Leave empty to keep current photo.') }}</p>
+                    <p style="font-size: 0.72rem; color: #64748b; margin-top: 3px;">{{ __('Max 100MB. Leave empty to keep current photo.') }}</p>
                 </div>
             </div>
 
@@ -440,7 +440,7 @@
                     selectedCountBadge.textContent = `${files.length} selected`;
 
                     files.forEach(file => {
-                        if (file.size > 20 * 1024 * 1024) {
+                        if (file.size > 100 * 1024 * 1024) {
                             hasOversized = true;
                         }
 
@@ -459,7 +459,7 @@
                     if (hasOversized) {
                         photoSizeAlert.style.display = 'block';
                         photoSizeAlert.style.color = '#ef4444';
-                        photoSizeAlert.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Image(s) exceed 20MB limit. Select smaller files.`;
+                        photoSizeAlert.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> Image(s) exceed 100MB limit. Select smaller files.`;
                         btnSubmitPhoto.disabled = true;
                         btnSubmitPhoto.style.opacity = '0.6';
                     } else {
