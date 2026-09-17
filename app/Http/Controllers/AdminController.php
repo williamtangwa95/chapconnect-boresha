@@ -542,6 +542,15 @@ $media->delete();
     public function togglePublish($id)
     {
         $user = User::where('role', 'user')->findOrFail($id);
+        
+        // If attempting to publish an unpublished talent profile, check for unpaid invoice
+        if (!$user->is_published) {
+            $hasUnpaidInvoice = $user->invoices()->whereIn('payment_status', ['Unpaid', 'unpaid', 'Pending', 'pending'])->exists();
+            if ($hasUnpaidInvoice || ($user->invoices()->exists() && !$user->hasConfirmedPayment())) {
+                return redirect()->back()->with('error', "Cannot publish talent profile '{$user->name}': Clear payment first!");
+            }
+        }
+
         $user->update(['is_published' => !$user->is_published]);
         $status = $user->is_published ? 'published' : 'unpublished';
         return redirect()->back()->with('success', "Talent profile has been {$status}.");
@@ -556,7 +565,34 @@ $media->delete();
         if (empty($ids)) {
             return redirect()->back()->with('error', 'No talents selected.');
         }
-        User::where('role', 'user')->whereIn('id', $ids)->update(['is_published' => true]);
+
+        $users = User::where('role', 'user')->whereIn('id', $ids)->get();
+        $publishedCount = 0;
+        $blockedCount = 0;
+        $blockedNames = [];
+
+        foreach ($users as $user) {
+            if (!$user->is_published) {
+                $hasUnpaidInvoice = $user->invoices()->whereIn('payment_status', ['Unpaid', 'unpaid', 'Pending', 'pending'])->exists();
+                if ($hasUnpaidInvoice || ($user->invoices()->exists() && !$user->hasConfirmedPayment())) {
+                    $blockedCount++;
+                    $blockedNames[] = $user->name;
+                    continue;
+                }
+            }
+            $user->update(['is_published' => true]);
+            $publishedCount++;
+        }
+
+        if ($blockedCount > 0) {
+            $blockedStr = implode(', ', array_slice($blockedNames, 0, 5));
+            if (count($blockedNames) > 5) {
+                $blockedStr .= ' and ' . (count($blockedNames) - 5) . ' others';
+            }
+            $msg = "{$publishedCount} talent profile(s) published. {$blockedCount} profile(s) could not be published ({$blockedStr}): Clear payment first!";
+            return redirect()->back()->with($publishedCount > 0 ? 'warning' : 'error', $msg);
+        }
+
         return redirect()->back()->with('success', count($ids) . ' talent profile(s) published successfully.');
     }
 

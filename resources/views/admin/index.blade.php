@@ -458,9 +458,22 @@
                                             </form>
 
                                             <!-- Toggle Publish / Unpublish -->
-                                            <form action="{{ route('admin.user.toggle-publish', $u->id) }}" method="POST" style="margin:0;display:inline;">
+                                            @php
+                                                $unpaidInv = $u->invoices()->whereIn('payment_status', ['Unpaid', 'unpaid', 'Pending', 'pending'])->first();
+                                                $hasUnpaidInvoice = !is_null($unpaidInv) || ($u->invoices()->exists() && !$u->hasConfirmedPayment());
+                                            @endphp
+                                            <form action="{{ route('admin.user.toggle-publish', $u->id) }}" method="POST" style="margin:0;display:inline;" class="toggle-publish-form">
                                                 @csrf
-                                                <button type="submit" style="padding: 4px 9px; font-size: 0.73rem; border: 1px solid {{ $u->is_published ? 'rgba(239,68,68,0.4)' : 'rgba(16,185,129,0.4)' }}; color: {{ $u->is_published ? '#ef4444' : '#10b981' }}; border-radius: 6px; font-weight: 600; background: {{ $u->is_published ? 'rgba(239,68,68,0.08)' : 'rgba(16,185,129,0.08)' }}; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; line-height: 1.2;">
+                                                <button type="submit"
+                                                    class="btn-toggle-publish"
+                                                    data-is-published="{{ $u->is_published ? '1' : '0' }}"
+                                                    data-has-unpaid="{{ $hasUnpaidInvoice ? '1' : '0' }}"
+                                                    data-user-id="{{ $u->id }}"
+                                                    data-user-name="{{ e($u->name) }}"
+                                                    data-invoice-id="{{ $unpaidInv ? $unpaidInv->id : '' }}"
+                                                    data-invoice-number="{{ $unpaidInv ? ($unpaidInv->invoice_number ?? ('INV-' . str_pad($unpaidInv->id, 5, '0', STR_PAD_LEFT))) : '' }}"
+                                                    data-invoice-amount="{{ $unpaidInv ? (number_format($unpaidInv->amount ?? 0, 0) . ' TZS') : '' }}"
+                                                    style="padding: 4px 9px; font-size: 0.73rem; border: 1px solid {{ $u->is_published ? 'rgba(239,68,68,0.4)' : 'rgba(16,185,129,0.4)' }}; color: {{ $u->is_published ? '#ef4444' : '#10b981' }}; border-radius: 6px; font-weight: 600; background: {{ $u->is_published ? 'rgba(239,68,68,0.08)' : 'rgba(16,185,129,0.08)' }}; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; line-height: 1.2;">
                                                     <i class="bi {{ $u->is_published ? 'bi-lock' : 'bi-globe' }}" style="font-size: 0.72rem;"></i> {{ $u->is_published ? 'Unpublish' : 'Publish' }}
                                                 </button>
                                             </form>
@@ -2522,6 +2535,61 @@
             $('#pay_amount_paid').val(outstanding).attr('max', outstanding);
 
             $('#record-payment-modal').fadeIn(200);
+        });
+
+        // Intercept Publish button click if talent has unpaid invoice / incomplete payment
+        $(document).on('click', '.btn-toggle-publish', function(e) {
+            const isPublished = $(this).attr('data-is-published') === '1';
+            const hasUnpaid = $(this).attr('data-has-unpaid') === '1';
+
+            if (!isPublished && hasUnpaid) {
+                e.preventDefault();
+                const userName = $(this).attr('data-user-name');
+                const invId = $(this).attr('data-invoice-id');
+                const invNum = $(this).attr('data-invoice-number');
+                const invAmt = $(this).attr('data-invoice-amount');
+
+                $('#clear-payment-talent-name').text(userName);
+
+                if (invNum) {
+                    $('#clear-payment-invoice-number').text(invNum);
+                    $('#clear-payment-invoice-amount').text(invAmt || 'TZS 0');
+                    $('#clear-payment-invoice-box').show();
+                    const numericAmount = (invAmt || '').replace(/[^0-9]/g, '');
+                    $('#clear-payment-record-btn')
+                        .attr('data-id', invId)
+                        .attr('data-number', invNum)
+                        .attr('data-name', userName)
+                        .attr('data-outstanding', numericAmount)
+                        .show();
+                } else {
+                    $('#clear-payment-invoice-box').hide();
+                    $('#clear-payment-record-btn').hide();
+                }
+
+                $('#clear-payment-first-modal').fadeIn(200);
+                return false;
+            }
+        });
+
+        // Trigger record payment modal from clear-payment-first-modal
+        $(document).on('click', '#clear-payment-record-btn', function() {
+            const invId = $(this).attr('data-id');
+            const invNum = $(this).attr('data-number');
+            const userName = $(this).attr('data-name');
+            const outstanding = $(this).attr('data-outstanding');
+
+            $('#clear-payment-first-modal').fadeOut(200);
+
+            if (invId) {
+                $('#record-payment-form').attr('action', '/admin/invoices/' + invId + '/pay');
+                $('#pay_invoice_number').text(invNum);
+                $('#pay_user_name').text('Talent: ' + userName);
+                $('#pay_outstanding_balance').text(Number(outstanding).toLocaleString());
+                $('#pay_amount_paid').val(outstanding).attr('max', outstanding);
+
+                $('#record-payment-modal').fadeIn(200);
+            }
         });
 
         // Invoice Deletion & Deduplication Event Handlers

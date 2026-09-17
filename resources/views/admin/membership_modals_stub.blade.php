@@ -341,3 +341,51 @@
         </form>
     </div>
 </div>
+
+<!-- ==========================================================================
+     MODAL: Clear Payment First Warning Modal
+   ========================================================================== -->
+<div id="clear-payment-first-modal" class="admin-modal">
+    <div class="admin-modal-content" style="border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.25); max-width: 480px; width: 90%; margin: auto; overflow: hidden; border: 1px solid #fca5a5;">
+        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #fee2e2; padding: 18px 24px; background: #fef2f2; margin: 0;">
+            <h3 style="margin: 0; font-weight: 800; color: #dc2626; display: flex; align-items: center; gap: 10px; font-size: 1.15rem;">
+                <i class="bi bi-exclamation-triangle-fill" style="color: #ef4444; font-size: 1.35rem;"></i> Clear payment first!
+            </h3>
+            <button type="button" class="admin-modal-close" onclick="$('#clear-payment-first-modal').fadeOut(200);" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #991b1b; line-height: 1;">&times;</button>
+        </div>
+        
+        <div style="padding: 24px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width: 60px; height: 60px; border-radius: 50%; background: #fee2e2; color: #dc2626; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px auto; font-size: 1.8rem; box-shadow: 0 4px 12px rgba(220,38,38,0.15);">
+                    <i class="bi bi-shield-x"></i>
+                </div>
+                <h4 style="margin: 0 0 6px 0; font-weight: 800; color: #0f172a; font-size: 1.05rem;">
+                    Payment Required for <span id="clear-payment-talent-name" style="color: #dc2626;"></span>
+                </h4>
+                <p style="margin: 0; font-size: 0.88rem; color: #475569; line-height: 1.5;">
+                    This talent profile cannot be published because payment for their invoice is incomplete. Please <strong style="color: #dc2626;">clear payment first</strong> to publish this profile live on the platform.
+                </p>
+            </div>
+
+            <div id="clear-payment-invoice-box" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 14px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 0.78rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Invoice Reference</span>
+                    <span class="badge" style="background: rgba(239,68,68,0.12); color: #dc2626; font-weight: 800; padding: 3px 9px; border-radius: 6px; font-size: 0.72rem; border: 1px solid rgba(239,68,68,0.3);">UNPAID</span>
+                </div>
+                <div id="clear-payment-invoice-number" style="font-weight: 800; font-size: 0.95rem; color: #0f172a;"></div>
+                <div style="font-size: 0.85rem; color: #ef4444; font-weight: 700; margin-top: 4px;">
+                    Amount Due: <span id="clear-payment-invoice-amount"></span>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                <button type="button" onclick="$('#clear-payment-first-modal').fadeOut(200);" style="padding: 10px 20px; border-radius: 10px; font-weight: 600; background: #e2e8f0; border: none; color: #475569; cursor: pointer;">
+                    Close
+                </button>
+                <button type="button" id="clear-payment-record-btn" style="padding: 10px 22px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: #fff; box-shadow: 0 4px 15px rgba(16,185,129,0.3); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-wallet2"></i> Record Payment First
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
