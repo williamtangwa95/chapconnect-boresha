@@ -914,15 +914,22 @@ $media->delete();
         $request->validate([
             'package_id' => 'required',
             'start_date' => 'required|date',
-            'months' => 'required|integer|min:1|max:12',
+            'months' => 'required',
         ]);
 
-        $monthsMultiplier = intval($request->input('months', 1));
+        $monthsInput = $request->input('months');
+        $isLifetime = ($monthsInput === 'lifetime') || ($package->duration_unit === 'lifetime');
         $startDate = $request->input('start_date', now()->toDateString());
         
-        if ($package->duration_unit === 'lifetime') {
+        if ($isLifetime) {
             $endDate = '2099-12-31';
+            $monthsMultiplier = 1;
+            $durationSnapshot = -1;
+            $durationUnitSnapshot = 'lifetime';
         } else {
+            $monthsMultiplier = max(1, intval($monthsInput));
+            $durationSnapshot = $package->duration * $monthsMultiplier;
+            $durationUnitSnapshot = $package->duration_unit;
             $baseDays = intval($package->duration);
             if ($package->duration_unit === 'months') {
                 $baseDays = $baseDays * 30;
@@ -933,6 +940,9 @@ $media->delete();
             $days = $baseDays * $monthsMultiplier;
             $endDate = date('Y-m-d', strtotime($startDate . " + {$days} days"));
         }
+
+        $phoneVisibilityInput = $request->input('phone_visibility');
+        $phoneVisibility = in_array($phoneVisibilityInput, ['Yes', 'No']) ? $phoneVisibilityInput : $package->phone_visibility;
 
         // Deactivate previous active subscriptions for this user
         \App\Models\UserPackage::where('user_id', $userId)
@@ -945,9 +955,9 @@ $media->delete();
             'package_id' => $package->id,
             'package_name_snapshot' => $package->name,
             'price_snapshot' => $package->price * $monthsMultiplier,
-            'duration_snapshot' => $package->duration * $monthsMultiplier,
-            'duration_unit_snapshot' => $package->duration_unit,
-            'phone_visibility_snapshot' => $package->phone_visibility,
+            'duration_snapshot' => $durationSnapshot,
+            'duration_unit_snapshot' => $durationUnitSnapshot,
+            'phone_visibility_snapshot' => $phoneVisibility,
             'max_images_snapshot' => $package->max_images,
             'max_videos_snapshot' => $package->max_videos,
             'max_news_snapshot' => $package->max_news,
@@ -958,29 +968,89 @@ $media->delete();
             'assigned_by' => auth()->id(),
         ]);
 
-        // Generate invoice if package type is "To Pay"
-        if ($package->package_type === 'To Pay') {
-            $invoiceNumber = \App\Models\Invoice::generateInvoiceNumber();
-            \App\Models\Invoice::create([
-                'invoice_number' => $invoiceNumber,
+        $preservePayment = $request->input('preserve_payment', '1') == '1';
+        $latestInvoice = \App\Models\Invoice::where('user_id', $user->id)->orderBy('id', 'desc')->first();
+        $userHasPaidInvoice = $latestInvoice && $latestInvoice->payment_status === 'Paid';
+        $invoicePackageName = $isLifetime ? $package->name : ($package->name . " ({$monthsMultiplier} " . ($monthsMultiplier === 1 ? 'Month' : 'Months') . ")");
+
+        if ($preservePayment || $userHasPaidInvoice) {
+            // Update existing invoice to reflect the newly switched package without generating a new bill
+            if ($latestInvoice) {
+                $latestInvoice->update([
+                    'user_package_id' => $userPackage->id,
+                    'package_id' => $package->id,
+                    'package_name' => $invoicePackageName,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'duration' => $durationSnapshot,
+                    'duration_unit' => $durationUnitSnapshot,
+                ]);
+            }
+        } else {
+            // Generate new invoice only if package type is "To Pay" and payment preservation is not requested
+            if ($package->package_type === 'To Pay') {
+                $invoiceNumber = \App\Models\Invoice::generateInvoiceNumber();
+                \App\Models\Invoice::create([
+                    'invoice_number' => $invoiceNumber,
+                    'user_id' => $user->id,
+                    'user_package_id' => $userPackage->id,
+                    'package_id' => $package->id,
+                    'package_name' => $invoicePackageName,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'duration' => $durationSnapshot,
+                    'duration_unit' => $durationUnitSnapshot,
+                    'amount' => $package->price * $monthsMultiplier,
+                    'amount_paid' => 0.00,
+                    'payment_status' => 'Unpaid',
+                    'invoice_date' => now()->toDateString(),
+                    'due_date' => date('Y-m-d', strtotime(now()->toDateString() . ' + 7 days')),
+                    'created_by' => auth()->id(),
+                ]);
+            }
+        }
+
+        return redirect()->back()->with('success', "Package switched to '{$package->name}' for user '{$user->name}' successfully (Existing payment preserved).");
+    }
+
+    /**
+     * Toggle talent contact phone visibility between Visible ('Yes') and Hidden ('No').
+     */
+    public function toggleContactVisibility(Request $request, $userId)
+    {
+        $user = User::findOrFail($userId);
+        $activeSub = $user->activeSubscription ?? \App\Models\UserPackage::where('user_id', $userId)->latest()->first();
+
+        if ($activeSub) {
+            $currentVis = $activeSub->phone_visibility_snapshot ?? ($activeSub->package ? $activeSub->package->phone_visibility : 'No');
+            $newVisibility = ($currentVis === 'Yes') ? 'No' : 'Yes';
+            $activeSub->update(['phone_visibility_snapshot' => $newVisibility]);
+        } else {
+            $defaultPackage = \App\Models\Package::where('package_type', 'Free')->first();
+            $newVisibility = 'Yes';
+            \App\Models\UserPackage::create([
                 'user_id' => $user->id,
-                'user_package_id' => $userPackage->id,
-                'package_id' => $package->id,
-                'package_name' => $package->name . " ({$monthsMultiplier} " . ($monthsMultiplier === 1 ? 'Month' : 'Months') . ")",
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'duration' => $package->duration * $monthsMultiplier,
-                'duration_unit' => $package->duration_unit,
-                'amount' => $package->price * $monthsMultiplier,
-                'amount_paid' => 0.00,
-                'payment_status' => 'Unpaid',
-                'invoice_date' => now()->toDateString(),
-                'due_date' => date('Y-m-d', strtotime(now()->toDateString() . ' + 7 days')),
-                'created_by' => auth()->id(),
+                'package_id' => $defaultPackage ? $defaultPackage->id : null,
+                'package_name_snapshot' => $defaultPackage ? $defaultPackage->name : 'Standard',
+                'price_snapshot' => 0.00,
+                'duration_snapshot' => 365,
+                'duration_unit_snapshot' => 'days',
+                'phone_visibility_snapshot' => $newVisibility,
+                'max_images_snapshot' => 5,
+                'max_videos_snapshot' => 2,
+                'max_news_snapshot' => 3,
+                'package_type_snapshot' => 'Free',
+                'start_date' => now()->toDateString(),
+                'end_date' => now()->addDays(365)->toDateString(),
+                'status' => 'active',
+                'assigned_by' => auth()->id(),
             ]);
         }
 
-        return redirect()->back()->with('success', "Package '{$package->name}' assigned to user '{$user->name}' successfully.");
+        $statusText = ($newVisibility === 'Yes') ? 'Visible' : 'Hidden';
+        \App\Models\UserActivityLog::log('UPDATED', "Toggled contact phone visibility for talent {$user->name} to {$statusText}", [], null, 'User', $user->id);
+
+        return redirect()->back()->with('success', "Contact phone visibility for talent '{$user->name}' is now set to '{$statusText}'.");
     }
 
     public function recordInvoicePayment(Request $request, $invoiceId)
@@ -1028,6 +1098,117 @@ $media->delete();
         }
 
         return redirect()->back()->with('success', 'Payment logged successfully.');
+    }
+
+    /**
+     * Delete a single invoice.
+     */
+    public function deleteInvoice($id)
+    {
+        $invoice = \App\Models\Invoice::findOrFail($id);
+        
+        if ($invoice->payment_status === 'Paid') {
+            return redirect()->to(url('/admin#invoices'))->withErrors(['error' => "Invoice {$invoice->invoice_number} is PAID and protected from deletion for payment audit records."]);
+        }
+
+        $invoiceNum = $invoice->invoice_number;
+        $userName = $invoice->user ? $invoice->user->name : 'N/A';
+
+        $invoice->delete();
+
+        \App\Models\UserActivityLog::log('DELETED', "Deleted invoice {$invoiceNum} for user {$userName}", [
+            'invoice_number' => $invoiceNum,
+            'user' => $userName,
+        ], null, 'Invoice', $id);
+
+        return redirect()->to(url('/admin#invoices'))->with('success', "Invoice {$invoiceNum} deleted successfully.");
+    }
+
+    /**
+     * Bulk delete selected invoices (excludes paid invoices).
+     */
+    public function bulkDeleteInvoices(Request $request)
+    {
+        $ids = $request->input('invoice_ids', []);
+        if (is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+        $ids = array_filter(array_map('intval', (array)$ids));
+
+        if (empty($ids)) {
+            return redirect()->to(url('/admin#invoices'))->withErrors(['error' => 'No invoices selected for deletion.']);
+        }
+
+        $paidCount = \App\Models\Invoice::whereIn('id', $ids)->where('payment_status', 'Paid')->count();
+        $unpaidInvoices = \App\Models\Invoice::whereIn('id', $ids)->where('payment_status', '!=', 'Paid')->get();
+
+        if ($unpaidInvoices->isEmpty()) {
+            return redirect()->to(url('/admin#invoices'))->withErrors(['error' => 'All selected invoices are PAID and protected. Paid invoices cannot be deleted.']);
+        }
+
+        $count = \App\Models\Invoice::whereIn('id', $unpaidInvoices->pluck('id'))->delete();
+
+        \App\Models\UserActivityLog::log('DELETED', "Bulk deleted {$count} unpaid invoices", [
+            'invoice_ids' => $unpaidInvoices->pluck('id')->toArray(),
+        ], null, 'Invoice', null);
+
+        $message = "Successfully deleted {$count} unpaid invoice(s).";
+        if ($paidCount > 0) {
+            $message .= " ({$paidCount} paid invoice(s) were protected from deletion).";
+        }
+
+        return redirect()->to(url('/admin#invoices'))->with('success', $message);
+    }
+
+    /**
+     * Delete multiple unpaid invoices for single or all talent users, leaving 1 valid invoice per user and preserving paid invoices.
+     */
+    public function keepOneInvoicePerUser(Request $request)
+    {
+        $targetUserId = $request->input('user_id');
+
+        $query = \App\Models\Invoice::select('user_id')
+            ->whereNotNull('user_id')
+            ->groupBy('user_id')
+            ->havingRaw('COUNT(*) > 1');
+
+        if ($targetUserId) {
+            $query->where('user_id', $targetUserId);
+        }
+
+        $userIdsWithMultiple = $query->pluck('user_id');
+
+        $deletedTotal = 0;
+        $usersProcessed = 0;
+
+        foreach ($userIdsWithMultiple as $uId) {
+            $userInvoices = \App\Models\Invoice::where('user_id', $uId)->orderBy('id', 'desc')->get();
+            if ($userInvoices->count() <= 1) {
+                continue;
+            }
+
+            // Pick 1 best invoice to keep: prefer Paid invoice, otherwise the latest invoice
+            $invoiceToKeep = $userInvoices->firstWhere('payment_status', 'Paid') ?? $userInvoices->first();
+
+            // Never delete Paid invoices during deduplication
+            $invoicesToDelete = $userInvoices->reject(function ($inv) use ($invoiceToKeep) {
+                return $inv->id === $invoiceToKeep->id || $inv->payment_status === 'Paid';
+            });
+
+            if ($invoicesToDelete->count() > 0) {
+                $deletedCount = \App\Models\Invoice::whereIn('id', $invoicesToDelete->pluck('id'))->delete();
+                $deletedTotal += $deletedCount;
+                $usersProcessed++;
+            }
+        }
+
+        if ($deletedTotal === 0) {
+            return redirect()->to(url('/admin#invoices'))->with('info', 'No extra unpaid duplicate invoices were found to clean up. Paid invoices are protected.');
+        }
+
+        \App\Models\UserActivityLog::log('DELETED', "Deduplicated invoices: removed {$deletedTotal} extra unpaid invoices across {$usersProcessed} user(s)", [], null, 'Invoice', null);
+
+        return redirect()->to(url('/admin#invoices'))->with('success', "Cleaned up {$deletedTotal} extra unpaid invoice(s) across {$usersProcessed} talent user(s). Paid invoices were preserved.");
     }
 
     /**

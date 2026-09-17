@@ -830,12 +830,20 @@
                                     </span>
                                 </td>
                                 <td style="font-weight: 700; color: #0f172a;">{{ $inv->user ? $inv->user->name : 'N/A' }}</td>
-                                <td>{{ $inv->package_name }}</td>
+                                @php
+                                    $isLifetimeInv = $inv->duration == -1 || $inv->duration_unit === 'lifetime' || str_contains($inv->end_date, '2099');
+                                    $cleanPackageName = $isLifetimeInv ? preg_replace('/\s*\(\d+\s*Months?\)/i', '', $inv->package_name) : $inv->package_name;
+                                @endphp
+                                <td>{{ $cleanPackageName }}</td>
                                 <td style="font-weight: 700;">TZS {{ number_format($inv->amount) }}</td>
                                 <td style="font-weight: 700; color: #10b981;">TZS {{ number_format($inv->amount_paid) }}</td>
                                 <td style="font-weight: 700; color: #ef4444;">TZS {{ number_format($inv->amount - $inv->amount_paid) }}</td>
                                 <td style="font-size: 0.8rem; color: #475569;">
-                                    {{ date('M d, Y', strtotime($inv->start_date)) }} - {{ date('M d, Y', strtotime($inv->end_date)) }}
+                                    @if($isLifetimeInv)
+                                        <span style="font-weight: 700; color: #6366f1;"><i class="bi bi-infinity"></i> Lifetime</span>
+                                    @else
+                                        {{ date('M d, Y', strtotime($inv->start_date)) }} - {{ date('M d, Y', strtotime($inv->end_date)) }}
+                                    @endif
                                 </td>
                                 <td>
                                     <span style="font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border-radius: 20px; {{ $inv->payment_status === 'Paid' ? 'background: rgba(16,185,129,0.1); color: #10b981;' : ($inv->payment_status === 'Unpaid' ? 'background: rgba(239,68,68,0.1); color: #ef4444;' : 'background: rgba(100,100,100,0.1); color: #64748b;') }}">

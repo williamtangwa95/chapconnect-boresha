@@ -170,12 +170,16 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/packages/{id}/update', [AdminController::class, 'updatePackage']);
     Route::delete('/admin/packages/{id}', [AdminController::class, 'deletePackage'])->name('admin.packages.delete');
     Route::post('/admin/user/{id}/assign-package', [AdminController::class, 'assignPackage']);
+    Route::post('/admin/user/{id}/toggle-contact-visibility', [AdminController::class, 'toggleContactVisibility'])->name('admin.user.toggle-contact-visibility');
 
     // Payment Methods Management Routes (Super Admin)
     Route::post('/admin/payment-methods', [AdminController::class, 'storePaymentMethod'])->name('admin.payment-methods.store');
     Route::post('/admin/payment-methods/{id}/update', [AdminController::class, 'updatePaymentMethod'])->name('admin.payment-methods.update');
     Route::delete('/admin/payment-methods/{id}', [AdminController::class, 'deletePaymentMethod'])->name('admin.payment-methods.delete');
     Route::post('/admin/invoices/{id}/pay', [AdminController::class, 'recordInvoicePayment']);
+    Route::delete('/admin/invoices/{id}', [AdminController::class, 'deleteInvoice'])->name('admin.invoices.delete');
+    Route::post('/admin/invoices/bulk-delete', [AdminController::class, 'bulkDeleteInvoices'])->name('admin.invoices.bulk-delete');
+    Route::post('/admin/invoices/keep-one-per-user', [AdminController::class, 'keepOneInvoicePerUser'])->name('admin.invoices.keep-one');
 
     // Talent Payment Request Administration Routes
     Route::post('/admin/settings/payment-criteria', [AdminController::class, 'updatePaymentCriteria'])->name('admin.settings.payment-criteria');

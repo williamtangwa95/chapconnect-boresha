@@ -266,7 +266,7 @@
         </div>
         <form id="assign-package-form" action="" method="POST">
             @csrf
-            
+
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 18px; font-size: 0.88rem;">
                 <div style="font-weight: 700; color: #475569;">Active Package details:</div>
                 <div style="display: flex; justify-content: space-between; margin-top: 4px;">
@@ -285,10 +285,10 @@
 
             <div class="form-group" style="margin-bottom: 15px;">
                 <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Select New Package to Assign</label>
-                <select name="package_id" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                <select name="package_id" id="assign_package_id" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
                     <option value="">-- Choose Active Package --</option>
                     @foreach($packages->where('status', 'Active') as $p)
-                    <option value="{{ $p->id }}">
+                    <option value="{{ $p->id }}" data-name="{{ strtolower($p->name) }}" data-phone-visibility="{{ $p->phone_visibility }}">
                         {{ $p->name }} (TZS {{ number_format($p->price) }} / {{ ($p->duration_unit === 'lifetime' || $p->duration == -1) ? 'Lifetime' : $p->duration . ' ' . $p->duration_unit }})
                     </option>
                     @endforeach
@@ -296,12 +296,35 @@
             </div>
 
             <div class="form-group" style="margin-bottom: 15px;">
-                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Duration (Months)</label>
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Subscription Duration</label>
                 <select name="months" class="form-control" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
                     @for($m = 1; $m <= 12; $m++)
-                    <option value="{{ $m }}" {{ $m === 1 ? 'selected' : '' }}>{{ $m }} {{ $m === 1 ? 'Month' : 'Months' }}</option>
-                    @endfor
+                        <option value="{{ $m }}" {{ $m === 1 ? 'selected' : '' }}>{{ $m }} {{ $m === 1 ? 'Month' : 'Months' }}</option>
+                        @endfor
+                        <option value="24">2 Years (24 Months)</option>
+                        <option value="36">3 Years (36 Months)</option>
+                        <option value="lifetime" selected>∞ Lifetime Access (Permanent)</option>
                 </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Contact Phone Visibility</label>
+                <select name="phone_visibility" id="assign_phone_visibility" class="form-control" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <option value="">Default from Package Template</option>
+                    <option value="Yes">Visible (Public Contact Number)</option>
+                    <option value="No">Hidden (Private Contact Number)</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="color: #475569; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 6px;">Billing / Invoice Action</label>
+                <select name="preserve_payment" id="assign_preserve_payment" class="form-control" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                    <option value="1">Preserve Existing Payment (Do Not Generate New Invoice)</option>
+                    <option value="0">Generate New Unpaid Invoice</option>
+                </select>
+                <small style="color: #64748b; font-size: 0.76rem; display: block; margin-top: 4px;">
+                    <i class="bi bi-info-circle"></i> Use "Preserve Existing Payment" when switching packages (e.g. VIP &lt;-&gt; Standard) for a talent who has already paid.
+                </small>
             </div>
 
             <div class="form-group" style="margin-bottom: 20px;">

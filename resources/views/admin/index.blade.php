@@ -149,7 +149,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="5" style="text-align: center; color: #64748b; padding: 30px 0;">No registered users found.</td>
+                                    <td colspan="6" style="text-align: center; color: #64748b; padding: 30px 0;">No registered users found.</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -437,11 +437,25 @@
                                                 data-name="{{ $u->name }}"
                                                 data-package-id="{{ $u->activeSubscription ? $u->activeSubscription->package_id : '' }}"
                                                 data-package-name="{{ $u->currentPackageDetails()['name'] }}"
+                                                data-phone-visibility="{{ $u->currentPackageDetails()['phone_visibility'] }}"
                                                 data-start-date="{{ $u->currentPackageDetails()['start_date'] }}"
                                                 data-end-date="{{ $u->currentPackageDetails()['end_date'] }}"
                                                 style="padding: 4px 9px; font-size: 0.73rem; border: 1px solid #cbd5e1; color: #f59e0b; border-radius: 6px; font-weight: 600; background: #fff; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; line-height: 1.2;">
                                                 <i class="bi bi-box-seam-fill" style="font-size: 0.72rem;"></i> Package
                                             </button>
+
+                                            <!-- Toggle Contact Visibility (Phone Hidden / Visible) -->
+                                            @php
+                                                $phoneVis = $u->currentPackageDetails()['phone_visibility'];
+                                            @endphp
+                                            <form action="{{ route('admin.user.toggle-contact-visibility', $u->id) }}" method="POST" style="margin:0;display:inline;">
+                                                @csrf
+                                                <button type="submit"
+                                                    title="Switch contact phone visibility for this talent (Current: {{ $phoneVis === 'Yes' ? 'Visible' : 'Hidden' }})"
+                                                    style="padding: 4px 9px; font-size: 0.73rem; border: 1px solid {{ $phoneVis === 'Yes' ? 'rgba(16,185,129,0.4)' : 'rgba(239,68,68,0.4)' }}; color: {{ $phoneVis === 'Yes' ? '#059669' : '#dc2626' }}; border-radius: 6px; font-weight: 700; background: {{ $phoneVis === 'Yes' ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)' }}; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; line-height: 1.2;">
+                                                    <i class="bi {{ $phoneVis === 'Yes' ? 'bi-telephone-fill' : 'bi-eye-slash-fill' }}" style="font-size: 0.72rem;"></i> {{ $phoneVis === 'Yes' ? 'Phone Visible' : 'Phone Hidden' }}
+                                                </button>
+                                            </form>
 
                                             <!-- Toggle Publish / Unpublish -->
                                             <form action="{{ route('admin.user.toggle-publish', $u->id) }}" method="POST" style="margin:0;display:inline;">
@@ -491,7 +505,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8" style="text-align: center; color: #64748b; padding: 40px 0;">No registered users found.</td>
+                                    <td colspan="9" style="text-align: center; color: #64748b; padding: 40px 0;">No registered users found.</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -807,7 +821,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" style="text-align: center; color: #64748b; padding: 40px 0;">No registered staff accounts found.</td>
+                                <td colspan="8" style="text-align: center; color: #64748b; padding: 40px 0;">No registered staff accounts found.</td>
                             </tr>
                             @endforelse
                         </tbody>
@@ -2510,6 +2524,74 @@
             $('#record-payment-modal').fadeIn(200);
         });
 
+        // Invoice Deletion & Deduplication Event Handlers
+        $(document).on('click', '.btn-delete-invoice', function() {
+            const id = $(this).data('id');
+            const number = $(this).data('number');
+            if (confirm(`Are you sure you want to permanently delete invoice '${number}'?`)) {
+                const $form = $('#single-delete-invoice-form');
+                $form.attr('action', `/admin/invoices/${id}`);
+                $form.submit();
+            }
+        });
+
+        // Toggle Select All Invoices
+        $(document).on('change', '#select-all-invoices', function() {
+            const isChecked = $(this).is(':checked');
+            $('.invoice-checkbox').prop('checked', isChecked);
+            updateInvoicesBulkBar();
+        });
+
+        $(document).on('change', '.invoice-checkbox', function() {
+            updateInvoicesBulkBar();
+        });
+
+        function updateInvoicesBulkBar() {
+            const selectedCount = $('.invoice-checkbox:checked').length;
+            if (selectedCount > 0) {
+                $('#invoices-selected-count').text(`${selectedCount} Selected`);
+                $('#invoices-bulk-bar').slideDown(150);
+            } else {
+                $('#invoices-bulk-bar').slideUp(150);
+                $('#select-all-invoices').prop('checked', false);
+            }
+        }
+
+        // Bulk Delete Invoices
+        $(document).on('click', '#btn-bulk-delete-invoices', function() {
+            const selectedIds = $('.invoice-checkbox:checked').map(function() {
+                return $(this).val();
+            }).get();
+
+            if (selectedIds.length === 0) {
+                alert('Please select at least one invoice to delete.');
+                return;
+            }
+
+            if (confirm(`⚠️ WARNING: Are you sure you want to permanently delete the ${selectedIds.length} selected invoice(s)?`)) {
+                $('#bulk-delete-invoice-ids').val(selectedIds.join(','));
+                $('#bulk-delete-invoices-form').submit();
+            }
+        });
+
+        // Keep Only 1 Invoice for specific Talent
+        $(document).on('click', '.btn-keep-one-talent', function() {
+            const userId = $(this).data('user-id');
+            const userName = $(this).data('user-name');
+            if (confirm(`Are you sure you want to remove all extra duplicate invoices for '${userName}', keeping only 1 invoice?`)) {
+                $('#keep-one-user-id').val(userId);
+                $('#keep-one-invoice-form').submit();
+            }
+        });
+
+        // Keep Only 1 Invoice across ALL talents (Global Clean Duplicates)
+        $(document).on('click', '.btn-clean-all-duplicates', function() {
+            if (confirm('⚠️ Are you sure you want to automatically clean up all duplicate invoices across all talents, leaving only 1 valid invoice per user?')) {
+                $('#keep-one-user-id').val('');
+                $('#keep-one-invoice-form').submit();
+            }
+        });
+
         // Payout process modal trigger
         $(document).on('click', '.btn-process-payout', function() {
             const id = $(this).data('id');
@@ -2538,6 +2620,7 @@
             const name = $btn.data('name');
             const packageId = $btn.data('package-id');
             const packageName = $btn.data('package-name');
+            const phoneVis = $btn.data('phone-visibility');
             const startDate = $btn.data('start-date');
             const endDate = $btn.data('end-date');
 
@@ -2547,13 +2630,42 @@
             $('#assign_current_start').text(startDate || 'N/A');
             $('#assign_current_end').text(endDate || 'N/A');
 
-            if (packageId) {
-                $('#assign-package-form select[name="package_id"]').val(packageId);
+            const currentPkgLower = (packageName || '').toLowerCase();
+            let autoSelectedId = '';
+
+            // If active package is Standard, auto-select VIP. If active is VIP, auto-select Standard.
+            $('#assign_package_id option').each(function() {
+                const optName = ($(this).data('name') || '').toLowerCase();
+                if (currentPkgLower.includes('standard') && optName.includes('vip')) {
+                    autoSelectedId = $(this).val();
+                    return false;
+                } else if (currentPkgLower.includes('vip') && optName.includes('standard')) {
+                    autoSelectedId = $(this).val();
+                    return false;
+                }
+            });
+
+            if (autoSelectedId) {
+                $('#assign_package_id').val(autoSelectedId);
+            } else if (packageId) {
+                $('#assign_package_id').val(packageId);
             } else {
-                $('#assign-package-form select[name="package_id"]').val('');
+                $('#assign_package_id').val('');
             }
 
+            // Trigger change to auto-update Contact Phone Visibility based on newly selected package
+            $('#assign_package_id').trigger('change');
+
             $('#manage-user-package-modal').fadeIn(200);
+        });
+
+        // Automatically update Contact Phone Visibility when selected package changes
+        $(document).on('change', '#assign_package_id', function() {
+            const $selectedOpt = $(this).find('option:selected');
+            const defaultVis = $selectedOpt.data('phone-visibility');
+            if (defaultVis) {
+                $('#assign_phone_visibility').val(defaultVis);
+            }
         });
 
         // Edit Payment Method Modal trigger

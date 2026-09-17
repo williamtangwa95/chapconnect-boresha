@@ -200,7 +200,7 @@ class User extends Authenticatable
                 'price' => $activeSub->price_snapshot,
                 'duration' => $activeSub->duration_snapshot,
                 'duration_unit' => $activeSub->duration_unit_snapshot,
-                'phone_visibility' => $activeSub->package ? $activeSub->package->phone_visibility : $activeSub->phone_visibility_snapshot,
+                'phone_visibility' => $activeSub->phone_visibility_snapshot ?? ($activeSub->package ? $activeSub->package->phone_visibility : 'No'),
                 'max_images' => intval($activeSub->package ? $activeSub->package->max_images : $activeSub->max_images_snapshot),
                 'max_videos' => intval($activeSub->package ? $activeSub->package->max_videos : $activeSub->max_videos_snapshot),
                 'max_news' => intval($activeSub->package ? $activeSub->package->max_news : $activeSub->max_news_snapshot),
