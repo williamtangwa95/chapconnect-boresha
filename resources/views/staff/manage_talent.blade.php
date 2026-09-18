@@ -137,7 +137,7 @@
                     <label style="display: block; font-weight: 700; color: #334155; font-size: 0.88rem; margin-bottom: 6px;">Profile Avatar Picture</label>
                     <input type="file" name="profile_image" accept="image/*" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px; background: #ffffff; font-size: 0.85rem;">
                     <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 6px;">
-                        <i class="bi bi-info-circle-fill" style="color: #6366f1;"></i> Upload JPEG, PNG, WEBP image file (max 10MB). Automatically compressed on upload.
+                        <i class="bi bi-info-circle-fill" style="color: #6366f1;"></i> Upload JPEG, PNG, WEBP image file (max 100MB). Automatically compressed on upload.
                     </small>
                 </div>
 

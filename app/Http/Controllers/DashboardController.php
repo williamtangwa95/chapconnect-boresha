@@ -101,7 +101,7 @@ class DashboardController extends Controller
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:30',
             'country' => 'nullable|string|max:100',
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:12288',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:102400',
         ];
 
         // Social media account link validation rules
@@ -216,13 +216,21 @@ class DashboardController extends Controller
             $data['password'] = \Illuminate\Support\Facades\Hash::make($request->password);
         }
 
+        if ($request->boolean('remove_profile_image') || $request->input('remove_profile_image') == '1') {
+            if ($user->profile_image && !str_starts_with($user->profile_image, 'http')) {
+                $relativePath = str_replace('/storage/', '', $user->profile_image);
+                Storage::disk('public')->delete($relativePath);
+            }
+            $data['profile_image'] = null;
+        }
+
         if ($request->hasFile('profile_image')) {
             $request->validate([
-                'profile_image' => 'file|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+                'profile_image' => 'file|image|mimes:jpeg,png,jpg,gif,webp|max:102400',
             ], [
                 'profile_image.image' => 'The profile image must be a valid image file (JPEG, PNG, JPG, GIF, or WEBP).',
                 'profile_image.mimes' => 'SVG and non-standard file formats are strictly prohibited.',
-                'profile_image.max'   => 'Profile image file size cannot exceed 10MB.',
+                'profile_image.max'   => 'Profile image file size cannot exceed 100MB.',
             ]);
 
             // Delete old profile image if it exists and is not a default stock URL
@@ -930,7 +938,7 @@ class DashboardController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:102400',
         ]);
 
         $filePath = null;
@@ -974,12 +982,12 @@ class DashboardController extends Controller
         $request->validate([
             'title'   => 'required|string|max:255',
             'content' => 'required|string',
-            'image'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'image'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:102400',
         ], [
             'title.required'   => 'Please provide a title for the news article.',
             'content.required' => 'Please enter the content details for the news article.',
             'image.image'      => 'The cover file must be a valid image.',
-            'image.max'        => 'The image file size cannot exceed 10MB.',
+            'image.max'        => 'The image file size cannot exceed 100MB.',
         ]);
 
         $data = [

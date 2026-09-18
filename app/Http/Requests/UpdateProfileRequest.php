@@ -24,7 +24,7 @@ class UpdateProfileRequest extends FormRequest
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:30',
             'country' => 'nullable|string|max:100',
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:12288',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:102400',
             'social_instagram' => [
                 'nullable',
                 'url',

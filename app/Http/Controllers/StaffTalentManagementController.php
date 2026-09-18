@@ -51,7 +51,7 @@ class StaffTalentManagementController extends Controller
             'category' => 'required|string|exists:categories,slug',
             'country' => 'nullable|string|max:100',
             'description' => 'nullable|string',
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:102400',
             'social_instagram' => 'nullable|url|max:255',
             'social_facebook'  => 'nullable|url|max:255',
             'social_tiktok'    => 'nullable|url|max:255',
@@ -425,7 +425,7 @@ class StaffTalentManagementController extends Controller
         $request->validate([
             'title'   => 'required|string|max:255',
             'content' => 'required|string',
-            'image'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
+            'image'   => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:102400',
         ]);
 
         $filePath = null;

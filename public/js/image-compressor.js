@@ -36,7 +36,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const form = input.closest("form");
             const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+            const savePhotoBtn = document.getElementById("save-profile-photo-btn");
+            const savePhotoContainer = document.getElementById("save-photo-action-container");
+            const removeSelectedBtn = document.getElementById("remove-selected-btn");
             const hasLargeFiles = imageFiles.some(f => f.size > 1024 * 1024);
+
+            if (input.id === 'profile_image') {
+                if (savePhotoContainer) savePhotoContainer.style.display = "flex";
+                if (removeSelectedBtn) removeSelectedBtn.style.display = "inline-flex";
+            }
 
             if (hasLargeFiles) {
                 statusEl.style.display = "block";
@@ -49,6 +57,11 @@ document.addEventListener("DOMContentLoaded", () => {
                         submitBtn.dataset.origText = submitBtn.innerText;
                     }
                     submitBtn.innerText = "Compressing Image(s)...";
+                }
+
+                if (savePhotoBtn && input.id === 'profile_image') {
+                    savePhotoBtn.disabled = true;
+                    savePhotoBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Optimizing...';
                 }
 
                 try {
@@ -84,6 +97,12 @@ document.addEventListener("DOMContentLoaded", () => {
                             submitBtn.innerText = submitBtn.dataset.origText;
                         }
                     }
+                    if (savePhotoBtn && input.id === 'profile_image') {
+                        savePhotoBtn.disabled = false;
+                        savePhotoBtn.innerHTML = '<i class="bi bi-check2-circle"></i> SAVE PROFILE PHOTO';
+                        if (savePhotoContainer) savePhotoContainer.style.display = "flex";
+                    }
+                    window.dispatchEvent(new CustomEvent('image-optimized', { detail: { input } }));
                 }
             } else {
                 statusEl.style.display = "block";
@@ -95,6 +114,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         submitBtn.innerText = submitBtn.dataset.origText;
                     }
                 }
+                if (savePhotoBtn && input.id === 'profile_image') {
+                    savePhotoBtn.disabled = false;
+                    savePhotoBtn.innerHTML = '<i class="bi bi-check2-circle"></i> SAVE PROFILE PHOTO';
+                    if (savePhotoContainer) savePhotoContainer.style.display = "flex";
+                }
+                window.dispatchEvent(new CustomEvent('image-optimized', { detail: { input } }));
             }
         });
     });

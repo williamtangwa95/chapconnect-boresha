@@ -135,42 +135,59 @@
 
                 <div class="form-group" style="margin-bottom: 20px;">
                     <label style="color: #475569; font-weight: 600; margin-bottom: 8px; display: block;">Profile Avatar Photo</label>
+                    <input type="hidden" name="remove_profile_image" id="remove_profile_image" value="0">
                     
-                    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; background: #f8fafc; padding: 16px; border-radius: 14px; border: 1px solid #cbd5e1;">
-                        <!-- Current Avatar Display -->
-                        <div style="position: relative; width: 68px; height: 68px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 3px solid var(--primary); box-shadow: 0 4px 12px rgba(99,102,241,0.25);">
-                            <img id="current-avatar-img" src="{{ $user->avatar_url }}" alt="{{ $user->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; background: #f8fafc; padding: 16px; border-radius: 14px; border: 1px solid #cbd5e1;">
+                        <!-- Left avatar controls -->
+                        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                            <!-- Current Avatar Display -->
+                            <div style="position: relative; width: 68px; height: 68px; border-radius: 50%; overflow: hidden; flex-shrink: 0; border: 3px solid var(--primary); box-shadow: 0 4px 12px rgba(99,102,241,0.25);">
+                                <img id="current-avatar-img" src="{{ $user->avatar_url }}" data-original-src="{{ $user->avatar_url }}" alt="{{ $user->name }}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
+                            </div>
+
+                            <!-- Avatar Controls -->
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
+                                    <label for="profile_image" style="padding: 8px 16px; background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%); color: #ffffff; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin: 0; box-shadow: 0 4px 12px rgba(59,130,246,0.25); border: none;">
+                                        <i class="bi bi-camera-fill"></i> <span id="upload-btn-text">{{ $user->profile_image ? 'Change / Edit Photo' : 'Upload Photo' }}</span>
+                                    </label>
+                                    <input type="file" id="profile_image" name="profile_image" class="form-control" accept="image/*" style="display: none;" onchange="previewProfileImage(event)">
+                                    
+                                    <!-- Remove Selected Image Button -->
+                                    <button type="button" id="remove-selected-btn" onclick="cancelImageSelection()" style="display: none; padding: 7px 14px; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; align-items: center; gap: 5px;">
+                                        <i class="bi bi-trash3-fill"></i> (Remove)
+                                    </button>
+
+                                    @if($user->profile_image)
+                                        <button type="button" id="remove-active-photo-btn" onclick="removeCurrentProfilePhoto()" style="padding: 7px 14px; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;" title="Remove current profile photo">
+                                            <i class="bi bi-trash3-fill"></i> (Remove)
+                                        </button>
+                                        <span id="active-photo-badge" style="font-size: 0.78rem; color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                                            <i class="bi bi-check-circle-fill"></i> Photo Active
+                                        </span>
+                                    @endif
+                                </div>
+                                <span style="font-size: 0.78rem; color: #64748b; display: block; margin-top: 4px;">JPG, PNG, GIF or WEBP. Max size 100MB.</span>
+                            </div>
                         </div>
 
-                        <!-- Avatar Controls -->
-                        <div style="flex-grow: 1;">
-                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
-                                <label for="profile_image" style="padding: 8px 16px; background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%); color: #ffffff; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; margin: 0; box-shadow: 0 4px 12px rgba(59,130,246,0.25); border: none;">
-                                    <i class="bi bi-camera-fill"></i> {{ $user->profile_image ? 'Change / Edit Photo' : 'Upload Photo' }}
-                                </label>
-                                <input type="file" id="profile_image" name="profile_image" class="form-control" accept="image/*" style="display: none;" onchange="previewProfileImage(event)">
-                                @if($user->profile_image)
-                                    <span style="font-size: 0.78rem; color: #10b981; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
-                                        <i class="bi bi-check-circle-fill"></i> Photo Active
-                                    </span>
-                                @endif
-                            </div>
-                            <span style="font-size: 0.78rem; color: #64748b; display: block; margin-top: 4px;">JPG, PNG, GIF or WEBP. Max size 10MB.</span>
+                        <!-- Right Action: Save Profile Photo Button (Shown after image selection/optimization) -->
+                        <div id="save-photo-action-container" style="display: none; align-items: center;">
+                            <button type="button" id="save-profile-photo-btn" onclick="saveProfilePhotoDirectly()" style="padding: 10px 22px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border-radius: 10px; font-weight: 800; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; border: none; box-shadow: 0 4px 14px rgba(16,185,129,0.35); letter-spacing: 0.3px;">
+                                <i class="bi bi-check2-circle" style="font-size: 1.1rem;"></i> (SAVE PROFILE PHOTO)
+                            </button>
                         </div>
                     </div>
 
                     <!-- Live Image Preview Box -->
-                    <div id="image-preview-container" style="margin-top: 12px; display: none; align-items: center; gap: 15px; background: #eff6ff; padding: 12px 16px; border-radius: 12px; border: 1px dashed var(--primary);">
+                    <div id="image-preview-container" style="margin-top: 12px; display: none; align-items: center; gap: 14px; background: #eff6ff; padding: 12px 16px; border-radius: 12px; border: 1px dashed var(--primary);">
                         <div style="width: 52px; height: 52px; border-radius: 50%; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.12); flex-shrink: 0; border: 2px solid var(--primary);">
                             <img id="image-preview-element" src="#" alt="New Profile Preview" style="width: 100%; height: 100%; object-fit: cover;">
                         </div>
-                        <div style="flex-grow: 1;">
+                        <div>
                             <span style="font-size: 13px; font-weight: 700; color: var(--primary); display: block;">✨ New Image Selected!</span>
                             <span id="image-file-info" style="font-size: 12px; color: var(--text-muted);">Previewing selected file</span>
                         </div>
-                        <button type="button" onclick="cancelImageSelection()" style="background: none; border: none; color: #ef4444; font-size: 1.15rem; cursor: pointer; padding: 2px 6px;" title="Cancel image selection">
-                            <i class="bi bi-x-circle-fill"></i>
-                        </button>
                     </div>
                 </div>
 
@@ -295,27 +312,77 @@
         if (input) input.value = '';
         const previewContainer = document.getElementById('image-preview-container');
         if (previewContainer) previewContainer.style.display = 'none';
+        const saveContainer = document.getElementById('save-photo-action-container');
+        if (saveContainer) saveContainer.style.display = 'none';
+        const removeSelectedBtn = document.getElementById('remove-selected-btn');
+        if (removeSelectedBtn) removeSelectedBtn.style.display = 'none';
+        const activePhotoBtn = document.getElementById('remove-active-photo-btn');
+        if (activePhotoBtn) activePhotoBtn.style.display = 'inline-flex';
+        const currentAvatar = document.getElementById('current-avatar-img');
+        if (currentAvatar && currentAvatar.dataset.originalSrc) {
+            currentAvatar.src = currentAvatar.dataset.originalSrc;
+        }
+        const statusEl = document.querySelector('.image-optimize-status');
+        if (statusEl) statusEl.style.display = 'none';
+    }
+
+    function removeCurrentProfilePhoto() {
+        if (confirm('Are you sure you want to remove your profile photo and reset to the default avatar?')) {
+            const removeInput = document.getElementById('remove_profile_image');
+            if (removeInput) removeInput.value = '1';
+            const form = document.querySelector('form[action="{{ route('dashboard.update') }}"]');
+            if (form) form.submit();
+        }
     }
 
     function previewProfileImage(event) {
         const file = event.target.files[0];
         const previewContainer = document.getElementById('image-preview-container');
         const previewElement = document.getElementById('image-preview-element');
+        const currentAvatar = document.getElementById('current-avatar-img');
         const fileInfo = document.getElementById('image-file-info');
+        const saveContainer = document.getElementById('save-photo-action-container');
+        const removeSelectedBtn = document.getElementById('remove-selected-btn');
+        const activePhotoBtn = document.getElementById('remove-active-photo-btn');
 
         if (file && file.type.startsWith('image/')) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 previewElement.src = e.target.result;
+                if (currentAvatar) currentAvatar.src = e.target.result;
                 previewContainer.style.display = 'flex';
+                if (saveContainer) saveContainer.style.display = 'flex';
+                if (removeSelectedBtn) removeSelectedBtn.style.display = 'inline-flex';
+                if (activePhotoBtn) activePhotoBtn.style.display = 'none';
                 if (fileInfo) {
-                    fileInfo.textContent = file.name;
+                    fileInfo.textContent = file.name + ' (' + (file.size / (1024 * 1024)).toFixed(2) + ' MB)';
                 }
             };
             reader.readAsDataURL(file);
         } else {
-            previewContainer.style.display = 'none';
-            previewElement.src = '#';
+            cancelImageSelection();
+        }
+    }
+
+    function saveProfilePhotoDirectly() {
+        const input = document.getElementById('profile_image');
+        if (!input || !input.files || input.files.length === 0) {
+            alert('Please select a photo to upload first.');
+            return;
+        }
+        const saveBtn = document.getElementById('save-profile-photo-btn');
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="margin-right: 6px;"></span> Saving Photo...';
+        }
+        const form = document.querySelector('form[action="{{ route('dashboard.update') }}"]');
+        if (form) {
+            if (form.reportValidity ? form.reportValidity() : true) {
+                form.submit();
+            } else if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="bi bi-check2-circle" style="font-size: 1.1rem;"></i> (SAVE PROFILE PHOTO)';
+            }
         }
     }
 
