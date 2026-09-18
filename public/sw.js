@@ -1,8 +1,15 @@
-const CACHE_NAME = 'chapconnect-v1';
+const CACHE_NAME = 'chapconnect-v2';
 const urlsToCache = [
   '/',
   '/css/Style.css',
   '/logo.png',
+  '/favicon-32x32.png',
+  '/favicon-16x16.png',
+  '/apple-touch-icon.png',
+  '/images/icons/icon-192x192.png',
+  '/images/icons/icon-512x512.png',
+  '/images/icons/maskable-icon-192x192.png',
+  '/images/icons/maskable-icon-512x512.png',
   '/manifest.json'
 ];
 
