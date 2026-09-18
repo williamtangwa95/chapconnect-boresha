@@ -982,39 +982,286 @@
                         </div>
                     </div>
 
-                    <!-- Card 3: Custom Maintenance Messages (Swahili & English) -->
+                    <!-- Card 3: Homepage Notice & Marquee Banner Category Styling -->
+                    <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); grid-column: 1 / -1;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;">
+                            <div>
+                                <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                    <i class="bi bi-palette-fill" style="color: #6366f1;"></i> Homepage Announcement &amp; Marquee Banner Category
+                                </h3>
+                                <p style="color: #64748b; margin: 4px 0 0 0; font-size: 0.85rem;">Select the appropriate notice category to style the marquee banner with distinct colors, badges, and icons matching the context.</p>
+                            </div>
+                            <label style="display: inline-flex; align-items: center; gap: 10px; background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px 16px; border-radius: 30px; cursor: pointer; font-size: 0.88rem; font-weight: 700; color: #1e293b;">
+                                <span>Show Marquee Banner on Homepage</span>
+                                <input type="checkbox" name="maintenance_banner_enabled" id="admin_banner_enabled_toggle" value="1" {{ ($mDetails['banner_enabled'] ?? true) ? 'checked' : '' }} style="width: 18px; height: 18px; accent-color: #6366f1;">
+                            </label>
+                        </div>
+
+                        <!-- Category Selector Grid -->
+                        <div style="font-weight: 800; font-size: 0.88rem; color: #334155; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Select Banner Category / Tone:
+                        </div>
+                        
+                        @php
+                            $currCat = $mDetails['banner_category'] ?? 'info';
+                            $bannerCatOptions = [
+                                [
+                                    'id' => 'info',
+                                    'label' => 'Information / Instructions',
+                                    'sw' => 'Maelekezo & Taarifa',
+                                    'desc' => 'Best for user guidelines, instructions, tips, and general info.',
+                                    'color' => '#0284c7',
+                                    'bg_gradient' => 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
+                                    'icon' => 'bi-info-circle-fill',
+                                    'emoji' => 'ℹ️',
+                                    'default_title' => 'MAELEKEZO MUHIMU',
+                                ],
+                                [
+                                    'id' => 'warning',
+                                    'label' => 'Warning / Advisory',
+                                    'sw' => 'Tahadhari & Ilani',
+                                    'desc' => 'Best for planned downtimes, scheduled maintenance, caution.',
+                                    'color' => '#d97706',
+                                    'bg_gradient' => 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+                                    'icon' => 'bi-exclamation-triangle-fill',
+                                    'emoji' => '⚠️',
+                                    'default_title' => 'TAHADHARI YA MFUMO',
+                                ],
+                                [
+                                    'id' => 'danger',
+                                    'label' => 'Danger / Restriction Alert',
+                                    'sw' => 'Maboresho & Kufungwa',
+                                    'desc' => 'Best for active maintenance, emergency alerts, restricted access.',
+                                    'color' => '#dc2626',
+                                    'bg_gradient' => 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                                    'icon' => 'bi-exclamation-octagon-fill',
+                                    'emoji' => '🚨',
+                                    'default_title' => 'ILANI YA MABORESHO',
+                                ],
+                                [
+                                    'id' => 'primary',
+                                    'label' => 'Announcement / Official News',
+                                    'sw' => 'Tangazo Kuu la Jukwaa',
+                                    'desc' => 'Best for new features, platform announcements, promotions.',
+                                    'color' => '#4f46e5',
+                                    'bg_gradient' => 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
+                                    'icon' => 'bi-megaphone-fill',
+                                    'emoji' => '📢',
+                                    'default_title' => 'TANGAZO RASMI',
+                                ],
+                                [
+                                    'id' => 'success',
+                                    'label' => 'Success / System Update',
+                                    'sw' => 'Sasisho & Mafanikio',
+                                    'desc' => 'Best for maintenance resolved, feature released, normal state.',
+                                    'color' => '#16a34a',
+                                    'bg_gradient' => 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+                                    'icon' => 'bi-check-circle-fill',
+                                    'emoji' => '✅',
+                                    'default_title' => 'SASISHO LA MFUMO',
+                                ],
+                            ];
+                        @endphp
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 22px;">
+                            @foreach($bannerCatOptions as $bCat)
+                            <label class="banner-cat-card" style="display: flex; flex-direction: column; justify-content: space-between; padding: 14px 16px; border-radius: 12px; border: 2px solid {{ $currCat === $bCat['id'] ? $bCat['color'] : '#e2e8f0' }}; background: {{ $currCat === $bCat['id'] ? 'rgba('.($bCat['id']==='info'?'2,132,199':($bCat['id']==='warning'?'217,119,6':($bCat['id']==='danger'?'220,38,38':($bCat['id']==='primary'?'79,70,229':'22,163,74')))).', 0.05)' : '#ffffff' }}; cursor: pointer; transition: all 0.2s ease; position: relative;" onclick="updateAdminBannerPreview('{{ $bCat['id'] }}', '{{ $bCat['color'] }}', '{{ $bCat['icon'] }}', '{{ $bCat['emoji'] }}', '{{ $bCat['default_title'] }}')">
+                                <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 8px; background: {{ $bCat['color'] }}; color: #ffffff; font-size: 1rem;">
+                                            <i class="bi {{ $bCat['icon'] }}"></i>
+                                        </span>
+                                        <div>
+                                            <div style="font-weight: 800; font-size: 0.92rem; color: #0f172a;">{{ $bCat['label'] }}</div>
+                                            <div style="font-size: 0.76rem; color: #64748b; font-weight: 600;">{{ $bCat['sw'] }}</div>
+                                        </div>
+                                    </div>
+                                    <input type="radio" name="maintenance_banner_category" value="{{ $bCat['id'] }}" {{ $currCat === $bCat['id'] ? 'checked' : '' }} style="accent-color: {{ $bCat['color'] }}; width: 18px; height: 18px; margin: 0;">
+                                </div>
+                                <div style="font-size: 0.78rem; color: #64748b; line-height: 1.4; margin-top: 4px;">
+                                    {{ $bCat['desc'] }}
+                                </div>
+                            </label>
+                            @endforeach
+                        </div>
+
+                        <!-- Optional Custom Badge Overrides -->
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 18px; margin-bottom: 20px;">
+                            <div style="font-weight: 800; font-size: 0.85rem; color: #334155; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                                <i class="bi bi-tag-fill" style="color: #6366f1;"></i> Custom Badge Titles (Optional - Leave blank to use category default):
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                                <div>
+                                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 4px;">Swahili Badge Label (Lebo ya Kiswahili):</label>
+                                    <input type="text" name="maintenance_banner_title_sw" id="admin_banner_title_sw" value="{{ $mDetails['banner_title_sw'] ?? '' }}" placeholder="e.g. MAELEKEZO MUHIMU / TAARIFA" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; font-weight: 600;" oninput="refreshAdminLiveBanner()">
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.8rem; font-weight: 700; color: #475569; margin-bottom: 4px;">English Badge Label (English Notice Label):</label>
+                                    <input type="text" name="maintenance_banner_title_en" id="admin_banner_title_en" value="{{ $mDetails['banner_title_en'] ?? '' }}" placeholder="e.g. INFORMATION NOTICE / ALERT" style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.86rem; font-weight: 600;" oninput="refreshAdminLiveBanner()">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Visual Preview Bar -->
+                        <div style="margin-top: 10px;">
+                            <div style="font-size: 0.8rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                                <i class="bi bi-eye-fill" style="color: #6366f1;"></i> Live Banner Preview (How it will render on Homepage):
+                            </div>
+
+                            @php
+                                $previewEmoji = \App\Services\MaintenanceService::getBannerEmoji($currCat);
+                                $previewIcon = \App\Services\MaintenanceService::getBannerIcon($currCat);
+                                $previewTitle = \App\Services\MaintenanceService::getBannerTitle();
+                            @endphp
+
+                            <div id="admin_live_banner_preview" class="admin-preview-marquee-bar banner-{{ $currCat }}" style="border-radius: 12px; padding: 10px 16px; display: flex; align-items: center; gap: 14px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.3); color: #ffffff; transition: all 0.3s ease;">
+                                <div id="admin_live_preview_badge" style="display: inline-flex; align-items: center; gap: 8px; background: #ffffff; padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; box-shadow: 0 2px 8px rgba(0,0,0,0.15); flex-shrink: 0;">
+                                    <i id="admin_live_preview_icon" class="{{ $previewIcon }}" style="font-size: 0.95rem;"></i>
+                                    <span id="admin_live_preview_text">{{ $previewTitle['desktop'] }}</span>
+                                </div>
+                                <div style="flex: 1; overflow: hidden; white-space: nowrap; font-weight: 600; font-size: 0.92rem; text-shadow: 0 1px 3px rgba(0,0,0,0.4);">
+                                    <span id="admin_live_preview_emoji">{{ $previewEmoji }}</span> <span id="admin_live_preview_message">{{ $mDetails['message_sw'] ?? $mDetails['message'] }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Card 4: Custom Maintenance Messages (Swahili & English) -->
                     <div class="admin-card" style="background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border: 1px solid var(--border-color); grid-column: 1 / -1;">
                         <h3 style="font-size: 1.1rem; font-weight: 800; color: #0f172a; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-                            <i class="bi bi-chat-quote-fill" style="color: #6366f1;"></i> User-Facing Multilingual Maintenance Messages (Swahili &amp; English)
+                            <i class="bi bi-chat-quote-fill" style="color: #6366f1;"></i> User-Facing Multilingual Notice Messages (Swahili &amp; English)
                         </h3>
 
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 16px;">
                             <div>
                                 <label style="display: block; font-weight: 700; color: #334155; font-size: 0.88rem; margin-bottom: 6px;">
-                                    <span>🇹🇿</span> Swahili Restriction Message (Ujumbe wa Kiswahili):
+                                    <span>🇹🇿</span> Swahili Message / Maelezo ya Kiswahili:
                                 </label>
-                                <textarea name="maintenance_message_sw" rows="4" style="width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.92rem; font-family: inherit; box-sizing: border-box;" placeholder="Ingiza ujumbe wa Kiswahili wa kuzuia huduma...">{{ $mDetails['message_sw'] ?? $mDetails['message'] }}</textarea>
+                                <textarea name="maintenance_message_sw" id="admin_maintenance_message_sw" rows="4" style="width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.92rem; font-family: inherit; box-sizing: border-box;" placeholder="Ingiza ujumbe wa Kiswahili wa taarifa/maelekezo au kuzuia huduma..." oninput="refreshAdminLiveBanner()">{{ $mDetails['message_sw'] ?? $mDetails['message'] }}</textarea>
                                 <small style="color: #64748b; font-size: 0.78rem;">Displayed when the website language is Swahili (SW).</small>
                             </div>
 
                             <div>
                                 <label style="display: block; font-weight: 700; color: #334155; font-size: 0.88rem; margin-bottom: 6px;">
-                                    <span>🇬🇧</span> English Restriction Message (English Notice):
+                                    <span>🇬🇧</span> English Message / English Notice:
                                 </label>
-                                <textarea name="maintenance_message_en" rows="4" style="width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.92rem; font-family: inherit; box-sizing: border-box;" placeholder="Enter custom English restriction message to be displayed when language is English...">{{ $mDetails['message_en'] ?? '' }}</textarea>
+                                <textarea name="maintenance_message_en" id="admin_maintenance_message_en" rows="4" style="width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.92rem; font-family: inherit; box-sizing: border-box;" placeholder="Enter custom English notice or restriction message to be displayed when language is English..." oninput="refreshAdminLiveBanner()">{{ $mDetails['message_en'] ?? '' }}</textarea>
                                 <small style="color: #64748b; font-size: 0.78rem;">Displayed when the website language is English (EN).</small>
                             </div>
                         </div>
 
                         <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
                             <button type="submit" style="background: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%); color: #ffffff; border: none; padding: 12px 30px; border-radius: 30px; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4); display: inline-flex; align-items: center; gap: 8px;">
-                                <i class="bi bi-check-lg" style="font-size: 1.1rem;"></i> Save Maintenance Settings
+                                <i class="bi bi-check-lg" style="font-size: 1.1rem;"></i> Save Maintenance &amp; Banner Settings
                             </button>
                         </div>
                     </div>
 
                 </div>
             </form>
+
+            <style>
+                .admin-preview-marquee-bar.banner-info {
+                    background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #075985 100%);
+                    box-shadow: 0 4px 18px rgba(2, 132, 199, 0.35);
+                }
+                .admin-preview-marquee-bar.banner-info #admin_live_preview_badge,
+                .admin-preview-marquee-bar.banner-info #admin_live_preview_icon {
+                    color: #0284c7;
+                }
+
+                .admin-preview-marquee-bar.banner-warning {
+                    background: linear-gradient(135deg, #d97706 0%, #b45309 50%, #78350f 100%);
+                    box-shadow: 0 4px 18px rgba(217, 119, 6, 0.35);
+                }
+                .admin-preview-marquee-bar.banner-warning #admin_live_preview_badge,
+                .admin-preview-marquee-bar.banner-warning #admin_live_preview_icon {
+                    color: #b45309;
+                }
+
+                .admin-preview-marquee-bar.banner-danger {
+                    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+                    box-shadow: 0 4px 18px rgba(220, 38, 38, 0.35);
+                }
+                .admin-preview-marquee-bar.banner-danger #admin_live_preview_badge,
+                .admin-preview-marquee-bar.banner-danger #admin_live_preview_icon {
+                    color: #dc2626;
+                }
+
+                .admin-preview-marquee-bar.banner-primary {
+                    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 50%, #312e81 100%);
+                    box-shadow: 0 4px 18px rgba(79, 70, 229, 0.35);
+                }
+                .admin-preview-marquee-bar.banner-primary #admin_live_preview_badge,
+                .admin-preview-marquee-bar.banner-primary #admin_live_preview_icon {
+                    color: #4f46e5;
+                }
+
+                .admin-preview-marquee-bar.banner-success {
+                    background: linear-gradient(135deg, #16a34a 0%, #15803d 50%, #14532d 100%);
+                    box-shadow: 0 4px 18px rgba(22, 163, 74, 0.35);
+                }
+                .admin-preview-marquee-bar.banner-success #admin_live_preview_badge,
+                .admin-preview-marquee-bar.banner-success #admin_live_preview_icon {
+                    color: #16a34a;
+                }
+            </style>
+
+            <script>
+                function updateAdminBannerPreview(category, color, iconClass, emoji, defaultTitle) {
+                    const cards = document.querySelectorAll('.banner-cat-card');
+                    cards.forEach(c => {
+                        c.style.borderColor = '#e2e8f0';
+                        c.style.background = '#ffffff';
+                    });
+                    
+                    const selectedRadio = document.querySelector('input[name="maintenance_banner_category"][value="' + category + '"]');
+                    if (selectedRadio) {
+                        selectedRadio.checked = true;
+                        const parentLabel = selectedRadio.closest('.banner-cat-card');
+                        if (parentLabel) {
+                            parentLabel.style.borderColor = color;
+                            parentLabel.style.background = 'rgba(' + (category === 'info' ? '2,132,199' : (category === 'warning' ? '217,119,6' : (category === 'danger' ? '220,38,38' : (category === 'primary' ? '79,70,229' : '22,163,74')))) + ', 0.05)';
+                        }
+                    }
+
+                    const banner = document.getElementById('admin_live_banner_preview');
+                    if (banner) {
+                        banner.className = 'admin-preview-marquee-bar banner-' + category;
+                    }
+
+                    const iconElem = document.getElementById('admin_live_preview_icon');
+                    if (iconElem) {
+                        iconElem.className = 'bi ' + iconClass;
+                    }
+
+                    const emojiElem = document.getElementById('admin_live_preview_emoji');
+                    if (emojiElem) {
+                        emojiElem.innerText = emoji;
+                    }
+
+                    refreshAdminLiveBanner(defaultTitle);
+                }
+
+                function refreshAdminLiveBanner(forcedDefaultTitle) {
+                    const customTitleSw = document.getElementById('admin_banner_title_sw')?.value.trim();
+                    const textBadge = document.getElementById('admin_live_preview_text');
+                    if (textBadge) {
+                        if (customTitleSw) {
+                            textBadge.innerText = customTitleSw;
+                        } else if (forcedDefaultTitle) {
+                            textBadge.innerText = forcedDefaultTitle;
+                        }
+                    }
+
+                    const swMsg = document.getElementById('admin_maintenance_message_sw')?.value.trim();
+                    const previewMsg = document.getElementById('admin_live_preview_message');
+                    if (previewMsg && swMsg) {
+                        previewMsg.innerText = swMsg;
+                    }
+                }
+            </script>
         </div>
 
         <!-- ==========================================

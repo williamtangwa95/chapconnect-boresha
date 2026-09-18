@@ -240,7 +240,7 @@ class User extends Authenticatable
             'price' => 0.00,
             'duration' => 365,
             'duration_unit' => 'days',
-            'phone_visibility' => 'No',
+            'phone_visibility' => 'Yes',
             'max_images' => 5,
             'max_videos' => 2,
             'max_news' => 3,
@@ -251,6 +251,106 @@ class User extends Authenticatable
             'is_fallback' => true,
             'is_expired' => true,
         ];
+    }
+
+    /**
+     * Ensure this talent user has an active standard package and invoice.
+     * Guarantees contact visibility and generates standard invoice for billing tab.
+     */
+    public function ensureStandardPackageAndInvoice(): ?Invoice
+    {
+        if ($this->role !== 'user') {
+            return null;
+        }
+
+        // Get standard package with visible contacts
+        $standardPackage = Package::where('name', 'Standard')->where('status', 'Active')->first();
+        if (!$standardPackage) {
+            $standardPackage = Package::where('phone_visibility', 'Yes')->where('status', 'Active')->first();
+        }
+        if (!$standardPackage) {
+            $standardPackage = Package::where('status', 'Active')->first() ?? Package::first();
+        }
+
+        if (!$standardPackage) {
+            return null;
+        }
+
+        $startDate = now()->toDateString();
+        $isLifetime = ($standardPackage->duration_unit === 'lifetime' || $standardPackage->duration == -1);
+        if ($isLifetime) {
+            $endDate = '2099-12-31';
+            $durationSnapshot = -1;
+            $durationUnitSnapshot = 'lifetime';
+        } else {
+            $baseDays = intval($standardPackage->duration);
+            if ($standardPackage->duration_unit === 'months') {
+                $baseDays = $baseDays * 30;
+            } elseif ($standardPackage->duration_unit === 'years') {
+                $baseDays = $baseDays * 365;
+            }
+            $endDate = date('Y-m-d', strtotime($startDate . " + {$baseDays} days"));
+            $durationSnapshot = $standardPackage->duration;
+            $durationUnitSnapshot = $standardPackage->duration_unit;
+        }
+
+        // 1. Ensure Active UserPackage with phone_visibility = Yes
+        $userPackage = $this->activeSubscription;
+        if (!$userPackage) {
+            $userPackage = UserPackage::create([
+                'user_id' => $this->id,
+                'package_id' => $standardPackage->id,
+                'package_name_snapshot' => $standardPackage->name,
+                'price_snapshot' => $standardPackage->price,
+                'duration_snapshot' => $durationSnapshot,
+                'duration_unit_snapshot' => $durationUnitSnapshot,
+                'phone_visibility_snapshot' => 'Yes',
+                'max_images_snapshot' => $standardPackage->max_images,
+                'max_videos_snapshot' => $standardPackage->max_videos,
+                'max_news_snapshot' => $standardPackage->max_news,
+                'package_type_snapshot' => $standardPackage->package_type,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'status' => 'active',
+            ]);
+        } else {
+            // Update phone visibility snapshot to Yes to guarantee contacts are visible
+            if ($userPackage->phone_visibility_snapshot !== 'Yes') {
+                $userPackage->update([
+                    'phone_visibility_snapshot' => 'Yes',
+                ]);
+            }
+        }
+
+        $this->unsetRelation('activeSubscription');
+
+        // 2. Ensure Invoice exists
+        $latestInvoice = $this->invoices()->latest()->first();
+        if (!$latestInvoice) {
+            $invoiceNumber = Invoice::generateInvoiceNumber();
+            $isPaid = $this->hasConfirmedPayment() || $this->is_published;
+
+            $latestInvoice = Invoice::create([
+                'invoice_number' => $invoiceNumber,
+                'user_id' => $this->id,
+                'user_package_id' => $userPackage->id,
+                'package_id' => $standardPackage->id,
+                'package_name' => $standardPackage->name,
+                'start_date' => $userPackage->start_date,
+                'end_date' => $userPackage->end_date,
+                'duration' => $userPackage->duration_snapshot,
+                'duration_unit' => $userPackage->duration_unit_snapshot,
+                'amount' => $standardPackage->price,
+                'amount_paid' => $isPaid ? $standardPackage->price : 0.00,
+                'payment_status' => $isPaid ? 'Paid' : 'Unpaid',
+                'invoice_date' => $userPackage->start_date,
+                'due_date' => date('Y-m-d', strtotime($userPackage->start_date . ' + 7 days')),
+                'paid_at' => $isPaid ? now() : null,
+                'notes' => 'Standard Package Invoice - Contact Visibility Enabled',
+            ]);
+        }
+
+        return $latestInvoice;
     }
 
     /**

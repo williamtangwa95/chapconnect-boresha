@@ -20,20 +20,20 @@
             <h2>{{ $talent->name }}</h2>
             <p style="color: var(--text-muted); font-size: 14px; font-weight: 500; margin-bottom: 12px;">{{ __($talent->category_label) }}</p>
 
-            <div class="like-container" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 18px; gap: 4px; flex-wrap: nowrap; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; padding: 12px 0;">
+            <div class="like-container" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 16px; gap: 4px; flex-wrap: nowrap; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; padding: 10px 0;">
                 <div class="like" style="text-align: center; flex: 1;">
-                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;"><i class="bi bi-heart" style="margin-right: 4px;"></i>{{ __('Like') }}</button>
-                    <span class="like-count" id="likeCount_{{ $talent->id }}" style="display: block; font-size: 0.95rem; font-weight: 800; margin-top: 2px;">{{ $talent->likes_received_count ?? 0 }}</span>
+                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})" style="font-size: 0.68rem; font-weight: 700; white-space: nowrap; padding: 4px 6px;"><i class="bi bi-heart" style="margin-right: 3px;"></i>{{ __('Like') }}</button>
+                    <span class="like-count" id="likeCount_{{ $talent->id }}" style="display: block; font-size: 0.82rem; font-weight: 800; margin-top: 2px;">{{ $talent->likes_received_count ?? 0 }}</span>
                 </div>
                 <div class="comment" style="text-align: center; flex: 1;">
                     <a href="#comments-tab" style="text-decoration:none;" onclick="$('.menu a[href=\'#comments-tab\']').click();">
-                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;"><i class="bi bi-chat-dots" style="margin-right: 4px; color: #0284c7;"></i>{{ __('Comments') }}</button>
+                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}" style="font-size: 0.68rem; font-weight: 700; white-space: nowrap; padding: 4px 6px;"><i class="bi bi-chat-dots" style="margin-right: 3px; color: #0284c7;"></i>{{ __('Comments') }}</button>
                     </a>
-                    <span class="comment-count {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentCount_{{ $talent->id }}" style="display: block; font-size: 0.95rem; font-weight: 800; margin-top: 2px;">{{ $talent->comments_received_count ?? 0 }}</span>
+                    <span class="comment-count {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentCount_{{ $talent->id }}" style="display: block; font-size: 0.82rem; font-weight: 800; margin-top: 2px;">{{ $talent->comments_received_count ?? 0 }}</span>
                 </div>
                 <div class="follow" style="text-align: center; flex: 1;">
-                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})" style="font-size: 0.78rem; font-weight: 700; white-space: nowrap;"><i class="bi bi-person-plus" style="margin-right: 4px;"></i>{{ __('Followers') }}</button>
-                    <span class="followers-count" id="followersCount_{{ $talent->id }}" style="display: block; font-size: 0.95rem; font-weight: 800; margin-top: 2px;">{{ $talent->followers_received_count ?? 0 }}</span>
+                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})" style="font-size: 0.68rem; font-weight: 700; white-space: nowrap; padding: 4px 6px;"><i class="bi bi-person-plus" style="margin-right: 3px;"></i>{{ __('Followers') }}</button>
+                    <span class="followers-count" id="followersCount_{{ $talent->id }}" style="display: block; font-size: 0.82rem; font-weight: 800; margin-top: 2px;">{{ $talent->followers_received_count ?? 0 }}</span>
                 </div>
             </div>
 

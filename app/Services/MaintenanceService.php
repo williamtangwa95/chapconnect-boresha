@@ -184,6 +184,137 @@ class MaintenanceService
     }
 
     /**
+     * Check if marquee banner on homepage is explicitly enabled or auto-enabled by maintenance/restrictions.
+     */
+    public static function isBannerVisible(): bool
+    {
+        $bannerSetting = SystemSetting::get('maintenance_banner_enabled', null);
+
+        // If explicitly set, respect setting ('1' = show, '0' = hide)
+        if ($bannerSetting !== null && $bannerSetting !== '') {
+            return $bannerSetting === '1';
+        }
+
+        // Fallback: show if master maintenance or any restriction is active
+        return self::isEnabled() || self::isLoginRestrictedFlag() || self::isRegisterRestrictedFlag() || self::isConnectRestrictedFlag();
+    }
+
+    /**
+     * Get banner category type ('info', 'warning', 'danger', 'primary', 'success').
+     */
+    public static function getBannerCategory(): string
+    {
+        $category = trim(strtolower((string) SystemSetting::get('maintenance_banner_category', '')));
+
+        $validCategories = ['info', 'warning', 'danger', 'primary', 'success'];
+        if (in_array($category, $validCategories, true)) {
+            return $category;
+        }
+
+        // Default: if restrictions or maintenance is active, default to 'danger', else 'info'
+        if (self::isEnabled() || self::isLoginRestrictedFlag() || self::isRegisterRestrictedFlag() || self::isConnectRestrictedFlag()) {
+            return 'danger';
+        }
+
+        return 'info';
+    }
+
+    /**
+     * Get badge icon class based on category.
+     */
+    public static function getBannerIcon(?string $category = null): string
+    {
+        $cat = $category ?: self::getBannerCategory();
+        switch ($cat) {
+            case 'info':
+                return 'bi bi-info-circle-fill';
+            case 'warning':
+                return 'bi bi-exclamation-triangle-fill';
+            case 'primary':
+                return 'bi bi-megaphone-fill';
+            case 'success':
+                return 'bi bi-check-circle-fill';
+            case 'danger':
+            default:
+                return 'bi bi-exclamation-octagon-fill';
+        }
+    }
+
+    /**
+     * Get banner marquee emoji based on category.
+     */
+    public static function getBannerEmoji(?string $category = null): string
+    {
+        $cat = $category ?: self::getBannerCategory();
+        switch ($cat) {
+            case 'info':
+                return 'ℹ️';
+            case 'warning':
+                return '⚠️';
+            case 'primary':
+                return '📢';
+            case 'success':
+                return '✅';
+            case 'danger':
+            default:
+                return '🚨';
+        }
+    }
+
+    /**
+     * Get banner badge titles (desktop & mobile).
+     */
+    public static function getBannerTitle(?string $locale = null): array
+    {
+        $currentLocale = strtolower($locale ?: app()->getLocale());
+        $cat = self::getBannerCategory();
+
+        $customSw = trim((string) SystemSetting::get('maintenance_banner_title_sw', ''));
+        $customEn = trim((string) SystemSetting::get('maintenance_banner_title_en', ''));
+
+        if ($currentLocale === 'en' && !empty($customEn)) {
+            return [
+                'desktop' => $customEn,
+                'mobile' => $customEn,
+            ];
+        }
+
+        if ($currentLocale !== 'en' && !empty($customSw)) {
+            return [
+                'desktop' => $customSw,
+                'mobile' => $customSw,
+            ];
+        }
+
+        // Default badge labels per category
+        $defaults = [
+            'info' => [
+                'sw' => ['desktop' => 'MAELEKEZO MUHIMU', 'mobile' => 'MAELEKEZO'],
+                'en' => ['desktop' => 'INFORMATION NOTICE', 'mobile' => 'INFO'],
+            ],
+            'warning' => [
+                'sw' => ['desktop' => 'TAHADHARI YA MFUMO', 'mobile' => 'ILANI'],
+                'en' => ['desktop' => 'IMPORTANT WARNING', 'mobile' => 'WARNING'],
+            ],
+            'danger' => [
+                'sw' => ['desktop' => 'ILANI YA MABORESHO', 'mobile' => 'MABORESHO'],
+                'en' => ['desktop' => 'SYSTEM ALERT', 'mobile' => 'ALERT'],
+            ],
+            'primary' => [
+                'sw' => ['desktop' => 'TANGAZO RASMI', 'mobile' => 'TANGAZO'],
+                'en' => ['desktop' => 'GENERAL NOTICE', 'mobile' => 'NOTICE'],
+            ],
+            'success' => [
+                'sw' => ['desktop' => 'SASISHO LA MFUMO', 'mobile' => 'SASISHO'],
+                'en' => ['desktop' => 'SYSTEM UPDATE', 'mobile' => 'UPDATE'],
+            ],
+        ];
+
+        $langKey = $currentLocale === 'en' ? 'en' : 'sw';
+        return $defaults[$cat][$langKey] ?? $defaults['danger'][$langKey];
+    }
+
+    /**
      * Helper array of all current maintenance details.
      */
     public static function getDetails(): array
@@ -205,6 +336,10 @@ class MaintenanceService
             'message' => self::getMessage(),
             'message_sw' => SystemSetting::get('maintenance_message_sw', '') ?: SystemSetting::get('maintenance_message', ''),
             'message_en' => SystemSetting::get('maintenance_message_en', ''),
+            'banner_enabled' => SystemSetting::get('maintenance_banner_enabled', '1') === '1',
+            'banner_category' => self::getBannerCategory(),
+            'banner_title_sw' => SystemSetting::get('maintenance_banner_title_sw', ''),
+            'banner_title_en' => SystemSetting::get('maintenance_banner_title_en', ''),
         ];
     }
 }

@@ -629,6 +629,9 @@ $media->delete();
             'is_published' => true,
         ]);
 
+        // Automatically assign standard package and generate invoice
+        $user->ensureStandardPackageAndInvoice();
+
         // Notify Staff of New Talent Registration
         $staffMembers = User::whereIn('role', ['admin', 'customer_care'])->get();
         foreach ($staffMembers as $staff) {
@@ -822,12 +825,20 @@ $media->delete();
             'maintenance_message' => 'nullable|string|max:1000',
             'maintenance_message_sw' => 'nullable|string|max:1000',
             'maintenance_message_en' => 'nullable|string|max:1000',
+            'maintenance_banner_category' => 'nullable|string|in:info,warning,danger,primary,success',
+            'maintenance_banner_title_sw' => 'nullable|string|max:100',
+            'maintenance_banner_title_en' => 'nullable|string|max:100',
         ]);
 
         \App\Models\SystemSetting::set('maintenance_enabled', $request->has('maintenance_enabled') ? '1' : '0');
         \App\Models\SystemSetting::set('maintenance_restrict_login', $request->has('maintenance_restrict_login') ? '1' : '0');
         \App\Models\SystemSetting::set('maintenance_restrict_register', $request->has('maintenance_restrict_register') ? '1' : '0');
         \App\Models\SystemSetting::set('maintenance_restrict_connect', $request->has('maintenance_restrict_connect') ? '1' : '0');
+
+        \App\Models\SystemSetting::set('maintenance_banner_enabled', $request->has('maintenance_banner_enabled') ? '1' : '0');
+        \App\Models\SystemSetting::set('maintenance_banner_category', $request->input('maintenance_banner_category', 'info'));
+        \App\Models\SystemSetting::set('maintenance_banner_title_sw', trim((string) $request->input('maintenance_banner_title_sw', '')));
+        \App\Models\SystemSetting::set('maintenance_banner_title_en', trim((string) $request->input('maintenance_banner_title_en', '')));
 
         \App\Models\SystemSetting::set('maintenance_start_at', $request->input('maintenance_start_at') ?: '');
         \App\Models\SystemSetting::set('maintenance_end_at', $request->input('maintenance_end_at') ?: '');
@@ -839,12 +850,16 @@ $media->delete();
         \App\Models\SystemSetting::set('maintenance_message_sw', $swMsg);
         \App\Models\SystemSetting::set('maintenance_message_en', $enMsg);
 
-        \App\Models\UserActivityLog::log('UPDATED', 'Updated System Maintenance & Access Control settings.', [
+        \App\Models\UserActivityLog::log('UPDATED', 'Updated System Maintenance, Banner & Access Control settings.', [
             'new' => [
                 'enabled' => $request->has('maintenance_enabled') ? '1' : '0',
                 'restrict_login' => $request->has('maintenance_restrict_login') ? '1' : '0',
                 'restrict_register' => $request->has('maintenance_restrict_register') ? '1' : '0',
                 'restrict_connect' => $request->has('maintenance_restrict_connect') ? '1' : '0',
+                'banner_enabled' => $request->has('maintenance_banner_enabled') ? '1' : '0',
+                'banner_category' => $request->input('maintenance_banner_category', 'info'),
+                'banner_title_sw' => $request->input('maintenance_banner_title_sw'),
+                'banner_title_en' => $request->input('maintenance_banner_title_en'),
                 'start_at' => $request->input('maintenance_start_at'),
                 'end_at' => $request->input('maintenance_end_at'),
                 'message_sw' => $swMsg,
@@ -852,7 +867,7 @@ $media->delete();
             ]
         ], null, 'SystemSetting');
 
-        return redirect()->back()->with('success', 'System Maintenance & Access Control settings updated successfully.');
+        return redirect()->back()->with('success', 'System Maintenance & Notice Banner settings updated successfully.');
     }
 
     /**
@@ -1047,6 +1062,37 @@ $media->delete();
         }
 
         return redirect()->back()->with('success', "Package switched to '{$package->name}' for user '{$user->name}' successfully (Existing payment preserved).");
+    }
+
+    /**
+     * Batch generate standard package & invoice for all talents who currently have no invoices.
+     */
+    public function generateMissingInvoices()
+    {
+        $talentsWithoutInvoices = User::where('role', 'user')->whereDoesntHave('invoices')->get();
+        $count = 0;
+
+        foreach ($talentsWithoutInvoices as $talent) {
+            $inv = $talent->ensureStandardPackageAndInvoice();
+            if ($inv) {
+                $count++;
+            }
+        }
+
+        // Also ensure all existing talent user packages have phone_visibility = 'Yes' for Standard package
+        $standardPackage = \App\Models\Package::where('name', 'Standard')->where('status', 'Active')->first();
+        if ($standardPackage) {
+            \App\Models\UserPackage::where('package_id', $standardPackage->id)
+                ->where('status', 'active')
+                ->where('phone_visibility_snapshot', '!=', 'Yes')
+                ->update(['phone_visibility_snapshot' => 'Yes']);
+        }
+
+        \App\Models\UserActivityLog::log('CREATED', "Generated standard package invoices for {$count} talents without billing records.", [
+            'count' => $count
+        ], null, 'Invoice');
+
+        return redirect()->back()->with('success', "Processed talent accounts: Generated standard invoices and ensured contact visibility for {$count} talents.");
     }
 
     /**

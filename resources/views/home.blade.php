@@ -326,16 +326,23 @@
 @endsection
 
 @section('content')
-@if(\App\Services\MaintenanceService::isEnabled() || \App\Services\MaintenanceService::isLoginRestrictedFlag() || \App\Services\MaintenanceService::isRegisterRestrictedFlag() || \App\Services\MaintenanceService::isConnectRestrictedFlag())
-<div class="maintenance-marquee-bar">
+@if(\App\Services\MaintenanceService::isBannerVisible())
+@php
+    $bannerCategory = \App\Services\MaintenanceService::getBannerCategory();
+    $bannerTitle = \App\Services\MaintenanceService::getBannerTitle();
+    $bannerIcon = \App\Services\MaintenanceService::getBannerIcon();
+    $bannerEmoji = \App\Services\MaintenanceService::getBannerEmoji();
+    $bannerMsg = \App\Services\MaintenanceService::getMessage();
+@endphp
+<div class="maintenance-marquee-bar banner-{{ $bannerCategory }}">
     <div class="maintenance-badge">
-        <i class="bi bi-megaphone-fill maintenance-icon"></i>
-        <span class="badge-text-desktop">{{ __('GENERAL NOTICE') }}</span>
-        <span class="badge-text-mobile">{{ __('NOTICE') }}</span>
+        <i class="{{ $bannerIcon }} maintenance-icon"></i>
+        <span class="badge-text-desktop">{{ $bannerTitle['desktop'] }}</span>
+        <span class="badge-text-mobile">{{ $bannerTitle['mobile'] }}</span>
     </div>
     <div class="maintenance-marquee-content">
         <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();">
-            📢 {{ \App\Services\MaintenanceService::getMessage() }}
+            {{ $bannerEmoji }} {{ $bannerMsg }}
         </marquee>
     </div>
 </div>
@@ -344,16 +351,61 @@
         max-width: 1550px;
         width: 98%;
         margin: 10px auto 14px auto;
-        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
         color: #ffffff;
         padding: 10px 16px;
         border-radius: 12px;
-        box-shadow: 0 4px 18px rgba(220, 38, 38, 0.4);
         border: 1px solid rgba(255, 255, 255, 0.3);
         display: flex;
         align-items: center;
         gap: 14px;
         overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    /* Category Specific Color Schemes */
+    .maintenance-marquee-bar.banner-info {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #075985 100%);
+        box-shadow: 0 4px 18px rgba(2, 132, 199, 0.4);
+    }
+    .maintenance-marquee-bar.banner-info .maintenance-badge,
+    .maintenance-marquee-bar.banner-info .maintenance-icon {
+        color: #0284c7;
+    }
+
+    .maintenance-marquee-bar.banner-warning {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 50%, #78350f 100%);
+        box-shadow: 0 4px 18px rgba(217, 119, 6, 0.4);
+    }
+    .maintenance-marquee-bar.banner-warning .maintenance-badge,
+    .maintenance-marquee-bar.banner-warning .maintenance-icon {
+        color: #b45309;
+    }
+
+    .maintenance-marquee-bar.banner-danger {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 50%, #991b1b 100%);
+        box-shadow: 0 4px 18px rgba(220, 38, 38, 0.4);
+    }
+    .maintenance-marquee-bar.banner-danger .maintenance-badge,
+    .maintenance-marquee-bar.banner-danger .maintenance-icon {
+        color: #dc2626;
+    }
+
+    .maintenance-marquee-bar.banner-primary {
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 50%, #312e81 100%);
+        box-shadow: 0 4px 18px rgba(79, 70, 229, 0.4);
+    }
+    .maintenance-marquee-bar.banner-primary .maintenance-badge,
+    .maintenance-marquee-bar.banner-primary .maintenance-icon {
+        color: #4f46e5;
+    }
+
+    .maintenance-marquee-bar.banner-success {
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 50%, #14532d 100%);
+        box-shadow: 0 4px 18px rgba(22, 163, 74, 0.4);
+    }
+    .maintenance-marquee-bar.banner-success .maintenance-badge,
+    .maintenance-marquee-bar.banner-success .maintenance-icon {
+        color: #15803d;
     }
 
     .maintenance-badge {
@@ -361,7 +413,6 @@
         align-items: center;
         gap: 8px;
         background: #ffffff;
-        color: #dc2626;
         padding: 5px 12px;
         border-radius: 20px;
         flex-shrink: 0;
@@ -374,7 +425,6 @@
     }
 
     .maintenance-icon {
-        color: #dc2626;
         font-size: 1rem;
         animation: wrenchPulse 1.8s infinite ease-in-out;
     }
@@ -402,12 +452,10 @@
     }
 
     @keyframes wrenchPulse {
-
         0%,
         100% {
             transform: scale(1) rotate(0deg);
         }
-
         50% {
             transform: scale(1.15) rotate(-10deg);
         }

@@ -180,6 +180,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/admin/invoices/{id}', [AdminController::class, 'deleteInvoice'])->name('admin.invoices.delete');
     Route::post('/admin/invoices/bulk-delete', [AdminController::class, 'bulkDeleteInvoices'])->name('admin.invoices.bulk-delete');
     Route::post('/admin/invoices/keep-one-per-user', [AdminController::class, 'keepOneInvoicePerUser'])->name('admin.invoices.keep-one');
+    Route::post('/admin/invoices/generate-missing', [AdminController::class, 'generateMissingInvoices'])->name('admin.invoices.generate-missing');
 
     // Talent Payment Request Administration Routes
     Route::post('/admin/settings/payment-criteria', [AdminController::class, 'updatePaymentCriteria'])->name('admin.settings.payment-criteria');

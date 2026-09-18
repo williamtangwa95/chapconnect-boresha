@@ -41,6 +41,12 @@ class DashboardController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = auth()->user();
+
+        // Ensure talent user has standard package & invoice setup
+        if ($user && $user->role === 'user') {
+            $user->ensureStandardPackageAndInvoice();
+        }
+
         $user->loadCount(['likesReceived', 'followersReceived', 'commentsReceived']);
         $completion = self::completionScore($user);
 

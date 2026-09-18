@@ -10,18 +10,25 @@
             <div class="admin-header" style="margin-bottom: 25px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 15px;">
                 <div>
                     <h1 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; display: flex; align-items: center; gap: 10px;">
-                        <i class="bi bi-receipt-cutoff" style="color: #ef4444;"></i> Invoices & Billing Operations
+                        <i class="bi bi-receipt-cutoff" style="color: #ef4444;"></i> Invoices &amp; Billing Operations
                     </h1>
                     <p style="color: #64748b; margin: 0; font-size: 0.92rem;">Review generated bills, record payments, manage duplicate user bills, and track balances.</p>
                 </div>
-                @if($usersWithMultiple > 0)
-                <div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <form action="{{ route('admin.invoices.generate-missing') }}" method="POST" style="margin: 0;">
+                        @csrf
+                        <button type="submit"
+                            style="padding: 9px 16px; font-size: 0.85rem; border: none; color: #fff; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); cursor: pointer; box-shadow: 0 4px 12px rgba(99,102,241,0.25); display: inline-flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-magic"></i> Generate Missing Invoices for Talents
+                        </button>
+                    </form>
+                    @if($usersWithMultiple > 0)
                     <button type="button" class="btn-clean-all-duplicates"
                         style="padding: 9px 16px; font-size: 0.85rem; border: none; color: #fff; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); cursor: pointer; box-shadow: 0 4px 12px rgba(245,158,11,0.25); display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="bi bi-magic"></i> Clean Duplicate Invoices ({{ $usersWithMultiple }} Talents)
+                        <i class="bi bi-trash3"></i> Clean Duplicate Invoices ({{ $usersWithMultiple }} Talents)
                     </button>
+                    @endif
                 </div>
-                @endif
             </div>
 
             <!-- Financial Summary Cards -->
