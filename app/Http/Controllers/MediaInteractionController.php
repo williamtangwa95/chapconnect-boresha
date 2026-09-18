@@ -281,6 +281,7 @@ class MediaInteractionController extends Controller
     {
         $offset = (int) $request->input('offset', 20);
         $limit = 20;
+        $mediaSeed = (int) session('media_seed', 12345);
 
         // Fetch 1 extra item to check if more items exist without running invalid count() offset query
         $mediaItems = Media::publiclyVisible()
@@ -290,7 +291,7 @@ class MediaInteractionController extends Controller
             })
             ->with('user')
             ->withCount(['likes', 'comments', 'shares'])
-            ->latest()
+            ->orderByRaw("(id * {$mediaSeed} + 17) % 999983")
             ->skip($offset)
             ->take($limit + 1)
             ->get();

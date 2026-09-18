@@ -74,14 +74,18 @@ class HomeController extends Controller
             return $countB <=> $countA; // descending
         });
 
-        // Fetch recent media uploads for sidebar preview (photos & videos, approved & visible only)
+        // Manage random seed in session for media feed so pagination / load more remains consistent without duplicates
+        $mediaSeed = rand(1, 999999);
+        session(['media_seed' => $mediaSeed]);
+
+        // Fetch media uploads for sidebar preview (photos & videos, approved & visible only) in randomized order
         $recentMedia = \App\Models\Media::publiclyVisible()->whereHas('user', function($q) {
             $q->where('role', 'user')
               ->where('is_published', true);
         })
         ->with('user')
         ->withCount(['likes', 'comments', 'shares'])
-        ->latest()
+        ->orderByRaw("(id * {$mediaSeed} + 17) % 999983")
         ->take(20)
         ->get();
 

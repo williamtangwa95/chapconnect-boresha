@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'ChapConnect - Manage Videos')
+@section('title', __('ChapConnect - Post Videos'))
 
 @section('styles')
 <style>
@@ -290,7 +290,7 @@
                             <i class="bi bi-link-45deg"></i> {{ __('Paste Link') }}
                         </a>
                         <a href="#formFileUpload" class="btn-tab" style="padding: 6px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; text-decoration: none; background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; display: inline-flex; align-items: center; gap: 5px;">
-                            <i class="bi bi-file-earmark-arrow-up-fill"></i> {{ __('Upload File') }}
+                            <i class="bi bi-camera-video-fill"></i> {{ __('Post Video File') }}
                         </a>
                     </div>
                 </div>
@@ -357,7 +357,7 @@
                                 <i class="bi bi-file-earmark-arrow-up-fill"></i>
                             </div>
                             <div>
-                                <h3 style="margin: 0; font-size: 1.02rem; font-weight: 800; color: #0f172a;">{{ __('Option 2: Upload Video File from Device') }}</h3>
+                                <h3 style="margin: 0; font-size: 1.02rem; font-weight: 800; color: #0f172a;">{{ __('Option 2: Post Video File from Device') }}</h3>
                                 <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: #64748b;">{{ __('Upload MP4, MOV, WEBM, or MKV files from your device') }}</p>
                             </div>
                         </div>
@@ -393,7 +393,7 @@
                     </div>
 
                     <button type="submit" id="btnSubmitFileUpload" class="videos-btn-submit" style="padding: 10px 22px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 14px rgba(99,102,241,0.3); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.86rem; transition: opacity 0.2s ease;">
-                        <i class="bi bi-upload"></i> {{ __('Upload Video File') }}
+                        <i class="bi bi-camera-video-fill"></i> {{ __('Post Video File') }}
                     </button>
 
                     <!-- Inline Real-Time Upload Progress Box (Always visible in form card during upload) -->
@@ -839,7 +839,7 @@
                             btnSubmitFileUpload.disabled = false;
                             btnSubmitFileUpload.style.opacity = '1';
                             btnSubmitFileUpload.style.cursor = 'pointer';
-                            btnSubmitFileUpload.innerHTML = `<i class="bi bi-upload"></i> ${'{{ __("Upload Video File") }}'}`;
+                            btnSubmitFileUpload.innerHTML = `<i class="bi bi-camera-video-fill"></i> ${'{{ __("Post Video File") }}'}`;
                             let msg = (res && res.message) ? res.message : "Server error or upload limit exceeded. Please select a smaller clip.";
                             alert("Upload Failed: " + msg);
                             return;
@@ -874,7 +874,7 @@
                         btnSubmitFileUpload.disabled = false;
                         btnSubmitFileUpload.style.opacity = '1';
                         btnSubmitFileUpload.style.cursor = 'pointer';
-                        btnSubmitFileUpload.innerHTML = `<i class="bi bi-upload"></i> ${'{{ __("Upload Video File") }}'}`;
+                        btnSubmitFileUpload.innerHTML = `<i class="bi bi-camera-video-fill"></i> ${'{{ __("Post Video File") }}'}`;
                         let errMsg = "An error occurred while uploading your video file.";
                         if (err.status === 413) {
                             errMsg = "The video file exceeds web server limits (HTTP 413). Please select a smaller clip or ask your server administrator to increase Nginx client_max_body_size / PHP post_max_size.";

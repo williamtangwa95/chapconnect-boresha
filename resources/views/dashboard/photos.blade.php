@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'ChapConnect - Manage Photos')
+@section('title', __('ChapConnect - Post Photos'))
 
 @section('styles')
 <style>
@@ -228,7 +228,7 @@
                         <i class="bi bi-cloud-arrow-up-fill"></i>
                     </div>
                     <div style="flex-grow: 1;">
-                        <h3 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a;">{{ __('Upload Photos') }}</h3>
+                        <h3 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #0f172a;">{{ __('Post Photos') }}</h3>
                     </div>
                     <span style="font-size: 0.72rem; color: #64748b; font-weight: 600; background: #e2e8f0; padding: 2px 8px; border-radius: 10px;">{{ __('Max 100MB') }}</span>
                 </div>
@@ -272,7 +272,7 @@
                 </div>
 
                 <button type="submit" id="btnSubmitPhoto" class="photos-btn-submit" style="padding: 10px 22px; border-radius: 10px; font-weight: 700; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none; color: #fff; box-shadow: 0 4px 14px rgba(99,102,241,0.3); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-size: 0.86rem; transition: opacity 0.2s ease;">
-                    <i class="bi bi-upload"></i> {{ __('Upload Photos') }}
+                    <i class="bi bi-camera-fill"></i> {{ __('Post Photos') }}
                 </button>
 
                 <!-- Inline Real-Time Upload Progress Box -->
@@ -607,7 +607,7 @@
                             btnSubmitPhoto.disabled = false;
                             btnSubmitPhoto.style.opacity = '1';
                             btnSubmitPhoto.style.cursor = 'pointer';
-                            btnSubmitPhoto.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i> ${'{{ __("Upload Photos") }}'}`;
+                            btnSubmitPhoto.innerHTML = `<i class="bi bi-camera-fill"></i> ${'{{ __("Post Photos") }}'}`;
                             let msg = (res && res.message) ? res.message : "Server error or upload limit exceeded. Please select smaller images.";
                             alert("Upload Failed: " + msg);
                             return;
@@ -642,7 +642,7 @@
                         btnSubmitPhoto.disabled = false;
                         btnSubmitPhoto.style.opacity = '1';
                         btnSubmitPhoto.style.cursor = 'pointer';
-                        btnSubmitPhoto.innerHTML = `<i class="bi bi-cloud-arrow-up-fill"></i> ${'{{ __("Upload Photos") }}'}`;
+                        btnSubmitPhoto.innerHTML = `<i class="bi bi-camera-fill"></i> ${'{{ __("Post Photos") }}'}`;
                         let errMsg = "An error occurred while uploading your photo file(s).";
                         if (err.status === 413) {
                             errMsg = "The image payload exceeds web server limits (HTTP 413). Please select smaller files or ask server administrator to increase upload limits.";

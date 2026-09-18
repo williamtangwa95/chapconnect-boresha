@@ -46,7 +46,7 @@ class StaffTalentManagementController extends Controller
 
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $talent->id,
+            'email' => 'nullable|string|email|max:255|unique:users,email,' . $talent->id,
             'phone' => 'nullable|string|max:30',
             'category' => 'required|string|exists:categories,slug',
             'country' => 'nullable|string|max:100',
@@ -85,7 +85,7 @@ class StaffTalentManagementController extends Controller
 
         $data = [
             'name' => $request->name,
-            'email' => $request->email,
+            'email' => $request->filled('email') ? $request->email : null,
             'category' => $categorySlug,
             'category_label' => $categoryLabel,
             'country' => $request->country ?? 'Tanzania',

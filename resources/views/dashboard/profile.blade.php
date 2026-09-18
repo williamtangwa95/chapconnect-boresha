@@ -108,8 +108,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="email" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Account Email Address</label>
-                        <input type="email" id="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" required style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
+                        <label for="email" style="color: #475569; font-weight: 600; margin-bottom: 6px; display: block;">Account Email Address <span style="font-weight: 400; color: #64748b; font-size: 0.8rem;">(Optional)</span></label>
+                        <input type="email" id="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $user->email) }}" placeholder="Enter email address" style="background: #fff; color: #1e293b; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px;">
                         @error('email')
                             <span style="color: #ef4444; font-size: 0.78rem; font-weight: 600; margin-top: 4px; display: block;">{{ $message }}</span>
                         @enderror

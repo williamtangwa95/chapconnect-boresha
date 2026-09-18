@@ -75,13 +75,13 @@
             <i class="bi bi-person-gear" style="font-size: 1.1rem;"></i> Profile Information
         </button>
         <button type="button" class="staff-tab-btn" data-tab="photos" onclick="switchStaffTab('photos')" style="padding: 12px 22px; font-weight: 700; font-size: 0.92rem; border: none; background: none; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; transition: all 0.2s ease;">
-            <i class="bi bi-camera-fill" style="font-size: 1.1rem;"></i> Manage Photos ({{ count($photos) }})
+            <i class="bi bi-camera-fill" style="font-size: 1.1rem;"></i> Post Photos ({{ count($photos) }})
         </button>
         <button type="button" class="staff-tab-btn" data-tab="videos" onclick="switchStaffTab('videos')" style="padding: 12px 22px; font-weight: 700; font-size: 0.92rem; border: none; background: none; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; transition: all 0.2s ease;">
-            <i class="bi bi-camera-video-fill" style="font-size: 1.1rem;"></i> Manage Videos ({{ count($videos) }})
+            <i class="bi bi-camera-video-fill" style="font-size: 1.1rem;"></i> Post Videos ({{ count($videos) }})
         </button>
         <button type="button" class="staff-tab-btn" data-tab="news" onclick="switchStaffTab('news')" style="padding: 12px 22px; font-weight: 700; font-size: 0.92rem; border: none; background: none; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; transition: all 0.2s ease;">
-            <i class="bi bi-newspaper" style="font-size: 1.1rem;"></i> Manage News ({{ count($newsItems) }})
+            <i class="bi bi-newspaper" style="font-size: 1.1rem;"></i> Post News ({{ count($newsItems) }})
         </button>
     </div>
 
@@ -103,8 +103,8 @@
                         <input type="text" name="name" value="{{ old('name', $talent->name) }}" required style="width: 100%; padding: 11px 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.92rem; color: #0f172a; box-sizing: border-box; background: #fff; transition: border-color 0.2s;">
                     </div>
                     <div>
-                        <label style="display: block; font-weight: 700; color: #334155; font-size: 0.85rem; margin-bottom: 7px;">Email Address *</label>
-                        <input type="email" name="email" value="{{ old('email', $talent->email) }}" required style="width: 100%; padding: 11px 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.92rem; color: #0f172a; box-sizing: border-box; background: #fff; transition: border-color 0.2s;">
+                        <label style="display: block; font-weight: 700; color: #334155; font-size: 0.85rem; margin-bottom: 7px;">Email Address <span style="font-weight: 400; color: #64748b;">(Optional)</span></label>
+                        <input type="email" name="email" value="{{ old('email', $talent->email) }}" placeholder="Enter email address" style="width: 100%; padding: 11px 15px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.92rem; color: #0f172a; box-sizing: border-box; background: #fff; transition: border-color 0.2s;">
                     </div>
                     <div>
                         <label style="display: block; font-weight: 700; color: #334155; font-size: 0.85rem; margin-bottom: 7px;">Phone Number (Tanzania)</label>
@@ -175,10 +175,10 @@
 
     <!-- TAB 2: Manage Photos -->
     <div id="staff-tab-photos" class="staff-tab-content" style="display: none;">
-        <!-- Upload Photos Card -->
+        <!-- Post Photos Card -->
         <div style="background: #ffffff; border-radius: 18px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; margin-bottom: 28px;">
             <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
-                <i class="bi bi-cloud-upload-fill" style="color: #6366f1; font-size: 1.2rem;"></i> Upload New Portfolio Photo(s)
+                <i class="bi bi-camera-fill" style="color: #6366f1; font-size: 1.2rem;"></i> Post New Photo(s)
             </h3>
             
             <form action="{{ route('staff.talent.photos.store', $talent->id) }}" method="POST" enctype="multipart/form-data">
@@ -199,7 +199,7 @@
                 </div>
                 <div style="display: flex; justify-content: flex-end;">
                     <button type="submit" style="background: #6366f1; color: #ffffff; border: none; padding: 11px 26px; border-radius: 25px; font-weight: 800; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
-                        <i class="bi bi-upload"></i> Upload Photos Now
+                        <i class="bi bi-camera-fill"></i> Post Photos Now
                     </button>
                 </div>
             </form>
@@ -266,18 +266,18 @@
         @else
         <div style="text-align: center; padding: 50px 20px; background: #ffffff; border-radius: 18px; border: 1px dashed #cbd5e1; color: #94a3b8;">
             <i class="bi bi-images" style="font-size: 3rem; display: block; margin-bottom: 12px; color: #cbd5e1;"></i>
-            <h4 style="margin: 0 0 6px 0; color: #475569; font-weight: 700;">No Portfolio Photos Uploaded</h4>
-            <p style="margin: 0; font-size: 0.88rem;">Use the form above to upload images for this talent portfolio.</p>
+            <h4 style="margin: 0 0 6px 0; color: #475569; font-weight: 700;">No Portfolio Photos Posted</h4>
+            <p style="margin: 0; font-size: 0.88rem;">Use the form above to post images for this talent portfolio.</p>
         </div>
         @endif
     </div>
 
-    <!-- TAB 3: Manage Videos -->
+    <!-- TAB 3: Post Videos -->
     <div id="staff-tab-videos" class="staff-tab-content" style="display: none;">
         <!-- Upload/Add Video Card -->
         <div style="background: #ffffff; border-radius: 18px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; margin-bottom: 28px;">
             <h3 style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 18px; display: flex; align-items: center; gap: 8px;">
-                <i class="bi bi-camera-video-fill" style="color: #6366f1; font-size: 1.2rem;"></i> Add Video Link or Upload Video File
+                <i class="bi bi-camera-video-fill" style="color: #6366f1; font-size: 1.2rem;"></i> Add Video Link or Post Video File
             </h3>
 
             <form action="{{ route('staff.talent.videos.store', $talent->id) }}" method="POST" enctype="multipart/form-data">
@@ -294,7 +294,7 @@
                 </div>
 
                 <div style="margin-bottom: 16px;">
-                    <label style="display: block; font-weight: 700; color: #334155; font-size: 0.85rem; margin-bottom: 6px;">Option B: Upload Direct MP4 Video File</label>
+                    <label style="display: block; font-weight: 700; color: #334155; font-size: 0.85rem; margin-bottom: 6px;">Option B: Post Direct MP4 Video File</label>
                     <input type="file" name="video" accept="video/mp4,video/quicktime,video/webm" style="width: 100%; padding: 8px; border: 1px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; font-size: 0.85rem; box-sizing: border-box;">
                     <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 4px;">Upload MP4, MOV, WEBM clip (max 100MB).</small>
                 </div>
@@ -306,7 +306,7 @@
 
                 <div style="display: flex; justify-content: flex-end;">
                     <button type="submit" style="background: #6366f1; color: #ffffff; border: none; padding: 11px 26px; border-radius: 25px; font-weight: 800; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);">
-                        <i class="bi bi-plus-circle-fill"></i> Add Video Now
+                        <i class="bi bi-camera-video-fill"></i> Post Video Now
                     </button>
                 </div>
             </form>
@@ -374,8 +374,8 @@
         @else
         <div style="text-align: center; padding: 50px 20px; background: #ffffff; border-radius: 18px; border: 1px dashed #cbd5e1; color: #94a3b8;">
             <i class="bi bi-camera-video" style="font-size: 3rem; display: block; margin-bottom: 12px; color: #cbd5e1;"></i>
-            <h4 style="margin: 0 0 6px 0; color: #475569; font-weight: 700;">No Portfolio Videos Added</h4>
-            <p style="margin: 0; font-size: 0.88rem;">Add video links or direct video files using the form above.</p>
+            <h4 style="margin: 0 0 6px 0; color: #475569; font-weight: 700;">No Portfolio Videos Posted</h4>
+            <p style="margin: 0; font-size: 0.88rem;">Post video links or direct video files using the form above.</p>
         </div>
         @endif
     </div>

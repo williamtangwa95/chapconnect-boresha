@@ -98,7 +98,7 @@ class DashboardController extends Controller
 
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'nullable|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:30',
             'country' => 'nullable|string|max:100',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:102400',
@@ -210,6 +210,7 @@ class DashboardController extends Controller
             'security_question', 'security_answer'
         ]);
 
+        $data['email'] = $request->filled('email') ? $request->email : null;
         $data['phone'] = $request->filled('phone') ? PhoneHelper::normalizeToLocal($request->phone) : null;
 
         if ($request->filled('password')) {

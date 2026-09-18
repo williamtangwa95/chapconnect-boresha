@@ -411,7 +411,7 @@ $media->delete();
 
         $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:30',
         ];
 
@@ -425,12 +425,13 @@ $media->delete();
 
             $user->update([
                 'name' => $request->input('name'),
-                'email' => $request->input('email'),
+                'email' => $request->filled('email') ? $request->input('email') : null,
                 'category' => $categorySlug,
                 'category_label' => $categoryLabel,
                 'phone' => $request->input('phone'),
             ]);
         } else {
+            $rules['email'] = 'required|string|email|max:255|unique:users,email,' . $user->id;
             $rules['role'] = 'required|string|in:admin,customer_care';
             $request->validate($rules);
 

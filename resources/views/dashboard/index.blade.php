@@ -311,7 +311,7 @@
                 </div>
                 <div class="dashboard-welcome-text">
                     <h2 class="dash-welcome-title">{{ __('Welcome') }}, {{ $user->name }}</h2>
-                    <p class="dash-welcome-sub">{{ __('Dashboard Overview') }} ({{ __('Role') }}: {{ $user->role === 'admin' ? __('Administration') : __('Customer Care') }}). {{ __('Manage your profile settings and security credentials.') }}</p>
+                    <p class="dash-welcome-sub">{{ __('Dashboard') }} ({{ __('Role') }}: {{ $user->role === 'admin' ? __('Administration') : __('Customer Care') }}). {{ __('Manage your profile settings and security credentials.') }}</p>
                 </div>
             </div>
             <div class="dash-header-actions">
@@ -526,19 +526,19 @@
                     </a>
                     <a href="{{ route('dashboard.photos') }}" class="action-card action-card-custom">
                         <i class="bi bi-camera-fill"></i>
-                        <span>{{ __('Manage Photos') }}</span>
+                        <span>{{ __('Post Photos') }}</span>
                     </a>
                     <a href="{{ route('dashboard.videos') }}" class="action-card action-card-custom">
                         <i class="bi bi-camera-video-fill"></i>
-                        <span>{{ __('Manage Videos') }}</span>
+                        <span>{{ __('Post Videos') }}</span>
                     </a>
                     <a href="{{ route('dashboard.news') }}" class="action-card action-card-custom">
                         <i class="bi bi-newspaper"></i>
-                        <span>{{ __('Manage News') }}</span>
+                        <span>{{ __('Post News') }}</span>
                     </a>
                     <a href="{{ route('dashboard.comments') }}" class="action-card action-card-custom">
                         <i class="bi bi-chat-left-text-fill"></i>
-                        <span>{{ __('Manage Comments') }}</span>
+                        <span>{{ __('Post Comments') }}</span>
                     </a>
                     <a href="{{ route('profile', $user->id) }}" target="_blank" class="action-card action-card-custom">
                         <i class="bi bi-person-badge-fill"></i>

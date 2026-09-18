@@ -144,7 +144,7 @@
                 @if(Request::is('admin*'))
                 <div class="drawer-section-label">MAIN CONTROL</div>
                 <a href="#dashboard" class="tab-link nav-mobile-link active" data-tab="dashboard">
-                    <i class="bi bi-speedometer2"></i> {{ __('Dashboard Overview') }}
+                    <i class="bi bi-speedometer2"></i> {{ __('Dashboard') }}
                     <i class="bi bi-chevron-right chevron-arrow"></i>
                 </a>
                 <a href="#talents" class="tab-link nav-mobile-link" data-tab="talents">
@@ -282,7 +282,7 @@
                     <i class="bi bi-camera-video-fill"></i> {{ __('Videos') }}
                 </a>
                 <a href="{{ route('dashboard.news') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.news') ? 'active' : '' }}">
-                    <i class="bi bi-newspaper"></i> Manage News
+                    <i class="bi bi-newspaper"></i> {{ __('Post News') }}
                 </a>
                 <a href="{{ route('dashboard.comments') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.comments') ? 'active' : '' }}">
                     <i class="bi bi-chat-left-text-fill"></i> {{ __('Comments') }}
@@ -510,7 +510,7 @@
                     @if(Request::is('admin*'))
                     <div class="drawer-section-label">MAIN CONTROL</div>
                     <a href="#dashboard" class="tab-link nav-mobile-link active" data-tab="dashboard">
-                        <i class="bi bi-speedometer2"></i> {{ __('Dashboard Overview') }}
+                        <i class="bi bi-speedometer2"></i> {{ __('Dashboard') }}
                         <i class="bi bi-chevron-right chevron-arrow"></i>
                     </a>
                     <a href="#talents" class="tab-link nav-mobile-link" data-tab="talents">
@@ -631,7 +631,7 @@
                         <i class="bi bi-camera-video-fill"></i> {{ __('Videos') }}
                     </a>
                     <a href="{{ route('dashboard.news') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.news') ? 'active' : '' }}">
-                        <i class="bi bi-newspaper"></i> Manage News
+                        <i class="bi bi-newspaper"></i> {{ __('Post News') }}
                     </a>
                     <a href="{{ route('dashboard.comments') }}" class="nav-mobile-link {{ Request::routeIs('dashboard.comments') ? 'active' : '' }}">
                         <i class="bi bi-chat-left-text-fill"></i> {{ __('Comments') }}
@@ -849,7 +849,7 @@
                 @elseif(auth()->user()->role === 'admin')
                 <div class="sidebar-group-label">MAIN CONTROL</div>
                 <a href="{{ Request::is('admin*') ? '#dashboard' : route('admin.dashboard') . '#dashboard' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="dashboard">
-                    <i class="bi bi-speedometer2"></i> <span>Dashboard Overview</span>
+                    <i class="bi bi-speedometer2"></i> <span>{{ __('Dashboard') }}</span>
                 </a>
                 <a href="{{ Request::is('admin*') ? '#talents' : route('admin.dashboard') . '#talents' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="talents">
                     <i class="bi bi-people-fill"></i> <span>Registered Talents</span>
@@ -930,27 +930,27 @@
                 <!-- ROLE USER SIDEBAR NAVIGATION -->
                 <div class="sidebar-group-label">MAIN CONTROL</div>
                 <a href="{{ route('dashboard') }}" class="sidebar-link {{ Request::routeIs('dashboard') && !Request::has('tab') ? 'active' : '' }}">
-                    <i class="bi bi-speedometer2"></i> <span>Dashboard Overview</span>
+                    <i class="bi bi-speedometer2"></i> <span>{{ __('Dashboard') }}</span>
                 </a>
                 <a href="{{ route('dashboard.profile') }}" class="sidebar-link {{ Request::routeIs('dashboard.profile') ? 'active' : '' }}">
-                    <i class="bi bi-person-gear"></i> <span>My Profile Settings</span>
+                    <i class="bi bi-person-gear"></i> <span>{{ __('My Profile') }}</span>
                 </a>
                 <a href="{{ route('dashboard') }}?tab=billing" class="sidebar-link {{ Request::routeIs('dashboard') && Request::input('tab') === 'billing' ? 'active' : '' }}">
-                    <i class="bi bi-receipt"></i> <span>My Package & Bills</span>
+                    <i class="bi bi-receipt"></i> <span>{{ __('My Bills') }}</span>
                 </a>
 
-                <div class="sidebar-group-label">PORTFOLIO CONTENT</div>
+                <div class="sidebar-group-label">{{ __('PORTFOLIO CONTENT') }}</div>
                 <a href="{{ route('dashboard.photos') }}" class="sidebar-link {{ Request::routeIs('dashboard.photos') ? 'active' : '' }}">
-                    <i class="bi bi-camera-fill"></i> <span>Manage Photos</span>
+                    <i class="bi bi-camera-fill"></i> <span>{{ __('Post Photos') }}</span>
                 </a>
                 <a href="{{ route('dashboard.videos') }}" class="sidebar-link {{ Request::routeIs('dashboard.videos') ? 'active' : '' }}">
-                    <i class="bi bi-camera-video-fill"></i> <span>Manage Videos</span>
+                    <i class="bi bi-camera-video-fill"></i> <span>{{ __('Post Videos') }}</span>
                 </a>
                 <a href="{{ route('dashboard.news') }}" class="sidebar-link {{ Request::routeIs('dashboard.news') ? 'active' : '' }}">
-                    <i class="bi bi-newspaper"></i> <span>Manage News</span>
+                    <i class="bi bi-newspaper"></i> <span>{{ __('Post News') }}</span>
                 </a>
                 <a href="{{ route('dashboard.comments') }}" class="sidebar-link {{ Request::routeIs('dashboard.comments') ? 'active' : '' }}">
-                    <i class="bi bi-chat-left-text-fill"></i> <span>Manage Comments</span>
+                    <i class="bi bi-chat-left-text-fill"></i> <span>{{ __('Post Comments') }}</span>
                 </a>
 
                 <div class="sidebar-group-label">DIRECTORY & PUBLIC</div>
