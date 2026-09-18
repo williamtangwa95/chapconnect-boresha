@@ -24,6 +24,11 @@ Route::get('/profile/{id}', [HomeController::class, 'profile'])->name('profile')
 Route::get('/profile/{id}/photos', [HomeController::class, 'photos'])->name('profile.photos');
 Route::get('/profile/{id}/videos', [HomeController::class, 'videos'])->name('profile.videos');
 Route::get('/download/app', [HomeController::class, 'downloadApp'])->name('app.download');
+
+// Public ChapConnect Hub (Tutorials, News, Announcements & Testimonies)
+Route::get('/hub', [\App\Http\Controllers\ChapHubController::class, 'index'])->name('hub');
+Route::get('/hub/{slug}', [\App\Http\Controllers\ChapHubController::class, 'show'])->name('hub.show');
+Route::post('/hub/{id}/like', [\App\Http\Controllers\ChapHubController::class, 'toggleLike'])->name('hub.like');
 // Public contact request — throttled to 5/hour per IP (additional app-level check inside controller)
 Route::post('/profile/{id}/connect', [\App\Http\Controllers\ContactRequestController::class, 'store'])
     ->middleware(['throttle:5,60', 'maintenance:connect'])
@@ -137,6 +142,14 @@ Route::middleware(['auth', 'customer_care'])->group(function () {
     Route::delete('/staff/talents/{id}/videos/{mediaId}', [\App\Http\Controllers\StaffTalentManagementController::class, 'deleteVideo'])->name('staff.talent.videos.delete');
     Route::post('/staff/talents/{id}/news/store', [\App\Http\Controllers\StaffTalentManagementController::class, 'storeNews'])->name('staff.talent.news.store');
     Route::delete('/staff/talents/{id}/news/{mediaId}', [\App\Http\Controllers\StaffTalentManagementController::class, 'deleteNews'])->name('staff.talent.news.delete');
+
+    // ChapConnect Hub Content Management (Super Admin & Customer Care)
+    Route::get('/staff/hub', [\App\Http\Controllers\StaffChapHubController::class, 'index'])->name('staff.hub.index');
+    Route::post('/staff/hub/store', [\App\Http\Controllers\StaffChapHubController::class, 'store'])->name('staff.hub.store');
+    Route::post('/staff/hub/{id}/update', [\App\Http\Controllers\StaffChapHubController::class, 'update'])->name('staff.hub.update');
+    Route::delete('/staff/hub/{id}', [\App\Http\Controllers\StaffChapHubController::class, 'destroy'])->name('staff.hub.destroy');
+    Route::post('/staff/hub/{id}/toggle-publish', [\App\Http\Controllers\StaffChapHubController::class, 'togglePublish'])->name('staff.hub.toggle-publish');
+    Route::post('/staff/hub/{id}/toggle-pin', [\App\Http\Controllers\StaffChapHubController::class, 'togglePin'])->name('staff.hub.toggle-pin');
 });
 
 // Super Admin Panel Routes (Protected by auth and admin middleware)

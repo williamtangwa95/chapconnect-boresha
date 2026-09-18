@@ -302,6 +302,9 @@
                 <a href="{{ route('home') }}" class="nav-mobile-link {{ Request::routeIs('home') ? 'active' : '' }}">
                     <i class="bi bi-house-door-fill"></i> {{ __('Home') }}
                 </a>
+                <a href="{{ route('hub') }}" class="nav-mobile-link {{ Request::routeIs('hub*') ? 'active' : '' }}">
+                    <i class="bi bi-mortarboard-fill" style="color: #818cf8;"></i> {{ __('ChapConnect Hub') }}
+                </a>
 
                 <div class="drawer-section-label">ACCOUNT ACCESS</div>
                 @if(\App\Services\MaintenanceService::isFeatureRestricted('login'))
@@ -457,6 +460,7 @@
                     @csrf
                 </form>
                 @else
+                <a href="{{ route('hub') }}" class="nav-btn" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); color: #fff; border-radius: 20px; padding: 6px 14px; font-weight: 700; font-size: 0.82rem; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"><i class="bi bi-mortarboard-fill" style="color: #fbbf24;"></i> {{ __('ChapConnect Hub') }}</a>
                 <a href="{{ route('home') }}" class="nav-btn nav-btn-home"><i class="bi bi-house-door-fill" style="color: #6366f1;"></i> {{ __('Home') }}</a>
                 @if(\App\Services\MaintenanceService::isFeatureRestricted('login'))
                 <a href="{{ route('login') }}" onclick="showMaintenanceNotice(event, '{{ addslashes(\App\Services\MaintenanceService::getMessage()) }}', 'Login'); return false;" class="nav-btn nav-btn-login" style="opacity: 0.85; border-color: rgba(245, 158, 11, 0.5);"><i class="bi bi-lock-fill" style="color: #f59e0b;"></i> {{ __('Login') }}</a>
@@ -650,6 +654,9 @@
                     <div class="drawer-section-label">MAIN MENU</div>
                     <a href="{{ route('home') }}" class="nav-mobile-link {{ Request::routeIs('home') ? 'active' : '' }}">
                         <i class="bi bi-house-door-fill"></i> {{ __('Home') }}
+                    </a>
+                    <a href="{{ route('hub') }}" class="nav-mobile-link {{ Request::routeIs('hub*') ? 'active' : '' }}">
+                        <i class="bi bi-mortarboard-fill" style="color: #818cf8;"></i> {{ __('ChapConnect Hub') }}
                     </a>
 
                     <div class="drawer-section-label">ACCOUNT ACCESS</div>
@@ -880,6 +887,9 @@
                 </a>
 
                 <div class="sidebar-group-label">OPERATIONS & SUPPORT</div>
+                <a href="{{ route('staff.hub.index') }}" class="sidebar-link {{ Request::is('staff/hub*') ? 'active' : '' }}">
+                    <i class="bi bi-journal-richtext" style="color: #6366f1;"></i> <span>ChapConnect Hub & Tutorials</span>
+                </a>
                 <a href="{{ route('admin.moderation') }}" class="sidebar-link {{ Request::is('admin/moderation*') ? 'active' : '' }}">
                     <i class="bi bi-shield-exclamation" style="color:#f59e0b;"></i> <span>Content Moderation & NSFW</span>
                     @php
@@ -960,6 +970,9 @@
                 </a>
                 <a href="{{ route('home') }}" class="sidebar-link">
                     <i class="bi bi-grid-fill"></i> <span>Public Directory</span>
+                </a>
+                <a href="{{ route('hub') }}" class="sidebar-link {{ Request::routeIs('hub*') ? 'active' : '' }}">
+                    <i class="bi bi-mortarboard-fill" style="color: #818cf8;"></i> <span>{{ __('ChapConnect Hub') }}</span>
                 </a>
 
                 <div class="sidebar-group-label">SUPPORT</div>
