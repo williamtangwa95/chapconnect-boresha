@@ -54,7 +54,7 @@
     <div class="auth-wrapper register-auth-wrapper">
         <div class="container" style="width: 100%; max-width: 100%;">
             <div class="form-box active register-form-box" id="register-form">
-                <form action="{{ route('register') }}" method="POST">
+                <form action="{{ route('register') }}" method="POST" autocomplete="off">
                     @csrf
                     <h2>{{ __('Register Account') }}</h2>
                     <p style="color: var(--text-muted); text-align: center; margin-bottom: 24px; font-size: 14px;">
@@ -116,7 +116,7 @@
                         <div class="form-group" style="margin-bottom: 0;">
                             <label for="reg-password">{{ __('Password') }} <span style="font-size: 0.8rem; color: #ef4444; font-weight: 600;">*</span></label>
                             <div class="password-wrapper" style="margin-bottom: 0;">
-                                <input id="reg-password" type="password" name="password" placeholder="{{ __('Enter password (min. 6 characters)') }}" required>
+                                <input id="reg-password" type="password" name="password" placeholder="{{ __('Enter password (min. 6 characters)') }}" required autocomplete="new-password">
                                 <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this)" title="{{ __('Toggle password visibility') }}">
                                     <i class="bi bi-eye"></i>
                                 </button>
@@ -126,7 +126,7 @@
                         <div class="form-group" style="margin-bottom: 0;">
                             <label for="reg-password-confirm">{{ __('Confirm Password') }} <span style="font-size: 0.8rem; color: #ef4444; font-weight: 600;">*</span></label>
                             <div class="password-wrapper" style="margin-bottom: 0;">
-                                <input id="reg-password-confirm" type="password" name="password_confirmation" placeholder="{{ __('Confirm password') }}" required>
+                                <input id="reg-password-confirm" type="password" name="password_confirmation" placeholder="{{ __('Confirm password') }}" required autocomplete="new-password">
                                 <button type="button" class="toggle-password" onclick="togglePasswordVisibility(this)" title="{{ __('Toggle password visibility') }}">
                                     <i class="bi bi-eye"></i>
                                 </button>
