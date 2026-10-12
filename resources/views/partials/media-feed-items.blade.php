@@ -1,5 +1,5 @@
 @forelse($recentMedia as $media)
-<div class="media-feed-item" data-media-id="{{ $media->id }}">
+<div class="media-feed-item talent-card-anim" data-media-id="{{ $media->id }}">
     <!-- User Info Header -->
     <div class="media-feed-user">
         <img class="media-feed-avatar" src="{{ $media->user->avatar_url }}" alt="{{ $media->user->name }}" loading="lazy">

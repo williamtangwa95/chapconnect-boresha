@@ -69,6 +69,11 @@ class CustomerCareController extends Controller
         $contactRequests = \App\Models\ContactRequest::with(['targetUser', 'requesterUser'])->latest()->get();
         $paymentRequests = \App\Models\TalentPaymentRequest::with(['user', 'payer'])->latest()->get();
         $invoices = \App\Models\Invoice::with(['user', 'userPackage'])->latest()->get();
+        $bookings = \App\Models\Booking::with(['talent', 'actionByUser'])->latest()->get();
+        $aboutSettings = \Illuminate\Support\Facades\Cache::remember('about_settings', 600, function() {
+            return \App\Models\SystemSetting::pluck('value', 'key')->toArray();
+        });
+        $aboutPosts = \App\Models\AboutPost::latest()->get();
 
         return view('customer_care.index', compact(
             'tickets',
@@ -85,7 +90,10 @@ class CustomerCareController extends Controller
             'allUsers',
             'contactRequests',
             'paymentRequests',
-            'invoices'
+            'invoices',
+            'bookings',
+            'aboutSettings',
+            'aboutPosts'
         ));
     }
 

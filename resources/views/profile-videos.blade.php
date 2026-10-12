@@ -25,7 +25,7 @@
         <h2>{{ $talent->name }}'s Videos</h2>
         <p style="color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem;">Watch uploaded videos and showreel files.</p>
         
-        <div class="videos-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+        <div class="videos-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;">
             @forelse($videos as $index => $video)
                 <div class="video-item media-feed-item" data-media-id="{{ $video->id }}" style="position: relative; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
                     {!! \App\Helpers\VideoHelper::renderEmbed($video->file_path) !!}

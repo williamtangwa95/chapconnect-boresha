@@ -20,21 +20,32 @@
             <h2>{{ $talent->name }}</h2>
             <p style="color: var(--text-muted); font-size: 14px; font-weight: 500; margin-bottom: 12px;">{{ __($talent->category_label) }}</p>
 
-            <div class="like-container" style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 16px; gap: 4px; flex-wrap: nowrap; border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; padding: 10px 0;">
-                <div class="like" style="text-align: center; flex: 1;">
-                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})" style="font-size: 0.68rem; font-weight: 700; white-space: nowrap; padding: 4px 6px;"><i class="bi bi-heart" style="margin-right: 3px;"></i>{{ __('Like') }}</button>
-                    <span class="like-count" id="likeCount_{{ $talent->id }}" style="display: block; font-size: 0.82rem; font-weight: 800; margin-top: 2px;">{{ $talent->likes_received_count ?? 0 }}</span>
+            <div class="like-container">
+                <div class="like">
+                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})" title="{{ __('Like') }}"><i class="bi bi-heart"></i><span class="btn-text">{{ __('Like') }}</span></button>
+                    <span class="like-count" id="likeCount_{{ $talent->id }}">{{ $talent->likes_received_count ?? 0 }}</span>
                 </div>
-                <div class="comment" style="text-align: center; flex: 1;">
-                    <a href="#comments-tab" style="text-decoration:none;" onclick="$('.menu a[href=\'#comments-tab\']').click();">
-                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}" style="font-size: 0.68rem; font-weight: 700; white-space: nowrap; padding: 4px 6px;"><i class="bi bi-chat-dots" style="margin-right: 3px; color: #0284c7;"></i>{{ __('Comments') }}</button>
+                <div class="comment">
+                    <a href="#comments-tab" style="text-decoration:none;" onclick="$('.menu a[href=\'#comments-tab\']').click();" title="{{ __('Comments') }}">
+                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}"><i class="bi bi-chat-dots" style="color: #0284c7;"></i><span class="btn-text">{{ __('Comments') }}</span></button>
                     </a>
-                    <span class="comment-count {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentCount_{{ $talent->id }}" style="display: block; font-size: 0.82rem; font-weight: 800; margin-top: 2px;">{{ $talent->comments_received_count ?? 0 }}</span>
+                    <span class="comment-count {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentCount_{{ $talent->id }}">{{ $talent->comments_received_count ?? 0 }}</span>
                 </div>
-                <div class="follow" style="text-align: center; flex: 1;">
-                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})" style="font-size: 0.68rem; font-weight: 700; white-space: nowrap; padding: 4px 6px;"><i class="bi bi-person-plus" style="margin-right: 3px;"></i>{{ __('Followers') }}</button>
-                    <span class="followers-count" id="followersCount_{{ $talent->id }}" style="display: block; font-size: 0.82rem; font-weight: 800; margin-top: 2px;">{{ $talent->followers_received_count ?? 0 }}</span>
+                <div class="follow">
+                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})" title="{{ __('Followers') }}"><i class="bi bi-person-plus"></i><span class="btn-text">{{ __('Followers') }}</span></button>
+                    <span class="followers-count" id="followersCount_{{ $talent->id }}">{{ $talent->followers_received_count ?? 0 }}</span>
                 </div>
+            </div>
+
+            <!-- Book Now Action Button -->
+            <div style="margin: 12px 0 8px 0;">
+                <button type="button" onclick="openBookingModal()" id="sidebarBookNowBtn"
+                    style="width: 100%; padding: 11px 14px; border: none; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-weight: 800; font-size: 0.92rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(16,185,129,0.35); transition: all 0.2s;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 18px rgba(16,185,129,0.45)';"
+                    onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 14px rgba(16,185,129,0.35)';">
+                    <i class="bi bi-calendar2-check-fill" style="font-size: 1rem;"></i>
+                    <span>{{ __('Book Now') }}</span>
+                </button>
             </div>
 
             <div class="menu">
@@ -50,7 +61,17 @@
         </div>
 
         <!-- Content Area -->
-        <div class="profile-content" style="padding: 12px 14px;">
+        <div class="profile-content" style="padding: 12px 14px; min-width: 0; max-width: 100%;">
+            @if(session('success_booking'))
+            <div style="background: linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(5,150,105,0.08) 100%); border: 1.5px solid #10b981; border-radius: 14px; padding: 14px 18px; margin-bottom: 18px; color: #065f46; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 14px rgba(16,185,129,0.15);">
+                <i class="bi bi-check-circle-fill" style="font-size: 1.4rem; color: #10b981; flex-shrink: 0;"></i>
+                <div>
+                    <div style="font-size: 0.95rem; font-weight: 800; color: #065f46;">{{ __('Booking Request Submitted!') }}</div>
+                    <div style="font-weight: 500; font-size: 0.85rem; color: #047857;">{{ session('success_booking') }}</div>
+                </div>
+            </div>
+            @endif
+
             <!-- Info Section -->
             <div id="info-tab" class="profile-tab-section active">
                 <div class="pdetails" style="padding: 0; border: none; box-shadow: none; background: transparent;">
@@ -59,12 +80,18 @@
                     <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; padding: 18px 22px; border-radius: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(15,23,42,0.12);">
                         <div>
                             <h2 style="margin: 0 0 4px 0; font-size: 1.25rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 10px;">
-                                <i class="bi bi-person-badge-fill" style="color: #6366f1;"></i> {{ __('Profile Overview & Key Details') }}
+                                <i class="bi bi-person-badge-fill" style="color: #6366f1;"></i> {{ __('Profile Overview') }}
                             </h2>
-                            <p style="margin: 0; color: #94a3b8; font-size: 0.84rem;">{{ __('Official verified contact credentials, professional biography, and media channels for') }} {{ $talent->name }}.</p>
                         </div>
-                        <div style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.35); padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.78rem; color: #34d399; display: flex; align-items: center; gap: 6px;">
-                            <i class="bi bi-patch-check-fill" style="color: #34d399; font-size: 0.9rem;"></i> {{ __('Verified Talent Profile') }}
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <div style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.35); padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.78rem; color: #34d399; display: flex; align-items: center; gap: 6px;">
+                                <i class="bi bi-patch-check-fill" style="color: #34d399; font-size: 0.9rem;"></i> {{ __('Verified Talent Profile') }}
+                            </div>
+                            <button type="button" onclick="openBookingModal()" id="headerBookNowBtn"
+                                style="padding: 6px 16px; border-radius: 20px; font-weight: 800; font-size: 0.82rem; border: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 3px 12px rgba(16,185,129,0.4); transition: transform 0.2s;"
+                                onmouseover="this.style.transform='translateY(-1px)';" onmouseout="this.style.transform='none';">
+                                <i class="bi bi-calendar2-check-fill"></i> {{ __('Book Now') }}
+                            </button>
                         </div>
                     </div>
 
@@ -186,10 +213,9 @@
                     <!-- Photos Header Banner -->
                     <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; padding: 18px 22px; border-radius: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(15,23,42,0.12);">
                         <div>
-                            <h2 style="margin: 0 0 4px 0; font-size: 1.25rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 10px;">
+                            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 10px;">
                                 <i class="bi bi-images" style="color: #6366f1;"></i> {{ __('Official Photo Gallery & Portfolio') }}
                             </h2>
-                            <p style="margin: 0; color: #94a3b8; font-size: 0.84rem;">{{ __('High-resolution photography, event highlights, and press shots of') }} {{ $talent->name }}.</p>
                         </div>
                         <div style="background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); padding: 5px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; color: #a5b4fc;">
                             {{ $miniPhotos->count() }} {{ __('Photos') }}
@@ -237,10 +263,9 @@
                     <!-- Videos Header Banner -->
                     <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; padding: 18px 22px; border-radius: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 15px rgba(15,23,42,0.12);">
                         <div>
-                            <h2 style="margin: 0 0 4px 0; font-size: 1.25rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 10px;">
+                            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 10px;">
                                 <i class="bi bi-camera-reels-fill" style="color: #ec4899;"></i> {{ __('Official Video Showcase & Reels') }}
                             </h2>
-                            <p style="margin: 0; color: #94a3b8; font-size: 0.84rem;">{{ __('Official music videos, interviews, live performances, and video clips from') }} {{ $talent->name }}.</p>
                         </div>
                         @php
                         $videos = $talent->media()->where('type', 'video')->latest()->get();
@@ -250,25 +275,25 @@
                         </div>
                     </div>
 
-                    <!-- Videos Grid -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px;">
+                    <!-- Videos Grid (Matches Photos Grid) -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px;">
                         @forelse($videos as $video)
-                        <div class="profile-video-card" style="background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 18px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; display: flex; flex-direction: column;">
+                        <div class="profile-video-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; transition: transform 0.2s ease, box-shadow 0.2s ease;">
                             <div style="width: 100%; background: #0f172a; position: relative;">
                                 {!! \App\Helpers\VideoHelper::renderEmbed($video->file_path) !!}
                             </div>
-                            <div style="padding: 16px; background: #ffffff; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 10px;">
+                            <div style="padding: 12px 14px; background: #ffffff; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 10px;">
                                 <div>
-                                    <h4 style="margin: 0 0 6px 0; color: #0f172a; font-size: 0.98rem; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+                                    <h4 style="margin: 0 0 4px 0; color: #0f172a; font-size: 0.92rem; font-weight: 700; display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                         <i class="bi bi-play-btn-fill" style="color: #ec4899;"></i> {{ $video->title ?: __('Portfolio Video Showcase') }}
                                     </h4>
                                     @if($video->content)
-                                    <p style="margin: 0 0 8px 0; color: #475569; font-size: 0.84rem; line-height: 1.5; white-space: pre-line;">{{ $video->content }}</p>
+                                    <p style="margin: 0 0 6px 0; color: #475569; font-size: 0.8rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;" title="{{ $video->content }}">{{ $video->content }}</p>
                                     @endif
                                 </div>
-                                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.76rem; color: #94a3b8; font-weight: 600; border-top: 1px solid #f1f5f9; padding-top: 10px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; color: #94a3b8; font-weight: 600; border-top: 1px solid #f1f5f9; padding-top: 8px;">
                                     <span><i class="bi bi-clock-history" style="color: #ec4899;"></i> {{ $video->created_at->diffForHumans() }}</span>
-                                    <span style="background: #f1f5f9; padding: 3px 10px; border-radius: 10px; color: #475569;"><i class="bi bi-film"></i> {{ __('HD Video') }}</span>
+                                    <span style="background: #f1f5f9; padding: 2px 8px; border-radius: 10px; color: #475569; font-size: 0.72rem;"><i class="bi bi-film"></i> {{ __('HD Video') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -289,10 +314,9 @@
                     <!-- News Header Banner (Reduced Size) -->
                     <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; padding: 12px 18px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                         <div>
-                            <h2 style="margin: 0 0 2px 0; font-size: 1.05rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 8px;">
+                            <h2 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 8px;">
                                 <i class="bi bi-newspaper" style="color: #6366f1;"></i> {{ __('Official News & Press Bulletins') }}
                             </h2>
-                            <p style="margin: 0; color: #94a3b8; font-size: 0.78rem;">{{ __('Latest announcements, tour dates, press releases, and media updates from') }} {{ $talent->name }}.</p>
                         </div>
                         @php
                         $newsItems = $talent->media()->where('type', 'news')->latest()->get();
@@ -374,10 +398,9 @@
                     <!-- Comments Header Banner (Reduced Size) -->
                     <div style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; padding: 12px 18px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; box-shadow: 0 4px 12px rgba(15,23,42,0.1);">
                         <div>
-                            <h2 style="margin: 0 0 2px 0; font-size: 1.05rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 8px;">
+                            <h2 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #ffffff; border: none; padding: 0; display: flex; align-items: center; gap: 8px;">
                                 <i class="bi bi-chat-quote-fill" style="color: #6366f1;"></i> Public Fan Reviews &amp; Remarks
                             </h2>
-                            <p style="margin: 0; color: #94a3b8; font-size: 0.78rem;">Fan comments, reviews, and official replies for {{ $talent->name }}.</p>
                         </div>
                         <div style="background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.75rem; color: #a5b4fc;">
                             {{ $comments->count() }} {{ Str::plural('Comment', $comments->count()) }}
@@ -417,9 +440,9 @@
                                         <strong style="color: #0f172a; font-size: 0.82rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
                                             {{ $cmt->author_name }}
                                             @if($cmt->user_id == $talent->id)
-                                                <span style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; font-size: 0.62rem; font-weight: 700; padding: 1px 5px; border-radius: 8px; display: inline-flex; align-items: center; gap: 2px;">
-                                                    <i class="bi bi-patch-check-fill"></i> Owner
-                                                </span>
+                                            <span style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; font-size: 0.62rem; font-weight: 700; padding: 1px 5px; border-radius: 8px; display: inline-flex; align-items: center; gap: 2px;">
+                                                <i class="bi bi-patch-check-fill"></i> Owner
+                                            </span>
                                             @endif
                                         </strong>
                                         <div style="display: flex; align-items: center; gap: 8px;">
@@ -446,9 +469,9 @@
                                             <strong style="color: #0f172a; font-size: 0.78rem; font-weight: 700; display: inline-flex; align-items: center; gap: 3px;">
                                                 {{ $reply->author_name }}
                                                 @if($reply->user_id == $talent->id)
-                                                    <span style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; font-size: 0.62rem; font-weight: 700; padding: 1px 5px; border-radius: 8px; display: inline-flex; align-items: center; gap: 2px;">
-                                                        <i class="bi bi-patch-check-fill"></i> Owner
-                                                    </span>
+                                                <span style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #fff; font-size: 0.62rem; font-weight: 700; padding: 1px 5px; border-radius: 8px; display: inline-flex; align-items: center; gap: 2px;">
+                                                    <i class="bi bi-patch-check-fill"></i> Owner
+                                                </span>
                                                 @endif
                                             </strong>
                                             <div style="display: flex; align-items: center; gap: 6px;">
@@ -516,10 +539,10 @@
 
     // Translation strings passed from Blade — must be declared before DOMContentLoaded
     const profileI18n = {
-        liked:      "{{ __('Liked ❤️') }}",
-        like:       "{{ __('Like') }} 🤍",
-        following:  "{{ __('Following') }}",
-        followers:  "{{ __('Followers') }}"
+        liked: "{{ __('Liked ❤️') }}",
+        like: "{{ __('Like') }} 🤍",
+        following: "{{ __('Following') }}",
+        followers: "{{ __('Followers') }}"
     };
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -538,11 +561,11 @@
 
                 if (likeBtn && data.is_liked) {
                     likeBtn.classList.add('liked');
-                    likeBtn.textContent = profileI18n.liked;
+                    likeBtn.innerHTML = '<i class="bi bi-heart-fill" style="color: #ef4444;"></i><span class="btn-text">' + profileI18n.liked + '</span>';
                 }
                 if (followBtn && data.is_following) {
                     followBtn.classList.add('following');
-                    followBtn.textContent = profileI18n.following;
+                    followBtn.innerHTML = '<i class="bi bi-person-check-fill" style="color: #10b981;"></i><span class="btn-text">' + profileI18n.following + '</span>';
                 }
             }
         });
@@ -571,10 +594,10 @@
                 if (res.success) {
                     if (res.liked) {
                         btn.classList.add('liked');
-                        btn.textContent = profileI18n.liked;
+                        btn.innerHTML = `<i class="bi bi-heart-fill" style="color: #ef4444;"></i><span class="btn-text">${profileI18n.liked}</span>`;
                     } else {
                         btn.classList.remove('liked');
-                        btn.textContent = profileI18n.like;
+                        btn.innerHTML = `<i class="bi bi-heart"></i><span class="btn-text">${profileI18n.like}</span>`;
                     }
                     count.textContent = res.count;
                 }
@@ -606,10 +629,10 @@
                 if (res.success) {
                     if (res.following) {
                         btn.classList.add('following');
-                        btn.textContent = profileI18n.following;
+                        btn.innerHTML = `<i class="bi bi-person-check-fill" style="color: #10b981;"></i><span class="btn-text">${profileI18n.following}</span>`;
                     } else {
                         btn.classList.remove('following');
-                        btn.textContent = profileI18n.followers;
+                        btn.innerHTML = `<i class="bi bi-person-plus"></i><span class="btn-text">${profileI18n.followers}</span>`;
                     }
                     count.textContent = res.count;
                 }
@@ -811,6 +834,138 @@
     function closeReplyModal() {
         document.getElementById('reply-modal').style.display = 'none';
     }
+</script>
+
+<!-- ====================================================================
+     TALENT BOOKING MODAL — Public Booking (No Login Required)
+     ==================================================================== -->
+<div id="booking-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.72); backdrop-filter: blur(6px); z-index: 99999; justify-content: center; align-items: center; padding: 16px; box-sizing: border-box;" onclick="if(event.target===this)closeBookingModal()">
+    <div style="background: #ffffff; border-radius: 20px; max-width: 500px; width: 100%; max-height: 92vh; overflow-y: auto; padding: 26px; box-shadow: 0 25px 60px rgba(0,0,0,0.3); border: 1px solid #e2e8f0; position: relative; box-sizing: border-box;" onclick="event.stopPropagation()">
+        <button type="button" onclick="closeBookingModal()" style="position: absolute; top: 16px; right: 16px; background: #f1f5f9; border: none; border-radius: 50%; width: 34px; height: 34px; font-size: 1.2rem; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center;">&times;</button>
+
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="width: 56px; height: 56px; border-radius: 18px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 10px; box-shadow: 0 6px 18px rgba(16,185,129,0.35);">
+                <i class="bi bi-calendar2-check-fill"></i>
+            </div>
+            <h3 style="margin: 0 0 4px 0; font-size: 1.2rem; font-weight: 800; color: #0f172a;">{{ __('Book Talent') }}</h3>
+            <p style="margin: 0; color: #64748b; font-size: 0.85rem;">{{ __('Schedule an event or service with') }} <strong style="color: #0f172a;">{{ $talent->name }}</strong>.</p>
+        </div>
+
+        @if($errors->booking->has('spam'))
+        <div style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; color: #b91c1c; font-size: 0.85rem; font-weight: 600;">
+            <i class="bi bi-exclamation-triangle-fill"></i> {{ $errors->booking->first('spam') }}
+        </div>
+        @endif
+        @if($errors->booking->has('duplicate'))
+        <div style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; color: #b45309; font-size: 0.85rem; font-weight: 600;">
+            <i class="bi bi-info-circle-fill"></i> {{ $errors->booking->first('duplicate') }}
+        </div>
+        @endif
+
+        <form action="{{ route('profile.book', $talent->id) }}" method="POST" id="talentBookingForm">
+            @csrf
+
+            <!-- Client Name -->
+            <div style="margin-bottom: 13px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 5px;">
+                    <i class="bi bi-person-fill" style="color: #6366f1;"></i> {{ __('Your Full Name') }} <span style="color: #ef4444;">*</span>
+                </label>
+                <input type="text" name="client_name" required maxlength="255"
+                    value="{{ old('client_name', auth()->user() ? auth()->user()->name : '') }}"
+                    placeholder="{{ __('e.g. Juma Ally / Sarah Mushi') }}"
+                    style="width: 100%; padding: 10px 14px; border: 1.5px solid {{ $errors->booking->has('client_name') ? '#ef4444' : '#e2e8f0' }}; border-radius: 10px; font-size: 0.9rem; color: #1e293b; box-sizing: border-box; outline: none; transition: border 0.2s;"
+                    onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#e2e8f0'">
+                @if($errors->booking->has('client_name'))
+                <div style="font-size: 0.78rem; color: #ef4444; margin-top: 4px;">{{ $errors->booking->first('client_name') }}</div>
+                @endif
+            </div>
+
+            <!-- Location & Booking Date in 2 columns -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 13px;">
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 5px;">
+                        <i class="bi bi-geo-alt-fill" style="color: #ef4444;"></i> {{ __('Location') }} <span style="color: #ef4444;">*</span>
+                    </label>
+                    <input type="text" name="location" required maxlength="255"
+                        value="{{ old('location') }}"
+                        placeholder="{{ __('e.g. Dar es Salaam') }}"
+                        style="width: 100%; padding: 10px 14px; border: 1.5px solid {{ $errors->booking->has('location') ? '#ef4444' : '#e2e8f0' }}; border-radius: 10px; font-size: 0.9rem; color: #1e293b; box-sizing: border-box; outline: none; transition: border 0.2s;"
+                        onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#e2e8f0'">
+                    @if($errors->booking->has('location'))
+                    <div style="font-size: 0.78rem; color: #ef4444; margin-top: 4px;">{{ $errors->booking->first('location') }}</div>
+                    @endif
+                </div>
+
+                <div>
+                    <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 5px;">
+                        <i class="bi bi-calendar-event-fill" style="color: #10b981;"></i> {{ __('Booking Date') }} <span style="color: #ef4444;">*</span>
+                    </label>
+                    <input type="date" name="booking_date" required min="{{ date('Y-m-d') }}"
+                        value="{{ old('booking_date', date('Y-m-d')) }}"
+                        style="width: 100%; padding: 10px 14px; border: 1.5px solid {{ $errors->booking->has('booking_date') ? '#ef4444' : '#e2e8f0' }}; border-radius: 10px; font-size: 0.9rem; color: #1e293b; box-sizing: border-box; outline: none; transition: border 0.2s;"
+                        onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#e2e8f0'">
+                    @if($errors->booking->has('booking_date'))
+                    <div style="font-size: 0.78rem; color: #ef4444; margin-top: 4px;">{{ $errors->booking->first('booking_date') }}</div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Phone Number -->
+            <div style="margin-bottom: 13px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 5px;">
+                    <i class="bi bi-telephone-fill" style="color: #0284c7;"></i> {{ __('Phone Number') }} <span style="color: #ef4444;">*</span>
+                </label>
+                <input type="text" name="client_phone" required maxlength="50"
+                    value="{{ old('client_phone', auth()->user() ? auth()->user()->phone : '') }}"
+                    placeholder="{{ __('e.g. +255 712 345 678') }}"
+                    style="width: 100%; padding: 10px 14px; border: 1.5px solid {{ $errors->booking->has('client_phone') ? '#ef4444' : '#e2e8f0' }}; border-radius: 10px; font-size: 0.9rem; color: #1e293b; box-sizing: border-box; outline: none; transition: border 0.2s;"
+                    onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#e2e8f0'">
+                @if($errors->booking->has('client_phone'))
+                <div style="font-size: 0.78rem; color: #ef4444; margin-top: 4px;">{{ $errors->booking->first('client_phone') }}</div>
+                @endif
+            </div>
+
+            <!-- Message -->
+            <div style="margin-bottom: 18px;">
+                <label style="display: block; font-size: 0.82rem; font-weight: 700; color: #475569; margin-bottom: 5px;">
+                    <i class="bi bi-chat-text-fill" style="color: #f59e0b;"></i> {{ __('Message / Event Details') }}
+                    <span style="font-size: 0.75rem; font-weight: 500; color: #94a3b8;">({{ __('Optional') }})</span>
+                </label>
+                <textarea name="message" rows="3" maxlength="1500"
+                    placeholder="{{ __('Describe your event, expected hours, or special requirements...') }}"
+                    style="width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 0.88rem; color: #1e293b; box-sizing: border-box; resize: vertical; outline: none; transition: border 0.2s; font-family: inherit;"
+                    onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#e2e8f0'">{{ old('message') }}</textarea>
+            </div>
+
+            <button type="submit" id="submitBookingBtn"
+                style="width: 100%; padding: 12px; border-radius: 12px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; border: none; font-weight: 800; font-size: 0.95rem; cursor: pointer; box-shadow: 0 4px 15px rgba(16,185,129,0.4); display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s;"
+                onmouseover="this.style.transform='translateY(-1px)';" onmouseout="this.style.transform='none';">
+                <i class="bi bi-calendar2-check-fill"></i> {{ __('Submit Booking Request') }}
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openBookingModal() {
+        var modal = document.getElementById('booking-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+
+    function closeBookingModal() {
+        var modal = document.getElementById('booking-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    @if($errors->booking->any() || old('client_name'))
+    document.addEventListener('DOMContentLoaded', function() {
+        openBookingModal();
+    });
+    @endif
 </script>
 
 @endsection

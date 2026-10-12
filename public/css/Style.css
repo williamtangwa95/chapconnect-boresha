@@ -127,7 +127,8 @@ body {
 }
 
 .nav-btn-home,
-.nav-btn-login {
+.nav-btn-login,
+.nav-btn-about {
     background: rgba(255, 255, 255, 0.95);
     color: #0f172a !important;
     border: 1px solid rgba(255, 255, 255, 0.8);
@@ -139,8 +140,14 @@ body {
     color: #6366f1;
 }
 
+.nav-btn-about i {
+    color: #38bdf8;
+}
+
 .nav-btn-home:hover,
-.nav-btn-login:hover {
+.nav-btn-login:hover,
+.nav-btn-about:hover,
+.nav-btn-about.active {
     background: #ffffff;
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
@@ -1132,24 +1139,6 @@ transition: background 0.3s;
         margin-bottom: 14px;
     }
 
-    .like-container {
-        padding: 8px 2px;
-        gap: 4px;
-    }
-
-    .like-btn,
-    .comment-btn,
-    .follow-btn {
-        padding: 4px 8px;
-        font-size: 11px;
-    }
-
-    .like-count,
-    .comment-count,
-    .followers-count {
-        font-size: 11px;
-    }
-
     .vbtn {
         padding: 8px 12px;
         font-size: 13px;
@@ -1169,9 +1158,165 @@ transition: background 0.3s;
 
     .like-container {
         flex-direction: row;
-        flex-wrap: wrap;
-        gap: 8px;
+        flex-wrap: nowrap;
+        gap: 6px;
         justify-content: space-around;
+    }
+}
+
+/* Hide interaction words on small devices / leave only beautiful icons */
+@media (max-width: 768px) {
+    .like-container .btn-text {
+        display: none !important;
+    }
+
+    .like-container {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        gap: 6px !important;
+        padding: 8px 4px !important;
+        margin-bottom: 14px !important;
+    }
+
+    .like,
+    .comment,
+    .follow {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .like-btn,
+    .comment-btn,
+    .follow-btn {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        padding: 0 !important;
+        margin: 0 auto;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50% !important;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .like-btn i,
+    .comment-btn i,
+    .follow-btn i {
+        margin-right: 0 !important;
+        font-size: 1.15rem !important;
+        line-height: 1;
+        display: inline-block;
+    }
+
+    .like-btn:hover,
+    .like-btn:active {
+        background: #fef2f2 !important;
+        border-color: #fca5a5 !important;
+        color: #ef4444 !important;
+        transform: scale(1.08);
+    }
+
+    .comment-btn:hover,
+    .comment-btn:active {
+        background: #f0f9ff !important;
+        border-color: #7dd3fc !important;
+        color: #0284c7 !important;
+        transform: scale(1.08);
+    }
+
+    .follow-btn:hover,
+    .follow-btn:active {
+        background: #ecfdf5 !important;
+        border-color: #6ee7b7 !important;
+        color: #10b981 !important;
+        transform: scale(1.08);
+    }
+
+    .like-btn.liked {
+        background: #fef2f2 !important;
+        border-color: #fca5a5 !important;
+        color: #ef4444 !important;
+    }
+
+    .like-btn.liked i {
+        color: #ef4444 !important;
+    }
+
+    .comment-btn.has-comments,
+    .comment-btn.commented {
+        background: #f0f9ff !important;
+        border-color: #7dd3fc !important;
+        color: #0284c7 !important;
+    }
+
+    .comment-btn.has-comments i,
+    .comment-btn.commented i {
+        color: #0284c7 !important;
+    }
+
+    .follow-btn.following {
+        background: #ecfdf5 !important;
+        border-color: #6ee7b7 !important;
+        color: #10b981 !important;
+    }
+
+    .follow-btn.following i {
+        color: #10b981 !important;
+    }
+
+    .like-count,
+    .comment-count,
+    .followers-count {
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        color: var(--text-main);
+        text-align: center;
+        margin-top: 2px;
+    }
+}
+
+/* ==========================================================================
+   Small Device Scroll Fade-In & Slide-Up Animation for Cards
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Initially hidden state on mobile when animation JS is active */
+    body.card-anim-ready .talent-card-anim:not(.card-in-view),
+    body.card-anim-ready .talent-grid > .container:not(.card-in-view),
+    body.card-anim-ready .media-feed-item.talent-card-anim:not(.card-in-view) {
+        opacity: 0;
+        transform: translateY(28px) scale(0.98);
+        transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: opacity, transform;
+    }
+
+    /* Animated in state during scroll */
+    body.card-anim-ready .talent-card-anim.card-in-view,
+    body.card-anim-ready .talent-grid > .container.card-in-view,
+    body.card-anim-ready .media-feed-item.talent-card-anim.card-in-view {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+}
+
+/* Accessibility: Respect user OS reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .talent-card-anim,
+    .talent-grid > .container,
+    .media-feed-item.talent-card-anim {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
     }
 }
 
@@ -1365,13 +1510,26 @@ transition: background 0.3s;
     color: white;
 }
 
-/* Profile Content Panel (Right) */
 .profile-content {
     background: white;
     border-radius: 16px;
     padding: 30px;
     box-shadow: var(--shadow);
     min-height: 400px;
+    min-width: 0;
+    max-width: 100%;
+}
+
+@media (max-width: 768px) {
+    .profile-content {
+        padding: 16px 12px;
+    }
+}
+
+.profile-photo-card,
+.profile-video-card {
+    min-width: 0;
+    max-width: 100%;
 }
 
 .profile-tab-section {
@@ -4043,4 +4201,9 @@ nav[role="navigation"] svg {
     width: 16px !important;
     height: 16px !important;
     fill: currentColor !important;
+}
+
+/* Completely hide floating PWA install banner across all devices */
+#pwaInstallBanner {
+    display: none !important;
 }

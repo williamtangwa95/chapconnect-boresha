@@ -1762,8 +1762,10 @@
         @include('admin.payment_methods_tab_stub')
         @include('admin.invoices_tab_stub')
         @include('admin.contact_requests_tab_stub')
+        @include('admin.bookings_tab_stub')
         @include('admin.analytics_tab_stub')
         @include('admin.activity_logs_tab_stub')
+        @include('admin.about_cms_tab_stub')
         @include('admin.membership_modals_stub')
     </div>
 </main>
@@ -2251,7 +2253,7 @@
             defaultTab = "activity-logs";
         } else if (window.location.hash) {
             const hash = window.location.hash.substring(1);
-            if (["dashboard", "talents", "categories", "settings", "staff", "system-settings", "customer-care", "packages", "invoices", "requests", "analytics", "activity-logs", "payments", "maintenance", "payment-methods"].includes(hash)) {
+            if (["dashboard", "talents", "categories", "settings", "staff", "system-settings", "customer-care", "packages", "invoices", "requests", "bookings", "analytics", "activity-logs", "payments", "maintenance", "payment-methods", "about"].includes(hash)) {
                 defaultTab = hash;
             }
         }

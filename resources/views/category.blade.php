@@ -19,7 +19,7 @@
     
     <div class="talent-grid">
         @forelse($talents as $talent)
-            <div class="container">
+            <div class="container talent-card-anim">
                 <div class="imagea">
                         <img src="{{ $talent->avatar_url }}" alt="{{ $talent->name }}">
                 </div>

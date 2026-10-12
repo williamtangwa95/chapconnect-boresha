@@ -113,6 +113,7 @@ class AdminController extends Controller
         $invoices = \App\Models\Invoice::with(['user'])->latest()->get();
         $contactRequests = \App\Models\ContactRequest::with(['targetUser', 'requesterUser'])->latest()->get();
         $paymentRequests = \App\Models\TalentPaymentRequest::with(['user', 'payer'])->latest()->get();
+        $allBookings = \App\Models\Booking::with(['talent', 'actionByUser'])->latest()->get();
 
         // Auto-seed mock data if empty
         if (\App\Models\VisitorActivity::count() === 0) {
@@ -284,6 +285,7 @@ class AdminController extends Controller
             'invoices' => $invoices,
             'contactRequests' => $contactRequests,
             'paymentRequests' => $paymentRequests,
+            'allBookings' => $allBookings,
             'paymentMethods' => $paymentMethods,
             // Analytics view variables
             'todaysVisits' => $todaysVisits,
@@ -301,6 +303,10 @@ class AdminController extends Controller
             'selectedLocation' => $selectedLocation,
             'selectedUser' => $selectedUser,
             'maintenanceDetails' => MaintenanceService::getDetails(),
+            'aboutSettings' => \Illuminate\Support\Facades\Cache::remember('about_settings', 600, function() {
+                return \App\Models\SystemSetting::pluck('value', 'key')->toArray();
+            }),
+            'aboutPosts' => \App\Models\AboutPost::latest()->get(),
         ]);
     }
 

@@ -18,6 +18,7 @@ use App\Http\Controllers\MediaInteractionController;
 
 // Public Routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 Route::get('/category/{category}', [HomeController::class, 'category'])->name('category');
 Route::get('/profile/{id}', [HomeController::class, 'profile'])->name('profile');
@@ -28,6 +29,10 @@ Route::get('/download/app', [HomeController::class, 'downloadApp'])->name('app.d
 Route::post('/profile/{id}/connect', [\App\Http\Controllers\ContactRequestController::class, 'store'])
     ->middleware(['throttle:5,60', 'maintenance:connect'])
     ->name('profile.connect');
+
+// Public Talent Booking Route
+Route::post('/profile/{id}/book', [\App\Http\Controllers\BookingController::class, 'store'])
+    ->name('profile.book');
 
 // Public Talent Interaction Routes (Likes, Followers, Comments)
 Route::post('/talent/{id}/like', [InteractionController::class, 'toggleLike'])->name('talent.like');
@@ -112,6 +117,9 @@ Route::get('/dashboard/support/submit', function () {
     // Administrative action route (Admin / Customer Care)
     Route::post('/admin/contact-requests/{id}/action', [\App\Http\Controllers\ContactRequestController::class, 'adminAction'])->name('admin.contact-requests.action');
 
+    // Booking status action route (Talent, Admin, Customer Care)
+    Route::post('/bookings/{id}/action', [\App\Http\Controllers\BookingController::class, 'updateStatus'])->name('bookings.action');
+
     // Talent Payment Request submission & Publishing Payment Confirmation
     Route::post('/dashboard/request-payment', [DashboardController::class, 'requestPayment'])->name('dashboard.request-payment');
     Route::post('/dashboard/submit-payment-confirmation', [DashboardController::class, 'submitPaymentConfirmation'])->name('dashboard.submit-payment-confirmation');
@@ -137,6 +145,12 @@ Route::middleware(['auth', 'customer_care'])->group(function () {
     Route::delete('/staff/talents/{id}/videos/{mediaId}', [\App\Http\Controllers\StaffTalentManagementController::class, 'deleteVideo'])->name('staff.talent.videos.delete');
     Route::post('/staff/talents/{id}/news/store', [\App\Http\Controllers\StaffTalentManagementController::class, 'storeNews'])->name('staff.talent.news.store');
     Route::delete('/staff/talents/{id}/news/{mediaId}', [\App\Http\Controllers\StaffTalentManagementController::class, 'deleteNews'])->name('staff.talent.news.delete');
+
+    // About Us Page CMS Management (Accessible to Super Admin and Customer Care)
+    Route::post('/staff/about/update-settings', [\App\Http\Controllers\AboutCmsController::class, 'updateSettings'])->name('staff.about.update-settings');
+    Route::post('/staff/about/posts/store', [\App\Http\Controllers\AboutCmsController::class, 'storePost'])->name('staff.about.posts.store');
+    Route::post('/staff/about/posts/{id}/toggle', [\App\Http\Controllers\AboutCmsController::class, 'togglePost'])->name('staff.about.posts.toggle');
+    Route::delete('/staff/about/posts/{id}', [\App\Http\Controllers\AboutCmsController::class, 'deletePost'])->name('staff.about.posts.delete');
 });
 
 // Super Admin Panel Routes (Protected by auth and admin middleware)

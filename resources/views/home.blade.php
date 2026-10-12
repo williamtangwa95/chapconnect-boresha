@@ -891,11 +891,11 @@
 
                         if (likeBtn && data.is_liked) {
                             likeBtn.classList.add('liked');
-                            likeBtn.textContent = i18n.liked;
+                            likeBtn.innerHTML = '<i class="bi bi-heart-fill" style="color: #ef4444;"></i><span class="btn-text">' + i18n.liked + '</span>';
                         }
                         if (followBtn && data.is_following) {
                             followBtn.classList.add('following');
-                            followBtn.textContent = i18n.following;
+                            followBtn.innerHTML = '<i class="bi bi-person-check-fill" style="color: #10b981;"></i><span class="btn-text">' + i18n.following + '</span>';
                         }
                     });
                 }
@@ -1154,6 +1154,10 @@
                         $('#viewMoreMediaContainer').before(res.html);
                         currentMediaOffset += res.count;
 
+                        if (typeof window.observeTalentCards === 'function') {
+                            window.observeTalentCards();
+                        }
+
                         // Fetch interaction statuses for newly appended media items
                         if (res.media_ids && res.media_ids.length > 0) {
                             $.get('{{ route("media.interactions.status") }}', {
@@ -1261,6 +1265,10 @@
                         $('.talent-grid').append(res.html);
                         currentTalentsOffset += res.count;
 
+                        if (typeof window.observeTalentCards === 'function') {
+                            window.observeTalentCards();
+                        }
+
                         if (!res.has_more) {
                             $btn.prop('disabled', false);
                             $btn.data('action', 'top');
@@ -1321,10 +1329,10 @@
                 if (res.success) {
                     if (res.liked) {
                         btn.classList.add('liked');
-                        btn.innerHTML = `<i class="bi bi-heart-fill" style="margin-right: 4px; color: #ef4444;"></i> ${i18nCard.liked}`;
+                        btn.innerHTML = `<i class="bi bi-heart-fill" style="color: #ef4444;"></i><span class="btn-text">${i18nCard.liked}</span>`;
                     } else {
                         btn.classList.remove('liked');
-                        btn.innerHTML = `<i class="bi bi-heart" style="margin-right: 4px;"></i> ${i18nCard.like}`;
+                        btn.innerHTML = `<i class="bi bi-heart"></i><span class="btn-text">${i18nCard.like}</span>`;
                     }
                     count.textContent = res.count;
                 }
@@ -1352,10 +1360,10 @@
                 if (res.success) {
                     if (res.following) {
                         btn.classList.add('following');
-                        btn.innerHTML = `<i class="bi bi-person-check-fill" style="margin-right: 4px; color: #10b981;"></i> ${i18nCard.following}`;
+                        btn.innerHTML = `<i class="bi bi-person-check-fill" style="color: #10b981;"></i><span class="btn-text">${i18nCard.following}</span>`;
                     } else {
                         btn.classList.remove('following');
-                        btn.innerHTML = `<i class="bi bi-person-plus" style="margin-right: 4px;"></i> ${i18nCard.followers}`;
+                        btn.innerHTML = `<i class="bi bi-person-plus"></i><span class="btn-text">${i18nCard.followers}</span>`;
                     }
                     count.textContent = res.count;
                 }

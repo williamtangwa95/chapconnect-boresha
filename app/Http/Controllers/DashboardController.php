@@ -69,15 +69,17 @@ class DashboardController extends Controller
         ];
 
         $paymentRequest = \App\Models\TalentPaymentRequest::where('user_id', $user->id)->first();
+        $myBookings = \App\Models\Booking::where('talent_id', $user->id)->with('actionByUser')->latest()->get();
 
         return view('dashboard.index', [
-            'user'       => $user,
-            'completion' => $completion,
-            'packageDetails' => $packageDetails,
-            'usage' => $usage,
-            'myInvoices' => $myInvoices,
+            'user'            => $user,
+            'completion'      => $completion,
+            'packageDetails'  => $packageDetails,
+            'usage'           => $usage,
+            'myInvoices'      => $myInvoices,
             'paymentSettings' => $paymentSettings,
-            'paymentRequest' => $paymentRequest,
+            'paymentRequest'  => $paymentRequest,
+            'myBookings'      => $myBookings,
         ]);
     }
 

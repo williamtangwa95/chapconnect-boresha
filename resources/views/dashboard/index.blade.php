@@ -540,6 +540,15 @@
                         <i class="bi bi-chat-left-text-fill"></i>
                         <span>{{ __('Post Comments') }}</span>
                     </a>
+                    <a href="#bookings-section" class="action-card action-card-custom" style="position: relative;">
+                        <i class="bi bi-calendar2-check-fill" style="color: #10b981;"></i>
+                        <span>{{ __('Bookings') }}</span>
+                        @if(isset($myBookings) && $myBookings->where('status', 'Pending')->count() > 0)
+                        <span style="position: absolute; top: 6px; right: 8px; background: #ef4444; color: #fff; border-radius: 20px; font-size: 0.68rem; font-weight: 800; padding: 2px 6px;">
+                            {{ $myBookings->where('status', 'Pending')->count() }}
+                        </span>
+                        @endif
+                    </a>
                     <a href="{{ route('profile', $user->id) }}" target="_blank" class="action-card action-card-custom">
                         <i class="bi bi-person-badge-fill"></i>
                         <span>{{ __('View Profile') }}</span>
@@ -779,9 +788,155 @@
             @endif
             @endif
         </div>
+
+        <!-- Talent Bookings & Client Requests Section -->
+        <div class="dashboard-panel dash-panel-card" id="bookings-section" style="margin-top: 22px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.15rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                        <i class="bi bi-calendar2-check-fill" style="color: #10b981;"></i> {{ __('Client Bookings & Event Requests') }}
+                    </h3>
+                    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.85rem;">{{ __('Review and manage booking requests placed by clients visiting your profile.') }}</p>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span style="background: rgba(99,102,241,0.1); color: #6366f1; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 0.78rem;">
+                        {{ __('Total') }}: {{ isset($myBookings) ? $myBookings->count() : 0 }}
+                    </span>
+                    <span style="background: rgba(245,158,11,0.12); color: #d97706; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 0.78rem;">
+                        {{ __('Pending') }}: {{ isset($myBookings) ? $myBookings->where('status', 'Pending')->count() : 0 }}
+                    </span>
+                    <span style="background: rgba(16,185,129,0.12); color: #10b981; padding: 5px 12px; border-radius: 20px; font-weight: 700; font-size: 0.78rem;">
+                        {{ __('Confirmed') }}: {{ isset($myBookings) ? $myBookings->where('status', 'Confirmed')->count() : 0 }}
+                    </span>
+                </div>
+            </div>
+
+            @if(!isset($myBookings) || $myBookings->isEmpty())
+            <div style="text-align: center; padding: 40px 20px; background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 14px;">
+                <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(16,185,129,0.1); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin: 0 auto 12px;">
+                    <i class="bi bi-calendar-heart"></i>
+                </div>
+                <h4 style="margin: 0 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #1e293b;">{{ __('No Bookings Yet') }}</h4>
+                <p style="margin: 0; color: #64748b; font-size: 0.88rem; max-width: 440px; margin: auto;">
+                    {{ __('When clients view your profile and click "Book Now", their booking details and preferred dates will appear here.') }}
+                </p>
+            </div>
+            @else
+            <div style="display: grid; gap: 14px;">
+                @foreach($myBookings as $b)
+                <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 6px 16px rgba(0,0,0,0.06)'" onmouseout="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.02)'">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <h4 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #0f172a;">
+                                    <i class="bi bi-person-fill" style="color: #6366f1;"></i> {{ $b->client_name }}
+                                </h4>
+                                <span style="font-size: 0.75rem; font-weight: 800; padding: 3px 10px; border-radius: 20px;
+                                    @if($b->status === 'Pending') background: rgba(245,158,11,0.12); color: #d97706;
+                                    @elseif($b->status === 'Confirmed') background: rgba(16,185,129,0.12); color: #059669;
+                                    @elseif($b->status === 'Completed') background: rgba(99,102,241,0.12); color: #4f46e5;
+                                    @else background: rgba(239,68,68,0.12); color: #dc2626; @endif">
+                                    {{ __($b->status) }}
+                                </span>
+                            </div>
+                            <small style="color: #64748b; font-size: 0.78rem;">
+                                {{ __('Submitted') }}: {{ $b->created_at->format('d M Y, h:i A') }} ({{ $b->created_at->diffForHumans() }})
+                            </small>
+                        </div>
+
+                        <!-- Date Badge -->
+                        <div style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 6px 12px; display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-calendar-event-fill" style="color: #10b981; font-size: 1rem;"></i>
+                            <div>
+                                <span style="display: block; font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">{{ __('Booking Date') }}</span>
+                                <strong style="font-size: 0.88rem; color: #0f172a;">{{ \Carbon\Carbon::parse($b->booking_date)->format('D, d M Y') }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details Grid -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; background: #f8fafc; padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 0.85rem;">
+                        <div>
+                            <span style="color: #64748b; font-weight: 600; display: block; margin-bottom: 2px;">
+                                <i class="bi bi-geo-alt-fill" style="color: #ef4444;"></i> {{ __('Location') }}:
+                            </span>
+                            <strong style="color: #1e293b;">{{ $b->location }}</strong>
+                        </div>
+                        <div>
+                            <span style="color: #64748b; font-weight: 600; display: block; margin-bottom: 2px;">
+                                <i class="bi bi-telephone-fill" style="color: #0284c7;"></i> {{ __('Client Phone') }}:
+                            </span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <a href="tel:{{ $b->client_phone }}" style="font-weight: 800; color: #0284c7; text-decoration: none;">
+                                    {{ $b->client_phone }}
+                                </a>
+                                @php
+                                $cleanDigits = preg_replace('/[^0-9]/', '', $b->client_phone);
+                                @endphp
+                                <a href="https://wa.me/{{ $cleanDigits }}" target="_blank" title="WhatsApp" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #25d366; color: #fff; text-decoration: none; font-size: 0.75rem;">
+                                    <i class="bi bi-whatsapp"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if($b->message)
+                    <div style="background: #ffffff; border-left: 3px solid #10b981; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-bottom: 14px; font-size: 0.85rem; color: #334155;">
+                        <span style="font-weight: 700; color: #64748b; display: block; font-size: 0.72rem; text-transform: uppercase; margin-bottom: 2px;">{{ __('Client Note / Message') }}</span>
+                        {{ $b->message }}
+                    </div>
+                    @endif
+
+                    @if($b->action_note)
+                    <div style="background: #fefce8; border: 1px solid #fef08a; padding: 8px 12px; border-radius: 8px; margin-bottom: 14px; font-size: 0.82rem; color: #854d0e;">
+                        <span style="font-weight: 700;">{{ __('Staff / Resolution Note') }}:</span> {{ $b->action_note }}
+                        @if($b->actionByUser)
+                        <small style="display: block; color: #a16207; margin-top: 2px;">- {{ $b->actionByUser->name }} ({{ $b->action_at ? $b->action_at->diffForHumans() : '' }})</small>
+                        @endif
+                    </div>
+                    @endif
+
+                    <!-- Action Buttons -->
+                    <div style="display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; border-top: 1px solid #f1f5f9; padding-top: 12px;">
+                        @if($b->status !== 'Confirmed')
+                        <form action="{{ route('bookings.action', $b->id) }}" method="POST" style="margin: 0;">
+                            @csrf
+                            <input type="hidden" name="status" value="Confirmed">
+                            <button type="submit" style="padding: 7px 14px; border-radius: 8px; border: none; background: #10b981; color: #fff; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+                                <i class="bi bi-check-circle-fill"></i> {{ __('Accept / Confirm') }}
+                            </button>
+                        </form>
+                        @endif
+
+                        @if($b->status === 'Confirmed')
+                        <form action="{{ route('bookings.action', $b->id) }}" method="POST" style="margin: 0;">
+                            @csrf
+                            <input type="hidden" name="status" value="Completed">
+                            <button type="submit" style="padding: 7px 14px; border-radius: 8px; border: none; background: #6366f1; color: #fff; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 6px rgba(99,102,241,0.3);">
+                                <i class="bi bi-award-fill"></i> {{ __('Mark Completed') }}
+                            </button>
+                        </form>
+                        @endif
+
+                        @if($b->status !== 'Cancelled')
+                        <form action="{{ route('bookings.action', $b->id) }}" method="POST" style="margin: 0;" onsubmit="return confirm('{{ __('Are you sure you want to decline this booking?') }}');">
+                            @csrf
+                            <input type="hidden" name="status" value="Cancelled">
+                            <button type="submit" style="padding: 7px 14px; border-radius: 8px; border: 1px solid #fecaca; background: #fef2f2; color: #dc2626; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                                <i class="bi bi-x-circle-fill"></i> {{ __('Decline / Cancel') }}
+                            </button>
+                        </form>
+                        @endif
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
+        </div>
         <!-- Settings Form Panel removed to profile -->
         @endif
         @endif
+
     </div>
 </main>
 

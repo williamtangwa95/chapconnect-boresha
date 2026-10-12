@@ -180,6 +180,11 @@ class User extends Authenticatable
         return $this->hasMany(ContactRequest::class, 'requester_user_id');
     }
 
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'talent_id');
+    }
+
     public function activeSubscription()
     {
         return $this->hasOne(UserPackage::class, 'user_id')

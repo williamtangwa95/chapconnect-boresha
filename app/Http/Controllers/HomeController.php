@@ -297,4 +297,52 @@ class HomeController extends Controller
             'talent_ids' => $talents->pluck('id')->toArray(),
         ]);
     }
+
+    /**
+     * Display the About Us page with platform overview and live metrics from database.
+     */
+    public function about()
+    {
+        $totalTalents = \Illuminate\Support\Facades\Cache::remember('about_total_talents', 600, function() {
+            return User::where('role', 'user')->where('is_published', true)->count();
+        });
+
+        $totalCategories = count(AuthController::categories());
+
+        $totalMedia = \Illuminate\Support\Facades\Cache::remember('about_total_media', 600, function() {
+            return \App\Models\Media::publiclyVisible()->count();
+        });
+
+        $featuredTalents = User::where('role', 'user')
+            ->where('is_published', true)
+            ->with(['activeSubscription.package'])
+            ->withCount(['likesReceived', 'followersReceived', 'commentsReceived'])
+            ->orderBy('likes_received_count', 'desc')
+            ->take(4)
+            ->get();
+
+        $aboutSettings = \Illuminate\Support\Facades\Cache::remember('about_settings', 600, function() {
+            return \App\Models\SystemSetting::pluck('value', 'key')->toArray();
+        });
+
+        $aboutPosts = \App\Models\AboutPost::published()->latest()->get();
+
+        $officeAddress = $aboutSettings['office_address'] ?? 'Dar es Salaam, Tanzania';
+        $officeCity = $aboutSettings['office_city'] ?? 'Dar es Salaam, Tanzania';
+        $officeLandmark = $aboutSettings['office_landmark'] ?? 'Posta / CBD, Dar es Salaam';
+        $officeHours = $aboutSettings['office_hours'] ?? 'Monday - Friday: 8:00 AM - 6:00 PM | Saturday: 9:00 AM - 3:00 PM';
+
+        return view('about', [
+            'totalTalents' => $totalTalents,
+            'totalCategories' => $totalCategories,
+            'totalMedia' => $totalMedia,
+            'featuredTalents' => $featuredTalents,
+            'officeAddress' => $officeAddress,
+            'officeCity' => $officeCity,
+            'officeLandmark' => $officeLandmark,
+            'officeHours' => $officeHours,
+            'aboutSettings' => $aboutSettings,
+            'aboutPosts' => $aboutPosts,
+        ]);
+    }
 }

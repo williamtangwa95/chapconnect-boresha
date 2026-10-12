@@ -18,8 +18,7 @@ class SetLocale
     public function handle(Request $request, Closure $next): Response
     {
         $supportedLocales = ['en', 'sw'];
-
-        $locale = Session::get('locale');
+        $locale = $request->hasSession() ? $request->session()->get('locale') : Session::get('locale');
 
         if (!$locale && auth()->check() && !empty(auth()->user()->preferred_language)) {
             $locale = auth()->user()->preferred_language;

@@ -175,6 +175,10 @@
                     <i class="bi bi-person-plus-fill"></i> Registered Staff
                     <i class="bi bi-chevron-right chevron-arrow"></i>
                 </a>
+                <a href="#bookings" class="tab-link nav-mobile-link" data-tab="bookings">
+                    <i class="bi bi-calendar2-check-fill" style="color: #10b981;"></i> Talent Bookings
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
                 <a href="#analytics" class="tab-link nav-mobile-link" data-tab="analytics">
                     <i class="bi bi-graph-up-arrow"></i> Visitor Analytics
                     <i class="bi bi-chevron-right chevron-arrow"></i>
@@ -205,12 +209,20 @@
                     <i class="bi bi-person-check-fill"></i> Contact Requests
                     <i class="bi bi-chevron-right chevron-arrow"></i>
                 </a>
+                <a href="{{ route('customer-care.dashboard') }}#bookings" class="nav-mobile-link cc-tab-link" data-cctab="bookings">
+                    <i class="bi bi-calendar2-check-fill" style="color: #10b981;"></i> Talent Bookings
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
                 <a href="{{ route('customer-care.dashboard') }}#payments" class="nav-mobile-link cc-tab-link" data-cctab="payments">
                     <i class="bi bi-wallet2"></i> Payment Requests
                     <i class="bi bi-chevron-right chevron-arrow"></i>
                 </a>
 
                 <div class="drawer-section-label">SYSTEM CONFIG</div>
+                <a href="#about" class="tab-link nav-mobile-link" data-tab="about">
+                    <i class="bi bi-info-circle-fill" style="color: #38bdf8;"></i> About Us Page (CMS)
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
                 <a href="#maintenance" class="tab-link nav-mobile-link" data-tab="maintenance">
                     <i class="bi bi-shield-lock-fill" style="color: #f59e0b;"></i> Maintenance Mode
                     <i class="bi bi-chevron-right chevron-arrow"></i>
@@ -227,6 +239,9 @@
                 <div class="drawer-section-label">CUSTOMER CARE CONTROL</div>
                 <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link cc-tab-link active" data-cctab="tickets">
                     <i class="bi bi-life-preserver"></i> Support Tickets Roster
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#about" class="nav-mobile-link cc-tab-link" data-cctab="about">
+                    <i class="bi bi-info-circle-fill" style="color: #38bdf8;"></i> About Us Page (CMS)
                 </a>
                 <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link cc-tab-link" data-cctab="blocked">
                     <i class="bi bi-shield-slash-fill"></i> Blocked Accounts & Login
@@ -270,6 +285,9 @@
                 <a href="{{ route('home') }}" class="nav-mobile-link {{ Request::routeIs('home') ? 'active' : '' }}">
                     <i class="bi bi-house-door-fill"></i> {{ __('Home') }}
                 </a>
+                <a href="{{ route('about') }}" class="nav-mobile-link {{ Request::routeIs('about') ? 'active' : '' }}">
+                    <i class="bi bi-info-circle-fill" style="color: #38bdf8;"></i> {{ __('About Us') }}
+                </a>
                 <a href="{{ route('dashboard') }}" class="nav-mobile-link {{ Request::routeIs('dashboard') ? 'active' : '' }}">
                     <i class="bi bi-speedometer2"></i> {{ __('Dashboard') }}
                 </a>
@@ -302,6 +320,9 @@
                 <a href="{{ route('home') }}" class="nav-mobile-link {{ Request::routeIs('home') ? 'active' : '' }}">
                     <i class="bi bi-house-door-fill"></i> {{ __('Home') }}
                 </a>
+                <a href="{{ route('about') }}" class="nav-mobile-link {{ Request::routeIs('about') ? 'active' : '' }}">
+                    <i class="bi bi-info-circle-fill" style="color: #38bdf8;"></i> {{ __('About Us') }}
+                </a>
 
                 <div class="drawer-section-label">ACCOUNT ACCESS</div>
                 @if(\App\Services\MaintenanceService::isFeatureRestricted('login'))
@@ -324,6 +345,11 @@
                 </a>
                 @endif
                 @endauth
+
+                <div class="drawer-section-label">APPLICATION</div>
+                <a href="#" onclick="event.preventDefault(); handlePwaInstallClick();" class="nav-mobile-link" style="color: #10b981 !important; font-weight: 700;">
+                    <i class="bi bi-download" style="color: #10b981; font-size: 1.1rem;"></i> {{ __('Install App') }}
+                </a>
 
                 <div class="drawer-section-label">CONTACT US</div>
                 <a href="tel:0710383352" class="nav-mobile-link">
@@ -424,6 +450,7 @@
                 </div>
 
                 @auth
+                <a href="{{ route('about') }}" class="nav-btn nav-btn-about {{ Request::routeIs('about') ? 'active' : '' }}"><i class="bi bi-info-circle-fill" style="color: #38bdf8;"></i> {{ __('About Us') }}</a>
                 <span style="font-weight: 700; font-size: 0.84rem; color: #fff; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;">
                     <i class="bi bi-person-circle" style="color: #38bdf8;"></i> {{ auth()->user()->name }}
                 </span>
@@ -458,6 +485,7 @@
                 </form>
                 @else
                 <a href="{{ route('home') }}" class="nav-btn nav-btn-home"><i class="bi bi-house-door-fill" style="color: #6366f1;"></i> {{ __('Home') }}</a>
+                <a href="{{ route('about') }}" class="nav-btn nav-btn-about {{ Request::routeIs('about') ? 'active' : '' }}"><i class="bi bi-info-circle-fill" style="color: #38bdf8;"></i> {{ __('About Us') }}</a>
                 @if(\App\Services\MaintenanceService::isFeatureRestricted('login'))
                 <a href="{{ route('login') }}" onclick="showMaintenanceNotice(event, '{{ addslashes(\App\Services\MaintenanceService::getMessage()) }}', 'Login'); return false;" class="nav-btn nav-btn-login" style="opacity: 0.85; border-color: rgba(245, 158, 11, 0.5);"><i class="bi bi-lock-fill" style="color: #f59e0b;"></i> {{ __('Login') }}</a>
                 @else
@@ -539,6 +567,10 @@
                     </a>
 
                     <div class="drawer-section-label">MANAGEMENT & SYSTEM</div>
+                    <a href="#about" class="tab-link nav-mobile-link" data-tab="about">
+                        <i class="bi bi-info-circle-fill" style="color: #38bdf8;"></i> About Us Page (CMS)
+                        <i class="bi bi-chevron-right chevron-arrow"></i>
+                    </a>
                     <a href="#settings" class="tab-link nav-mobile-link" data-tab="settings">
                         <i class="bi bi-person-gear"></i> User Profile
                         <i class="bi bi-chevron-right chevron-arrow"></i>
@@ -577,6 +609,9 @@
                     <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link cc-tab-link active" data-cctab="tickets">
                         <i class="bi bi-life-preserver"></i> Support Issues & Tickets
                     </a>
+                    <a href="{{ route('customer-care.dashboard') }}#about" class="nav-mobile-link cc-tab-link" data-cctab="about">
+                        <i class="bi bi-info-circle-fill" style="color: #38bdf8;"></i> About Us Page (CMS)
+                    </a>
                     <a href="{{ route('customer-care.dashboard') }}#blocked" class="nav-mobile-link cc-tab-link" data-cctab="blocked">
                         <i class="bi bi-shield-slash-fill"></i> Blocked Accounts & Login
                     </a>
@@ -585,6 +620,9 @@
                     </a>
                     <a href="{{ route('customer-care.dashboard') }}#requests" class="nav-mobile-link cc-tab-link" data-cctab="requests">
                         <i class="bi bi-person-check-fill"></i> Guest Contact Requests
+                    </a>
+                    <a href="{{ route('customer-care.dashboard') }}#bookings" class="nav-mobile-link cc-tab-link" data-cctab="bookings">
+                        <i class="bi bi-calendar2-check-fill" style="color: #10b981;"></i> Talent Bookings
                     </a>
                     <a href="{{ route('customer-care.dashboard') }}#payments" class="nav-mobile-link cc-tab-link" data-cctab="payments">
                         <i class="bi bi-wallet2"></i> Talent Payment Requests
@@ -651,6 +689,9 @@
                     <a href="{{ route('home') }}" class="nav-mobile-link {{ Request::routeIs('home') ? 'active' : '' }}">
                         <i class="bi bi-house-door-fill"></i> {{ __('Home') }}
                     </a>
+                    <a href="{{ route('about') }}" class="nav-mobile-link {{ Request::routeIs('about') ? 'active' : '' }}">
+                        <i class="bi bi-info-circle-fill" style="color: #38bdf8;"></i> {{ __('About Us') }}
+                    </a>
 
                     <div class="drawer-section-label">ACCOUNT ACCESS</div>
                     @if(\App\Services\MaintenanceService::isFeatureRestricted('login'))
@@ -673,6 +714,11 @@
                     </a>
                     @endif
                     @endauth
+
+                    <div class="drawer-section-label">APPLICATION</div>
+                    <a href="#" onclick="event.preventDefault(); handlePwaInstallClick();" class="nav-mobile-link" style="color: #10b981 !important; font-weight: 700;">
+                        <i class="bi bi-download" style="color: #10b981; font-size: 1.1rem;"></i> {{ __('Install App') }}
+                    </a>
 
                     <div class="drawer-section-label">CONTACT US</div>
                     <a href="tel:0710383352" class="nav-mobile-link">
@@ -811,6 +857,9 @@
                 <a href="{{ route('customer-care.dashboard') }}#tickets" class="sidebar-link cc-tab-link {{ Request::is('customer-care*') ? 'active' : '' }}" data-cctab="tickets">
                     <i class="bi bi-life-preserver"></i> <span>Support Issues & Tickets Roster</span>
                 </a>
+                <a href="{{ route('customer-care.dashboard') }}#about" class="sidebar-link cc-tab-link" data-cctab="about">
+                    <i class="bi bi-info-circle-fill" style="color:#38bdf8;"></i> <span>About Us Page (CMS)</span>
+                </a>
                 <a href="{{ route('customer-care.dashboard') }}#blocked" class="sidebar-link cc-tab-link" data-cctab="blocked">
                     <i class="bi bi-shield-slash-fill" style="color:#dc2626;"></i> <span>Blocked Accounts & Login Control</span>
                 </a>
@@ -828,6 +877,9 @@
                 </a>
                 <a href="{{ route('customer-care.dashboard') }}#requests" class="sidebar-link cc-tab-link" data-cctab="requests">
                     <i class="bi bi-person-check-fill" style="color:#6366f1;"></i> <span>Guest Contact Requests</span>
+                </a>
+                <a href="{{ route('customer-care.dashboard') }}#bookings" class="sidebar-link cc-tab-link" data-cctab="bookings">
+                    <i class="bi bi-calendar2-check-fill" style="color:#10b981;"></i> <span>Talent Bookings</span>
                 </a>
                 <a href="{{ route('customer-care.dashboard') }}#payments" class="sidebar-link cc-tab-link" data-cctab="payments">
                     <i class="bi bi-wallet2"></i> <span>Talent Payment Requests</span>
@@ -872,6 +924,9 @@
                 <a href="{{ Request::is('admin*') ? '#staff' : route('admin.dashboard') . '#staff' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="staff">
                     <i class="bi bi-person-plus-fill"></i> <span>Registered Staff</span>
                 </a>
+                <a href="{{ Request::is('admin*') ? '#bookings' : route('admin.dashboard') . '#bookings' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="bookings">
+                    <i class="bi bi-calendar2-check-fill" style="color: #10b981;"></i> <span>Talent Bookings</span>
+                </a>
                 <a href="{{ Request::is('admin*') ? '#analytics' : route('admin.dashboard') . '#analytics' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="analytics">
                     <i class="bi bi-graph-up-arrow"></i> <span>Visitor Analytics</span>
                 </a>
@@ -892,6 +947,9 @@
                 <a href="{{ route('customer-care.dashboard') }}#tickets" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="tickets">
                     <i class="bi bi-life-preserver"></i> <span>Support Issues & Tickets Roster</span>
                 </a>
+                <a href="{{ route('customer-care.dashboard') }}#about" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="about">
+                    <i class="bi bi-info-circle-fill" style="color:#38bdf8;"></i> <span>About Us Page (CMS)</span>
+                </a>
                 <a href="{{ route('customer-care.dashboard') }}#blocked" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="blocked">
                     <i class="bi bi-shield-slash-fill" style="color:#dc2626;"></i> <span>Blocked Accounts & Login Control</span>
                 </a>
@@ -901,11 +959,17 @@
                 <a href="{{ route('customer-care.dashboard') }}#requests" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="requests">
                     <i class="bi bi-person-check-fill" style="color:#6366f1;"></i> <span>Guest Contact Requests</span>
                 </a>
+                <a href="{{ route('customer-care.dashboard') }}#bookings" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="bookings">
+                    <i class="bi bi-calendar2-check-fill" style="color:#10b981;"></i> <span>Talent Bookings</span>
+                </a>
                 <a href="{{ route('customer-care.dashboard') }}#payments" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="payments">
                     <i class="bi bi-wallet2"></i> <span>Talent Payment Requests</span>
                 </a>
 
                 <div class="sidebar-group-label">SETTINGS & PROFILES</div>
+                <a href="{{ Request::is('admin*') ? '#about' : route('admin.dashboard') . '#about' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="about">
+                    <i class="bi bi-info-circle-fill" style="color: #38bdf8;"></i> <span>About Us Page (CMS)</span>
+                </a>
                 <a href="{{ Request::is('admin*') ? '#maintenance' : route('admin.dashboard') . '#maintenance' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="maintenance">
                     <i class="bi bi-shield-lock-fill" style="color: #f59e0b;"></i> <span>System Maintenance</span>
                     @if(\App\Services\MaintenanceService::getStatus() === 'ACTIVE')
@@ -960,6 +1024,9 @@
                 </a>
                 <a href="{{ route('home') }}" class="sidebar-link">
                     <i class="bi bi-grid-fill"></i> <span>Public Directory</span>
+                </a>
+                <a href="#" onclick="event.preventDefault(); handlePwaInstallClick();" class="sidebar-link" style="color: #10b981;">
+                    <i class="bi bi-download" style="color: #10b981;"></i> <span>{{ __('Install App') }}</span>
                 </a>
 
                 <div class="sidebar-group-label">SUPPORT</div>
@@ -1579,16 +1646,7 @@
         })();
     </script>
 
-    @if(Request::is('/'))
-    <!-- Floating Bottom-Right Corner Install App Link Banner (Home Page Only) -->
-    <div id="pwaInstallBanner" style="display: flex; position: fixed; bottom: 25px; right: 25px; z-index: 999999; background: #0f172a; border: 1px solid rgba(16,185,129,0.5); border-radius: 30px; padding: 10px 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); color: #ffffff; align-items: center; gap: 10px; backdrop-filter: blur(10px);">
-        <img src="{{ asset('logo.png') }}" alt="ChapConnect App" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0;" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=100&auto=format&fit=crop'">
-        <a href="#" onclick="event.preventDefault(); handlePwaInstallClick();" style="color: #ffffff; text-decoration: none; font-weight: 700; font-size: 0.86rem; display: inline-flex; align-items: center; gap: 6px;">
-            <i class="bi bi-download" style="color: #10b981; font-size: 1rem;"></i>
-        </a>
-        <button type="button" onclick="dismissPwaBanner()" style="background: none; border: none; color: #94a3b8; font-size: 1.1rem; cursor: pointer; padding: 0; margin-left: 4px; display: inline-flex; align-items: center;" title="Dismiss">&times;</button>
-    </div>
-    @endif
+
 
     <!-- PWA Step-by-Step Install Guide Modal -->
     <div id="pwaGuideModal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15,23,42,0.85); backdrop-filter: blur(8px); z-index: 999999; justify-content: center; align-items: center; padding: 20px;" onclick="closePwaGuideModal()">
@@ -2215,6 +2273,106 @@
         });
     </script>
     @endauth
+
+    <!-- Small Device Scroll Fade-In Animation for Cards -->
+    <script>
+        (function() {
+            let cardObserver = null;
+
+            function isSmallDevice() {
+                return window.matchMedia('(max-width: 768px)').matches;
+            }
+
+            function getPendingCards() {
+                return document.querySelectorAll('.talent-card-anim:not(.card-in-view), .talent-grid > .container:not(.card-in-view), .media-feed-item.talent-card-anim:not(.card-in-view)');
+            }
+
+            function setupCardObserver() {
+                if (!isSmallDevice()) {
+                    document.body.classList.remove('card-anim-ready');
+                    // On desktop, ensure all cards are visible immediately without scroll animation
+                    document.querySelectorAll('.talent-card-anim, .talent-grid > .container, .media-feed-item.talent-card-anim').forEach(function(card) {
+                        card.classList.add('card-in-view');
+                    });
+                    if (cardObserver) {
+                        cardObserver.disconnect();
+                        cardObserver = null;
+                    }
+                    return;
+                }
+
+                // Small screen detected: enable animation styling
+                document.body.classList.add('card-anim-ready');
+
+                if (!('IntersectionObserver' in window)) {
+                    // Fallback for older browsers
+                    document.querySelectorAll('.talent-card-anim, .talent-grid > .container, .media-feed-item.talent-card-anim').forEach(function(card) {
+                        card.classList.add('card-in-view');
+                    });
+                    return;
+                }
+
+                if (!cardObserver) {
+                    cardObserver = new IntersectionObserver(function(entries) {
+                        entries.forEach(function(entry) {
+                            if (entry.isIntersecting) {
+                                const card = entry.target;
+                                card.classList.add('card-in-view');
+                                cardObserver.unobserve(card);
+
+                                card.addEventListener('transitionend', function handler(e) {
+                                    if (e.propertyName === 'transform' || e.propertyName === 'opacity') {
+                                        card.style.willChange = 'auto';
+                                        card.removeEventListener('transitionend', handler);
+                                    }
+                                });
+                            }
+                        });
+                    }, {
+                        root: null,
+                        rootMargin: '0px 0px -20px 0px',
+                        threshold: 0.05
+                    });
+                }
+
+                const cards = getPendingCards();
+                let initialDelay = 0;
+                cards.forEach(function(card) {
+                    const rect = card.getBoundingClientRect();
+                    const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+
+                    if (isInViewport) {
+                        setTimeout(function() {
+                            card.classList.add('card-in-view');
+                        }, initialDelay);
+                        initialDelay = Math.min(initialDelay + 70, 280);
+                    } else {
+                        cardObserver.observe(card);
+                    }
+                });
+            }
+
+            // Expose globally for AJAX "View More" calls
+            window.observeTalentCards = function() {
+                if (isSmallDevice()) {
+                    setupCardObserver();
+                }
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', setupCardObserver);
+            } else {
+                setupCardObserver();
+            }
+
+            // Re-check on orientation change or screen resize
+            let resizeTimeout = null;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(setupCardObserver, 150);
+            });
+        })();
+    </script>
 
     @yield('scripts')
 </body>

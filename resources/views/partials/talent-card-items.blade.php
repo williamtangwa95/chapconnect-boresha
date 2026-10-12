@@ -1,5 +1,5 @@
 @forelse($talents as $talent)
-<div class="container">
+<div class="container talent-card-anim">
     <div class="imagea">
         <img src="{{ $talent->avatar_url }}" alt="{{ $talent->name }}" loading="lazy">
         <div class="details">
@@ -8,22 +8,22 @@
 
             <div class="like-container">
                 <div class="like">
-                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})"><i class="bi bi-heart" style="margin-right: 4px;"></i>{{ __('Like') }}</button>
+                    <button class="like-btn" id="likeBtn_{{ $talent->id }}" onclick="toggleCardLike({{ $talent->id }})" title="{{ __('Like') }}"><i class="bi bi-heart"></i><span class="btn-text">{{ __('Like') }}</span></button>
                     <span class="like-count" id="likeCount_{{ $talent->id }}">{{ $talent->likes_received_count ?? 0 }}</span>
                 </div>
                 <div class="comment">
-                    <a href="{{ route('profile', $talent->id) }}#comments-tab" style="text-decoration:none;">
-                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}"><i class="bi bi-chat-dots" style="margin-right: 4px; color: #0284c7;"></i>{{ __('Comments') }}</button>
+                    <a href="{{ route('profile', $talent->id) }}#comments-tab" style="text-decoration:none;" title="{{ __('Comments') }}">
+                        <button class="comment-btn {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentBtn_{{ $talent->id }}"><i class="bi bi-chat-dots" style="color: #0284c7;"></i><span class="btn-text">{{ __('Comments') }}</span></button>
                     </a>
                     <span class="comment-count {{ ($talent->comments_received_count ?? 0) > 0 ? 'has-comments' : '' }}" id="commentCount_{{ $talent->id }}">{{ $talent->comments_received_count ?? 0 }}</span>
                 </div>
                 <div class="follow">
-                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})"><i class="bi bi-person-plus" style="margin-right: 4px;"></i>{{ __('Followers') }}</button>
+                    <button class="follow-btn" id="followBtn_{{ $talent->id }}" onclick="toggleCardFollow({{ $talent->id }})" title="{{ __('Followers') }}"><i class="bi bi-person-plus"></i><span class="btn-text">{{ __('Followers') }}</span></button>
                     <span class="followers-count" id="followersCount_{{ $talent->id }}">{{ $talent->followers_received_count ?? 0 }}</span>
                 </div>
             </div>
 
-            <a href="{{ route('profile', $talent->id) }}" class="vbtn">{{ __('View Full Profile') }}</a>
+            <a href="{{ route('profile', $talent->id) }}" class="vbtn">{{ __('View Profile') }}</a>
 
             <div class="card-quick-links">
                 <a href="{{ route('profile', $talent->id) }}#photos-tab"><span class="bi bi-camera"></span> {{ __('Photos') }}</a>
