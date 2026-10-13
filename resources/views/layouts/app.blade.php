@@ -187,6 +187,10 @@
                     <i class="bi bi-journal-text"></i> Activity Logs
                     <i class="bi bi-chevron-right chevron-arrow"></i>
                 </a>
+                <a href="#site-news" class="tab-link nav-mobile-link" data-tab="site-news">
+                    <i class="bi bi-megaphone-fill" style="color: #f59e0b;"></i> Website News Feed
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
 
                 <div class="drawer-section-label">OPERATIONS & SUPPORT</div>
                 <a href="{{ route('admin.moderation') }}" class="nav-mobile-link">
@@ -215,6 +219,10 @@
                 </a>
                 <a href="{{ route('customer-care.dashboard') }}#payments" class="nav-mobile-link cc-tab-link" data-cctab="payments">
                     <i class="bi bi-wallet2"></i> Payment Requests
+                    <i class="bi bi-chevron-right chevron-arrow"></i>
+                </a>
+                <a href="{{ Request::is('customer-care*') ? '#site-news' : route('customer-care.dashboard') . '#site-news' }}" class="nav-mobile-link cc-tab-link" data-cctab="site-news">
+                    <i class="bi bi-megaphone-fill" style="color: #f59e0b;"></i> Website News Feed
                     <i class="bi bi-chevron-right chevron-arrow"></i>
                 </a>
 
@@ -587,6 +595,10 @@
                         <i class="bi bi-journal-text"></i> User Activity Logs
                         <i class="bi bi-chevron-right chevron-arrow"></i>
                     </a>
+                    <a href="#site-news" class="tab-link nav-mobile-link" data-tab="site-news">
+                        <i class="bi bi-megaphone-fill" style="color: #f59e0b;"></i> Website News Feed
+                        <i class="bi bi-chevron-right chevron-arrow"></i>
+                    </a>
 
                     <div class="drawer-section-label">SUPPORT & DIRECTORY</div>
                     <a href="{{ route('customer-care.dashboard') }}#tickets" class="nav-mobile-link">
@@ -933,6 +945,9 @@
                 <a href="{{ Request::is('admin*') ? '#activity-logs' : route('admin.dashboard') . '#activity-logs' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="activity-logs">
                     <i class="bi bi-journal-text"></i> <span>User Activity Logs</span>
                 </a>
+                <a href="{{ Request::is('admin*') ? '#site-news' : route('admin.dashboard') . '#site-news' }}" class="sidebar-link {{ Request::is('admin*') ? 'tab-link' : '' }}" data-tab="site-news">
+                    <i class="bi bi-megaphone-fill" style="color: #f59e0b;"></i> <span>Website News Feed</span>
+                </a>
 
                 <div class="sidebar-group-label">OPERATIONS & SUPPORT</div>
                 <a href="{{ route('admin.moderation') }}" class="sidebar-link {{ Request::is('admin/moderation*') ? 'active' : '' }}">
@@ -964,6 +979,9 @@
                 </a>
                 <a href="{{ route('customer-care.dashboard') }}#payments" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="payments">
                     <i class="bi bi-wallet2"></i> <span>Talent Payment Requests</span>
+                </a>
+                <a href="{{ Request::is('customer-care*') ? '#site-news' : route('customer-care.dashboard') . '#site-news' }}" class="sidebar-link {{ Request::is('customer-care*') ? 'cc-tab-link' : '' }}" data-cctab="site-news">
+                    <i class="bi bi-megaphone-fill" style="color: #f59e0b;"></i> <span>Website News Feed</span>
                 </a>
 
                 <div class="sidebar-group-label">SETTINGS & PROFILES</div>

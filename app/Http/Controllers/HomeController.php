@@ -79,7 +79,7 @@ class HomeController extends Controller
         session(['media_seed' => $mediaSeed]);
 
         // Fetch media uploads for sidebar preview (photos & videos, approved & visible only) in randomized order
-        $recentMedia = \App\Models\Media::publiclyVisible()->whereHas('user', function($q) {
+        $recentMediaItems = \App\Models\Media::publiclyVisible()->whereHas('user', function($q) {
             $q->where('role', 'user')
               ->where('is_published', true);
         })
@@ -88,6 +88,9 @@ class HomeController extends Controller
         ->orderByRaw("(id * {$mediaSeed} + 17) % 999983")
         ->take(20)
         ->get();
+
+        // Blend with active Site News (inserted after every N posts)
+        $recentMedia = \App\Http\Controllers\SiteNewsController::buildFeedWithNews($recentMediaItems, 0);
 
         return view('home', [
             'talents' => $talents,

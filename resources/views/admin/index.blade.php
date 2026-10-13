@@ -1766,6 +1766,7 @@
         @include('admin.analytics_tab_stub')
         @include('admin.activity_logs_tab_stub')
         @include('admin.about_cms_tab_stub')
+        @include('admin.site_news_tab_stub')
         @include('admin.membership_modals_stub')
     </div>
 </main>

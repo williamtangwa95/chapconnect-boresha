@@ -1,4 +1,13 @@
-@forelse($recentMedia as $media)
+@forelse($recentMedia as $entry)
+@php
+    $isNews = (is_array($entry) && ($entry['type'] ?? '') === 'news') || ($entry instanceof \App\Models\SiteNews);
+    $item = is_array($entry) ? $entry['data'] : $entry;
+@endphp
+
+@if($isNews)
+    @include('partials.site-news-card', ['news' => $item])
+@else
+@php $media = $item; @endphp
 <div class="media-feed-item talent-card-anim" data-media-id="{{ $media->id }}">
     <!-- User Info Header -->
     <div class="media-feed-user">
@@ -66,15 +75,16 @@
             <span id="mediaCommentCount_{{ $media->id }}">{{ $media->comments_count ?? 0 }}</span>
         </button>
 
-        <button type="button" class="post-action-btn media-share-btn" onclick="openMediaShareModal({{ $media->id }}, '{{ addslashes($media->title ?: 'ChapConnect Post') }}', '{{ route('profile', $media->user_id) }}')" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.82rem; font-weight: 700; color: #64748b; transition: all 0.2s ease;">
+        <button type="button" class="post-action-btn media-share-btn" onclick="openMediaShareModal({{ $media->id }}, '{{ addslashes($media->title ?: 'ChapConnect Post') }}', '{{ route('profile', $media->user_id) }}', 'media')" style="background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; font-size: 0.82rem; font-weight: 700; color: #64748b; transition: all 0.2s ease;">
             <i class="bi bi-share-fill" style="font-size: 1.05rem; color: #6366f1;"></i>
             <span id="mediaShareCount_{{ $media->id }}">{{ $media->shares_count ?? 0 }}</span>
         </button>
     </div>
 </div>
+@endif
 @empty
 <div style="text-align: center; padding: 30px 10px; color: var(--text-muted);">
     <i class="bi bi-images" style="font-size: 2.5rem; color: #cbd5e1; display: block; margin-bottom: 8px;"></i>
-    <p style="font-size: 0.88rem; font-weight: 500;">No photos or videos uploaded yet.</p>
+    <p style="font-size: 0.88rem; font-weight: 500;">{{ __('No photos, videos, or news available yet.') }}</p>
 </div>
 @endforelse

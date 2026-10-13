@@ -74,6 +74,8 @@ class CustomerCareController extends Controller
             return \App\Models\SystemSetting::pluck('value', 'key')->toArray();
         });
         $aboutPosts = \App\Models\AboutPost::latest()->get();
+        $siteNewsList = \App\Models\SiteNews::with('user')->withCount(['likes', 'shares'])->latest()->get();
+        $siteNewsInterval = (int) \App\Models\SystemSetting::get('site_news_interval', 5);
 
         return view('customer_care.index', compact(
             'tickets',
@@ -93,7 +95,9 @@ class CustomerCareController extends Controller
             'invoices',
             'bookings',
             'aboutSettings',
-            'aboutPosts'
+            'aboutPosts',
+            'siteNewsList',
+            'siteNewsInterval'
         ));
     }
 

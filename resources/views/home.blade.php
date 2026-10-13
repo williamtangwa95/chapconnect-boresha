@@ -1435,6 +1435,9 @@
                         // Bind events and check active video for newly appended media items
                         bindSidebarVideoEvents();
                         triggerActiveVideoCheck(150);
+                        if (typeof observeSiteNewsImpressions === 'function') {
+                            observeSiteNewsImpressions();
+                        }
 
                         // Re-trigger live search filter if query exists
                         if ($mediaSearch.length && $mediaSearch.val().trim() !== '') {
@@ -1619,11 +1622,12 @@
         });
     }
 
-    // Media Interactions JS (Like, Comment, Share)
+    // Media & Site News Interactions JS (Like, Comment, Share)
     let currentShareData = {
         id: null,
         title: '',
-        url: ''
+        url: '',
+        type: 'media'
     };
 
     function toggleMediaLike(id) {
@@ -1649,6 +1653,44 @@
                     } else {
                         btn.style.color = '#64748b';
                         if (icon) icon.className = 'bi bi-heart media-like-icon_' + id;
+                    }
+                }
+            },
+            error: function() {
+                btn.disabled = false;
+            }
+        });
+    }
+
+    function toggleNewsLike(id) {
+        const btn = document.getElementById('newsLikeBtn_' + id);
+        const icon = document.querySelector('.news-like-icon_' + id);
+        const countEl = document.getElementById('newsLikeCount_' + id);
+        if (!btn || !countEl) return;
+
+        btn.disabled = true;
+        $.ajax({
+            url: '/site-news/' + id + '/like',
+            type: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}'
+            },
+            success: function(res) {
+                btn.disabled = false;
+                if (res.success) {
+                    countEl.textContent = res.count;
+                    if (res.liked) {
+                        btn.style.color = '#ef4444';
+                        if (icon) {
+                            icon.classList.remove('bi-heart');
+                            icon.classList.add('bi-heart-fill');
+                        }
+                    } else {
+                        btn.style.color = '#64748b';
+                        if (icon) {
+                            icon.classList.remove('bi-heart-fill');
+                            icon.classList.add('bi-heart');
+                        }
                     }
                 }
             },
@@ -1736,11 +1778,12 @@
         });
     }
 
-    function openMediaShareModal(id, title, url) {
+    function openMediaShareModal(id, title, url, type = 'media') {
         currentShareData = {
             id: id,
             title: title,
-            url: url
+            url: url,
+            type: type || 'media'
         };
         $('#mediaShareTitle').text(title);
         if (navigator.share) {
@@ -1752,8 +1795,10 @@
     }
 
     function recordMediaShare(id, platform) {
+        const isNews = currentShareData && currentShareData.type === 'news';
+        const url = isNews ? '/site-news/' + id + '/share' : '/media/' + id + '/share';
         $.ajax({
-            url: '/media/' + id + '/share',
+            url: url,
             type: 'POST',
             data: {
                 _token: '{{ csrf_token() }}',
@@ -1761,7 +1806,12 @@
             },
             success: function(res) {
                 if (res.success) {
-                    $('#mediaShareCount_' + id).text(res.count);
+                    if (isNews) {
+                        const countEl = document.getElementById('newsShareCount_' + id);
+                        if (countEl) countEl.textContent = res.count;
+                    } else {
+                        $('#mediaShareCount_' + id).text(res.count);
+                    }
                 }
             }
         });
@@ -1848,7 +1898,46 @@
         }
     }
 
+    function observeSiteNewsImpressions() {
+        if (!('IntersectionObserver' in window)) return;
+        const newsItems = document.querySelectorAll('.site-news-item:not([data-news-observed="true"])');
+        if (!newsItems.length) return;
+
+        const newsObserver = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const item = entry.target;
+                    const newsId = item.getAttribute('data-news-id');
+                    obs.unobserve(item);
+                    if (newsId) {
+                        $.ajax({
+                            url: '/site-news/' + newsId + '/view',
+                            type: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}'
+                            },
+                            success: function(res) {
+                                if (res.success && res.views_count) {
+                                    const vCount = document.getElementById('newsViewsCount_' + newsId);
+                                    if (vCount) vCount.textContent = res.views_count;
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        }, { threshold: 0.35 });
+
+        newsItems.forEach(el => {
+            el.setAttribute('data-news-observed', 'true');
+            newsObserver.observe(el);
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+        // Observe initial Site News impressions
+        observeSiteNewsImpressions();
+
         const mediaIds = [];
         $('.media-feed-item').each(function() {
             const mid = $(this).data('media-id');

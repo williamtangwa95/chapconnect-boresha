@@ -301,7 +301,8 @@ class MediaInteractionController extends Controller
             $mediaItems = $mediaItems->slice(0, $limit);
         }
 
-        $html = view('partials.media-feed-items', ['recentMedia' => $mediaItems])->render();
+        $blendedFeed = \App\Http\Controllers\SiteNewsController::buildFeedWithNews($mediaItems, $offset);
+        $html = view('partials.media-feed-items', ['recentMedia' => $blendedFeed])->render();
 
         return response()->json([
             'success' => true,

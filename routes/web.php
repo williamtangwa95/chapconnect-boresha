@@ -51,6 +51,11 @@ Route::post('/media/{id}/share', [MediaInteractionController::class, 'recordShar
 Route::get('/media/load-more', [MediaInteractionController::class, 'loadMore'])->name('media.load-more');
 Route::get('/media/interactions/status', [MediaInteractionController::class, 'getStatuses'])->name('media.interactions.status');
 
+// Public Site News Interaction Routes (Likes, Shares, Views)
+Route::post('/site-news/{id}/like', [\App\Http\Controllers\SiteNewsController::class, 'toggleLike'])->name('site-news.like');
+Route::post('/site-news/{id}/share', [\App\Http\Controllers\SiteNewsController::class, 'recordShare'])->name('site-news.share');
+Route::post('/site-news/{id}/view', [\App\Http\Controllers\SiteNewsController::class, 'recordView'])->name('site-news.view');
+
 // Authentication Routes
 Route::get('/register', [AuthController::class, 'showRegister'])->middleware('maintenance:register')->name('register');
 Route::post('/register', [AuthController::class, 'register'])->middleware('maintenance:register');
@@ -151,6 +156,12 @@ Route::middleware(['auth', 'customer_care'])->group(function () {
     Route::post('/staff/about/posts/store', [\App\Http\Controllers\AboutCmsController::class, 'storePost'])->name('staff.about.posts.store');
     Route::post('/staff/about/posts/{id}/toggle', [\App\Http\Controllers\AboutCmsController::class, 'togglePost'])->name('staff.about.posts.toggle');
     Route::delete('/staff/about/posts/{id}', [\App\Http\Controllers\AboutCmsController::class, 'deletePost'])->name('staff.about.posts.delete');
+
+    // Site News Management (Accessible to Super Admin and Customer Care)
+    Route::post('/staff/site-news', [\App\Http\Controllers\SiteNewsController::class, 'store'])->name('staff.site-news.store');
+    Route::post('/staff/site-news/{id}/update', [\App\Http\Controllers\SiteNewsController::class, 'update'])->name('staff.site-news.update');
+    Route::post('/staff/site-news/{id}/toggle', [\App\Http\Controllers\SiteNewsController::class, 'toggle'])->name('staff.site-news.toggle');
+    Route::delete('/staff/site-news/{id}', [\App\Http\Controllers\SiteNewsController::class, 'destroy'])->name('staff.site-news.delete');
 });
 
 // Super Admin Panel Routes (Protected by auth and admin middleware)
@@ -200,6 +211,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/settings/payment-criteria', [AdminController::class, 'updatePaymentCriteria'])->name('admin.settings.payment-criteria');
     Route::post('/admin/payment-requests/{id}/pay', [AdminController::class, 'payRequest'])->name('admin.payment-requests.pay');
     Route::post('/admin/payment-requests/{id}/reject', [AdminController::class, 'rejectRequest'])->name('admin.payment-requests.reject');
+    Route::post('/admin/settings/site-news-interval', [\App\Http\Controllers\SiteNewsController::class, 'updateInterval'])->name('admin.settings.site-news-interval');
 });
 
 // Automated Content Moderation & NSFW Review Routes (Accessible to both Super Admin and Customer Care)

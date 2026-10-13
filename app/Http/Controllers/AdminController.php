@@ -287,6 +287,8 @@ class AdminController extends Controller
             'paymentRequests' => $paymentRequests,
             'allBookings' => $allBookings,
             'paymentMethods' => $paymentMethods,
+            'siteNewsList' => \App\Models\SiteNews::with('user')->withCount(['likes', 'shares'])->latest()->get(),
+            'siteNewsInterval' => (int) \App\Models\SystemSetting::get('site_news_interval', 5),
             // Analytics view variables
             'todaysVisits' => $todaysVisits,
             'totalPageViews' => $totalPageViews,

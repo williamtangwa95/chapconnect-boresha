@@ -1033,6 +1033,7 @@
         </div>
 
         @include('admin.about_cms_tab_stub')
+        @include('admin.site_news_tab_stub')
     </div>{{-- /dashboard-container --}}
 </main>
 
@@ -1607,9 +1608,9 @@
         });
 
         // -------------------------------------------------------
-        // CC Page Tab Navigation (tickets | blocked | requests | talents | payments | invoices | bookings)
+        // CC Page Tab Navigation (tickets | blocked | requests | talents | payments | invoices | bookings | site-news)
         // -------------------------------------------------------
-        const ccTabs = ['tickets', 'blocked', 'requests', 'payments', 'talents', 'invoices', 'about', 'bookings'];
+        const ccTabs = ['tickets', 'blocked', 'requests', 'payments', 'talents', 'invoices', 'about', 'bookings', 'site-news'];
 
         function ccSwitchTab(tabId) {
             // Hide all tab panels
@@ -1645,7 +1646,7 @@
         }
 
         // Read initial tab from URL hash
-        const ccValidTabs = ['tickets', 'blocked', 'requests', 'payments', 'talents', 'invoices', 'about', 'bookings'];
+        const ccValidTabs = ['tickets', 'blocked', 'requests', 'payments', 'talents', 'invoices', 'about', 'bookings', 'site-news'];
         let ccDefaultTab = 'tickets';
         if (window.location.hash) {
             const h = window.location.hash.substring(1);
