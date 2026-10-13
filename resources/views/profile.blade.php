@@ -2,6 +2,86 @@
 
 @section('title', 'ChapConnect - ' . $talent->name)
 
+@section('styles')
+<style>
+    .profile-social-channels {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .profile-social-btn {
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #ffffff !important;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .profile-social-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .profile-social-btn i {
+        font-size: 1.05rem;
+        line-height: 1;
+    }
+
+    .profile-social-btn.social-instagram {
+        background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+        box-shadow: 0 4px 12px rgba(220, 39, 67, 0.25);
+    }
+
+    .profile-social-btn.social-facebook {
+        background: #1877f2;
+        box-shadow: 0 4px 12px rgba(24, 119, 242, 0.25);
+    }
+
+    .profile-social-btn.social-tiktok {
+        background: #000000;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .profile-social-btn.social-youtube {
+        background: #ff0000;
+        box-shadow: 0 4px 12px rgba(255, 0, 0, 0.25);
+    }
+
+    /* Small device override: icon-only buttons */
+    @media (max-width: 768px) {
+        .profile-social-channels {
+            gap: 10px;
+            justify-content: flex-start;
+        }
+
+        .profile-social-btn {
+            width: 44px;
+            height: 44px;
+            padding: 0 !important;
+            border-radius: 12px;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .profile-social-btn i {
+            font-size: 1.3rem !important;
+            margin: 0 !important;
+        }
+
+        .profile-social-btn .social-btn-text {
+            display: none !important;
+        }
+    }
+</style>
+@endsection
+
 @section('search_bar')
 <form action="{{ route('home') }}" method="GET" class="Search">
     <input class="Srch" type="search" name="search" placeholder="Type to Search here">
@@ -173,25 +253,29 @@
                         <h3 style="margin: 0 0 14px 0; font-size: 1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
                             <i class="bi bi-share-fill" style="color: #6366f1;"></i> {{ __('Official Media & Social Channels') }}
                         </h3>
-                        <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <div class="profile-social-channels">
                             @if($talent->social_instagram)
-                            <a href="{{ $talent->social_instagram }}" target="_blank" style="padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(220,39,67,0.25); transition: transform 0.2s ease;">
-                                <i class="bi bi-instagram" style="font-size: 1.05rem;"></i> {{ __('Instagram Channel') }}
+                            <a href="{{ $talent->social_instagram }}" target="_blank" class="profile-social-btn social-instagram" title="{{ __('Instagram Channel') }}" aria-label="{{ __('Instagram Channel') }}">
+                                <i class="bi bi-instagram"></i>
+                                <span class="social-btn-text">{{ __('Instagram Channel') }}</span>
                             </a>
                             @endif
                             @if($talent->social_facebook)
-                            <a href="{{ $talent->social_facebook }}" target="_blank" style="padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; background: #1877f2; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(24,119,242,0.25); transition: transform 0.2s ease;">
-                                <i class="bi bi-facebook" style="font-size: 1.05rem;"></i> {{ __('Facebook Page') }}
+                            <a href="{{ $talent->social_facebook }}" target="_blank" class="profile-social-btn social-facebook" title="{{ __('Facebook Page') }}" aria-label="{{ __('Facebook Page') }}">
+                                <i class="bi bi-facebook"></i>
+                                <span class="social-btn-text">{{ __('Facebook Page') }}</span>
                             </a>
                             @endif
                             @if($talent->social_tiktok)
-                            <a href="{{ $talent->social_tiktok }}" target="_blank" style="padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; background: #000000; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); transition: transform 0.2s ease;">
-                                <i class="bi bi-tiktok" style="font-size: 1.05rem;"></i> {{ __('TikTok Feed') }}
+                            <a href="{{ $talent->social_tiktok }}" target="_blank" class="profile-social-btn social-tiktok" title="{{ __('TikTok Feed') }}" aria-label="{{ __('TikTok Feed') }}">
+                                <i class="bi bi-tiktok"></i>
+                                <span class="social-btn-text">{{ __('TikTok Feed') }}</span>
                             </a>
                             @endif
                             @if($talent->social_youtube)
-                            <a href="{{ $talent->social_youtube }}" target="_blank" style="padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; background: #ff0000; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(255,0,0,0.25); transition: transform 0.2s ease;">
-                                <i class="bi bi-youtube" style="font-size: 1.05rem;"></i> {{ __('YouTube Channel') }}
+                            <a href="{{ $talent->social_youtube }}" target="_blank" class="profile-social-btn social-youtube" title="{{ __('YouTube Channel') }}" aria-label="{{ __('YouTube Channel') }}">
+                                <i class="bi bi-youtube"></i>
+                                <span class="social-btn-text">{{ __('YouTube Channel') }}</span>
                             </a>
                             @endif
 
@@ -539,8 +623,8 @@
 
     // Translation strings passed from Blade — must be declared before DOMContentLoaded
     const profileI18n = {
-        liked: "{{ __('Liked ❤️') }}",
-        like: "{{ __('Like') }} 🤍",
+        liked: "{{ __('Liked') }}",
+        like: "{{ __('Like') }}",
         following: "{{ __('Following') }}",
         followers: "{{ __('Followers') }}"
     };

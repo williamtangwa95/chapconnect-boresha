@@ -169,22 +169,22 @@ function initProfileInteractions() {
 
     if (likeBtn) {
         if (isLiked) {
-            likeBtn.textContent = 'Liked ❤️';
+            likeBtn.textContent = 'Liked';
             likeBtn.classList.add('liked');
         } else {
-            likeBtn.textContent = 'Like 🤍';
+            likeBtn.textContent = 'Like';
             likeBtn.classList.remove('liked');
         }
 
         likeBtn.addEventListener('click', () => {
             if (!isLiked) {
                 likes++;
-                likeBtn.textContent = 'Liked ❤️';
+                likeBtn.textContent = 'Liked';
                 likeBtn.classList.add('liked');
                 isLiked = true;
             } else {
                 likes--;
-                likeBtn.textContent = 'Like 🤍';
+                likeBtn.textContent = 'Like';
                 likeBtn.classList.remove('liked');
                 isLiked = false;
             }

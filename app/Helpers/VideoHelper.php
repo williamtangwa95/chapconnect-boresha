@@ -142,7 +142,7 @@ class VideoHelper
         }
 
         return '<div class="local-video-wrapper" style="position:relative; width:100%; max-height:650px; background:#000000; border-radius:10px; overflow:hidden; display:flex; justify-content:center; align-items:center;">' .
-            '<video class="cc-managed-video local-video-player" data-platform="local" controls playsinline preload="metadata" style="width:100%; max-height:650px; height:auto; object-fit:contain; border-radius:10px; background:#000000; display:block;">' .
+            '<video class="cc-managed-video local-video-player" data-platform="local" controls playsinline muted loop preload="metadata" style="width:100%; max-height:650px; height:auto; object-fit:contain; border-radius:10px; background:#000000; display:block;">' .
                 '<source src="' . e($srcUrl) . '">' .
                 'Your browser does not support the video tag.' .
             '</video>' .

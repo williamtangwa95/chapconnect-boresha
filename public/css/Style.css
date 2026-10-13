@@ -1357,6 +1357,7 @@ transition: background 0.3s;
     transition: background 0.3s, color 0.3s;
     width: auto;
     margin: 0;
+    white-space: nowrap;
 }
 
 .like-btn:hover {
@@ -1550,6 +1551,82 @@ transition: background 0.3s;
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+/* Profile Social & Web Media Channels */
+.profile-social-channels {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.profile-social-btn {
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #ffffff !important;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-social-btn:hover {
+    transform: translateY(-2px);
+}
+
+.profile-social-btn i {
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.profile-social-btn.social-instagram {
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    box-shadow: 0 4px 12px rgba(220, 39, 67, 0.25);
+}
+
+.profile-social-btn.social-facebook {
+    background: #1877f2;
+    box-shadow: 0 4px 12px rgba(24, 119, 242, 0.25);
+}
+
+.profile-social-btn.social-tiktok {
+    background: #000000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.profile-social-btn.social-youtube {
+    background: #ff0000;
+    box-shadow: 0 4px 12px rgba(255, 0, 0, 0.25);
+}
+
+@media (max-width: 768px) {
+    .profile-social-channels {
+        gap: 10px;
+        justify-content: flex-start;
+    }
+
+    .profile-social-btn {
+        width: 44px;
+        height: 44px;
+        padding: 0 !important;
+        border-radius: 12px;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .profile-social-btn i {
+        font-size: 1.3rem !important;
+        margin: 0 !important;
+    }
+
+    .profile-social-btn .social-btn-text {
+        display: none !important;
     }
 }
 

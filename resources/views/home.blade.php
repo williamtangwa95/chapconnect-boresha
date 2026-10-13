@@ -97,6 +97,73 @@
         box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15) !important;
     }
 
+    /* Video Autoplay & Play/Pause Feedback Controls in Post View */
+    .local-video-wrapper {
+        position: relative !important;
+        cursor: pointer;
+    }
+
+    .video-sound-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.95rem;
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.2s ease;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    }
+
+    .video-sound-btn:hover {
+        background: rgba(15, 23, 42, 0.95);
+        transform: scale(1.1);
+        color: #38bdf8;
+    }
+
+    .video-action-indicator {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.6);
+        width: 60px;
+        height: 60px;
+        background: rgba(15, 23, 42, 0.75);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 1.8rem;
+        pointer-events: none;
+        opacity: 0;
+        z-index: 9;
+        backdrop-filter: blur(4px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .video-action-indicator.animate {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+        animation: fadeOutAction 0.7s forwards;
+    }
+
+    @keyframes fadeOutAction {
+        0% { opacity: 1; transform: translate(-50%, -50%) scale(0.85); }
+        50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.1); }
+        100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+    }
+
     /* Mobile search bar - hidden on desktop */
     .mobile-search-form {
         display: none;
@@ -628,8 +695,8 @@
 <script>
     // Translation strings passed from Blade for dynamic JS buttons
     const i18n = {
-        liked: "{{ __('Liked ❤️') }}",
-        like: "{{ __('Like') }} 🤍",
+        liked: "{{ __('Liked') }}",
+        like: "{{ __('Like') }}",
         following: "{{ __('Following') }}",
         followers: "{{ __('Followers') }}"
     };
@@ -719,12 +786,15 @@
             $('.col-3').addClass('open');
             $('.drawer-backdrop').fadeIn(200);
             $('#media-sidebar-toggle').css('right', '-60px'); // hide toggle button
+            setTimeout(checkActiveVideo, 250);
         }
 
         function closeMediaSidebar() {
             $('.col-3').removeClass('open');
             $('.drawer-backdrop').fadeOut(200);
             $('#media-sidebar-toggle').css('right', '0'); // show toggle button
+            pauseAllSidebarMediaExcept(null);
+            currentActiveMedia = null;
         }
 
         // Bind clicks
@@ -902,16 +972,17 @@
             });
         }
 
-        // Ensure only one video in the Recent Upload Previews sidebar plays at a time,
-        // and pause any video that scrolls out of view.
-        const sidebarVideos = document.querySelectorAll('.media-preview-sidebar video');
-        const sidebarIframes = document.querySelectorAll('.media-preview-sidebar iframe');
+        // ── Smart Video Autoplay & Play/Pause Controller for Post View (Sidebar) ──
         const ytPlayers = [];
+        let currentActiveMedia = null;
+        let isGlobalMuted = true;
+        let checkActiveTimeout = null;
 
-        // Load YouTube IFrame Player API
+        // Load YouTube IFrame Player API if needed
+        const sidebarIframes = document.querySelectorAll('.media-preview-sidebar iframe');
         if (sidebarIframes.length > 0) {
             const hasYouTube = Array.from(sidebarIframes).some(iframe => iframe.src.includes('youtube.com'));
-            if (hasYouTube) {
+            if (hasYouTube && typeof YT === 'undefined') {
                 var tag = document.createElement('script');
                 tag.src = "https://www.youtube.com/iframe_api";
                 var firstScriptTag = document.getElementsByTagName('script')[0];
@@ -922,7 +993,6 @@
         function initializeYTPlayers() {
             document.querySelectorAll('.media-preview-sidebar iframe').forEach((iframe, index) => {
                 if (iframe.src.includes('youtube.com')) {
-                    // Ensure enablejsapi=1 is present
                     if (!iframe.src.includes('enablejsapi=1')) {
                         const glue = iframe.src.includes('?') ? '&' : '?';
                         iframe.src += glue + 'enablejsapi=1';
@@ -931,7 +1001,7 @@
                         iframe.id = 'yt-player-sidebar-' + index;
                     }
                     if (ytPlayers.some(item => item.id === iframe.id)) {
-                        return; // already instantiated
+                        return;
                     }
                     try {
                         const player = new YT.Player(iframe.id, {
@@ -939,17 +1009,18 @@
                                 'onStateChange': function(event) {
                                     if (event.data === YT.PlayerState.PLAYING) {
                                         pauseAllSidebarMediaExcept(iframe);
+                                        currentActiveMedia = iframe;
+                                        iframe.removeAttribute('data-user-paused');
+                                    } else if (event.data === YT.PlayerState.PAUSED) {
+                                        if (currentActiveMedia === iframe) {
+                                            iframe.setAttribute('data-user-paused', 'true');
+                                        }
                                     }
                                 }
                             }
                         });
-                        ytPlayers.push({
-                            id: iframe.id,
-                            player: player
-                        });
-                    } catch (e) {
-                        console.error('Error instantiating YT Player:', e);
-                    }
+                        ytPlayers.push({ id: iframe.id, player: player });
+                    } catch (e) {}
                 }
             });
         }
@@ -958,96 +1029,287 @@
             initializeYTPlayers();
         };
 
-        // If YT is already loaded (due to cached api script or fast execution)
         if (typeof YT !== 'undefined' && YT.Player) {
             initializeYTPlayers();
         }
 
-        function pauseAllSidebarMediaExcept(activeMedia) {
-            // Pause HTML5 videos
-            sidebarVideos.forEach(v => {
-                if (v !== activeMedia && !v.paused) {
-                    v.pause();
+        function playMedia(el) {
+            if (!el) return;
+            if (el.tagName === 'VIDEO') {
+                el.loop = true;
+                el.playsInline = true;
+                if (isGlobalMuted) {
+                    el.muted = true;
                 }
-            });
+                const playPromise = el.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(function() {
+                        // Autoplay policy fallback: mute and play
+                        el.muted = true;
+                        isGlobalMuted = true;
+                        updateAllSoundButtons();
+                        el.play().catch(function(err) {
+                            console.warn('Autoplay prevented:', err);
+                        });
+                    });
+                }
+            } else if (el.tagName === 'IFRAME') {
+                if (el.src.includes('youtube.com')) {
+                    const found = ytPlayers.find(item => item.id === el.id);
+                    if (found && found.player && typeof found.player.playVideo === 'function') {
+                        try {
+                            if (isGlobalMuted) found.player.mute();
+                            found.player.playVideo();
+                        } catch (e) {}
+                    } else {
+                        try {
+                            el.contentWindow.postMessage(JSON.stringify({
+                                event: 'command',
+                                func: 'playVideo',
+                                args: ''
+                            }), '*');
+                        } catch (e) {}
+                    }
+                } else if (el.src.includes('vimeo.com')) {
+                    try {
+                        el.contentWindow.postMessage(JSON.stringify({ method: 'play' }), '*');
+                    } catch (e) {}
+                }
+            }
+        }
 
-            // Pause YouTube/Vimeo iframe videos
-            sidebarIframes.forEach(iframe => {
-                if (iframe !== activeMedia) {
-                    if (iframe.src.includes('youtube.com')) {
-                        const found = ytPlayers.find(item => item.id === iframe.id);
-                        if (found && found.player && typeof found.player.pauseVideo === 'function') {
-                            try {
-                                found.player.pauseVideo();
-                            } catch (e) {}
-                        } else {
-                            iframe.contentWindow.postMessage(JSON.stringify({
+        function pauseMedia(el) {
+            if (!el) return;
+            if (el.tagName === 'VIDEO') {
+                if (!el.paused) {
+                    el.pause();
+                }
+            } else if (el.tagName === 'IFRAME') {
+                if (el.src.includes('youtube.com')) {
+                    const found = ytPlayers.find(item => item.id === el.id);
+                    if (found && found.player && typeof found.player.pauseVideo === 'function') {
+                        try { found.player.pauseVideo(); } catch (e) {}
+                    } else {
+                        try {
+                            el.contentWindow.postMessage(JSON.stringify({
                                 event: 'command',
                                 func: 'pauseVideo',
                                 args: ''
                             }), '*');
-                        }
-                    } else if (iframe.src.includes('vimeo.com')) {
-                        iframe.contentWindow.postMessage(JSON.stringify({
-                            method: 'pause'
-                        }), '*');
+                        } catch (e) {}
                     }
+                } else if (el.src.includes('vimeo.com')) {
+                    try {
+                        el.contentWindow.postMessage(JSON.stringify({ method: 'pause' }), '*');
+                    } catch (e) {}
+                }
+            }
+        }
+
+        function pauseAllSidebarMediaExcept(activeMedia) {
+            document.querySelectorAll('.media-preview-sidebar video').forEach(v => {
+                if (v !== activeMedia) {
+                    pauseMedia(v);
+                }
+            });
+            document.querySelectorAll('.media-preview-sidebar iframe').forEach(iframe => {
+                if (iframe !== activeMedia) {
+                    pauseMedia(iframe);
                 }
             });
         }
 
-        // 1. Detect when HTML5 video starts playing
-        sidebarVideos.forEach(video => {
-            video.addEventListener('play', function() {
-                pauseAllSidebarMediaExcept(video);
-            });
-        });
+        function showFeedbackIcon(container, type) {
+            if (!container) return;
+            let badge = container.querySelector('.video-action-indicator');
+            if (!badge) {
+                badge = document.createElement('div');
+                badge.className = 'video-action-indicator';
+                container.appendChild(badge);
+            }
+            badge.innerHTML = `<i class="bi bi-${type === 'play' ? 'play-fill' : 'pause-fill'}"></i>`;
+            badge.classList.remove('animate');
+            void badge.offsetWidth;
+            badge.classList.add('animate');
+        }
 
-        // 2. Fallback blur listener for iframe focus transitions (especially Vimeo)
-        window.addEventListener('blur', function() {
-            setTimeout(() => {
-                if (document.activeElement && document.activeElement.tagName === 'IFRAME') {
-                    const iframe = document.activeElement;
-                    if (iframe.closest('.media-preview-sidebar')) {
-                        pauseAllSidebarMediaExcept(iframe);
+        function updateAllSoundButtons() {
+            document.querySelectorAll('.video-sound-btn').forEach(btn => {
+                const icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = isGlobalMuted ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill';
+                }
+                btn.title = isGlobalMuted ? '{{ __("Unmute") }}' : '{{ __("Mute") }}';
+            });
+        }
+
+        function bindSidebarVideoEvents() {
+            document.querySelectorAll('.media-preview-sidebar video').forEach(video => {
+                if (video.getAttribute('data-events-bound') === 'true') return;
+                video.setAttribute('data-events-bound', 'true');
+
+                video.loop = true;
+                video.playsInline = true;
+                video.muted = isGlobalMuted;
+
+                const wrapper = video.closest('.local-video-wrapper') || video.parentElement;
+                if (wrapper) {
+                    if (!wrapper.querySelector('.video-sound-btn')) {
+                        const soundBtn = document.createElement('button');
+                        soundBtn.type = 'button';
+                        soundBtn.className = 'video-sound-btn';
+                        soundBtn.title = isGlobalMuted ? '{{ __("Unmute") }}' : '{{ __("Mute") }}';
+                        soundBtn.innerHTML = `<i class="bi bi-${isGlobalMuted ? 'volume-mute-fill' : 'volume-up-fill'}"></i>`;
+                        soundBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            isGlobalMuted = !isGlobalMuted;
+                            document.querySelectorAll('.media-preview-sidebar video').forEach(v => {
+                                v.muted = isGlobalMuted;
+                            });
+                            ytPlayers.forEach(item => {
+                                if (item.player) {
+                                    try {
+                                        if (isGlobalMuted) item.player.mute();
+                                        else item.player.unMute();
+                                    } catch (err) {}
+                                }
+                            });
+                            updateAllSoundButtons();
+                        });
+                        wrapper.appendChild(soundBtn);
+                    }
+
+                    video.addEventListener('click', function(e) {
+                        const rect = video.getBoundingClientRect();
+                        const clickY = e.clientY - rect.top;
+                        if (clickY > rect.height - 42) {
+                            return; // clicked native controls area
+                        }
+
+                        e.preventDefault();
+                        if (video.paused) {
+                            video.removeAttribute('data-user-paused');
+                            pauseAllSidebarMediaExcept(video);
+                            currentActiveMedia = video;
+                            playMedia(video);
+                            showFeedbackIcon(wrapper, 'play');
+                        } else {
+                            video.setAttribute('data-user-paused', 'true');
+                            pauseMedia(video);
+                            showFeedbackIcon(wrapper, 'pause');
+                        }
+                    });
+                }
+
+                video.addEventListener('play', function() {
+                    video.removeAttribute('data-user-paused');
+                    pauseAllSidebarMediaExcept(video);
+                    currentActiveMedia = video;
+                });
+
+                video.addEventListener('pause', function() {
+                    if (currentActiveMedia === video && !video.ended) {
+                        video.setAttribute('data-user-paused', 'true');
+                    }
+                });
+            });
+
+            initializeYTPlayers();
+        }
+
+        function checkActiveVideo() {
+            const sidebar = document.querySelector('.media-preview-sidebar');
+            if (!sidebar) return;
+
+            if (sidebar.offsetParent === null) {
+                pauseAllSidebarMediaExcept(null);
+                currentActiveMedia = null;
+                return;
+            }
+
+            const sidebarRect = sidebar.getBoundingClientRect();
+            if (sidebarRect.bottom <= 60 || sidebarRect.top >= window.innerHeight - 60) {
+                pauseAllSidebarMediaExcept(null);
+                currentActiveMedia = null;
+                return;
+            }
+
+            const viewTop = Math.max(sidebarRect.top, 0);
+            const viewBottom = Math.min(sidebarRect.bottom, window.innerHeight);
+            const viewCenter = (viewTop + viewBottom) / 2;
+
+            const feedItems = sidebar.querySelectorAll('.media-feed-item');
+            let bestMedia = null;
+            let minDistance = Infinity;
+
+            feedItems.forEach(item => {
+                if (item.offsetParent === null || item.style.display === 'none') return;
+
+                const mediaEl = item.querySelector('video, iframe.cc-managed-video');
+                if (!mediaEl) return;
+
+                const itemRect = item.getBoundingClientRect();
+                const visibleTop = Math.max(itemRect.top, viewTop);
+                const visibleBottom = Math.min(itemRect.bottom, viewBottom);
+                const visibleHeight = Math.max(0, visibleBottom - visibleTop);
+
+                if (visibleHeight >= 90) {
+                    const itemCenter = (itemRect.top + itemRect.bottom) / 2;
+                    const dist = Math.abs(itemCenter - viewCenter);
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        bestMedia = mediaEl;
                     }
                 }
-            }, 150);
-        });
+            });
 
-        // 3. Pause any media that is scrolled out of the visible screen space
-        const sidebarObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (!entry.isIntersecting) {
-                    const el = entry.target;
-                    if (el.tagName === 'VIDEO') {
-                        if (!el.paused) {
-                            el.pause();
-                        }
-                    } else if (el.tagName === 'IFRAME') {
-                        if (el.src.includes('youtube.com')) {
-                            const found = ytPlayers.find(item => item.id === el.id);
-                            if (found && found.player && typeof found.player.pauseVideo === 'function') {
-                                try {
-                                    found.player.pauseVideo();
-                                } catch (e) {}
-                            } else {
-                                el.contentWindow.postMessage(JSON.stringify({
-                                    event: 'command',
-                                    func: 'pauseVideo',
-                                    args: ''
-                                }), '*');
-                            }
-                        } else if (el.src.includes('vimeo.com')) {
-                            el.contentWindow.postMessage(JSON.stringify({
-                                method: 'pause'
-                            }), '*');
+            if (bestMedia) {
+                if (currentActiveMedia !== bestMedia) {
+                    if (currentActiveMedia) {
+                        pauseMedia(currentActiveMedia);
+                        currentActiveMedia.removeAttribute('data-user-paused');
+                    }
+                    currentActiveMedia = bestMedia;
+                    playMedia(bestMedia);
+                } else {
+                    if (!bestMedia.hasAttribute('data-user-paused')) {
+                        if (bestMedia.tagName === 'VIDEO' && bestMedia.paused) {
+                            playMedia(bestMedia);
                         }
                     }
                 }
-            });
-        }, {
-            threshold: 0.15 // trigger when less than 15% visible
+            } else {
+                pauseAllSidebarMediaExcept(null);
+                if (currentActiveMedia) {
+                    currentActiveMedia.removeAttribute('data-user-paused');
+                    currentActiveMedia = null;
+                }
+            }
+        }
+
+        function triggerActiveVideoCheck(delay = 60) {
+            clearTimeout(checkActiveTimeout);
+            checkActiveTimeout = setTimeout(checkActiveVideo, delay);
+        }
+
+        // Initialize video bindings and active detection
+        bindSidebarVideoEvents();
+        setTimeout(checkActiveVideo, 350);
+
+        const sidebarContainer = document.querySelector('.media-preview-sidebar');
+        if (sidebarContainer) {
+            sidebarContainer.addEventListener('scroll', () => triggerActiveVideoCheck(50), { passive: true });
+        }
+        window.addEventListener('scroll', () => triggerActiveVideoCheck(50), { passive: true });
+        window.addEventListener('resize', () => triggerActiveVideoCheck(100), { passive: true });
+
+        // Pause media when tab is hidden
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                pauseAllSidebarMediaExcept(null);
+            } else {
+                triggerActiveVideoCheck(150);
+            }
         });
 
         // Live search/filter for Recent Upload Previews sidebar
@@ -1062,14 +1324,12 @@
                 $('.media-feed-item').each(function() {
                     const $item = $(this);
 
-                    // Extract text details
                     const username = $item.find('.media-feed-username').text().toLowerCase();
                     const userrole = $item.find('.media-feed-userrole').text().toLowerCase();
                     const title = $item.find('.media-feed-title').text().toLowerCase();
                     const caption = $item.find('.media-feed-caption').text().toLowerCase();
                     const type = $item.find('.media-feed-badge').text().toLowerCase();
 
-                    // Check matches
                     const isMatch = username.includes(query) ||
                         userrole.includes(query) ||
                         title.includes(query) ||
@@ -1081,27 +1341,10 @@
                         visibleCount++;
                     } else {
                         $item.hide();
-
-                        // Also pause any HTML5 video or YouTube iframe if it gets hidden
                         const video = $item.find('video')[0];
-                        if (video && !video.paused) {
-                            video.pause();
-                        }
+                        if (video) pauseMedia(video);
                         const iframe = $item.find('iframe')[0];
-                        if (iframe) {
-                            if (iframe.src.includes('youtube.com')) {
-                                const found = ytPlayers.find(item => item.id === iframe.id);
-                                if (found && found.player && typeof found.player.pauseVideo === 'function') {
-                                    try {
-                                        found.player.pauseVideo();
-                                    } catch (e) {}
-                                }
-                            } else if (iframe.src.includes('vimeo.com')) {
-                                iframe.contentWindow.postMessage(JSON.stringify({
-                                    method: 'pause'
-                                }), '*');
-                            }
-                        }
+                        if (iframe) pauseMedia(iframe);
                     }
                 });
 
@@ -1110,6 +1353,8 @@
                 } else {
                     $noResultsPlaceholder.hide();
                 }
+
+                triggerActiveVideoCheck(100);
             });
         }
 
@@ -1187,9 +1432,9 @@
                             });
                         }
 
-                        // Re-observe videos/iframes for auto-pause on scroll
-                        document.querySelectorAll('.media-preview-sidebar video').forEach(v => sidebarObserver.observe(v));
-                        document.querySelectorAll('.media-preview-sidebar iframe').forEach(iframe => sidebarObserver.observe(iframe));
+                        // Bind events and check active video for newly appended media items
+                        bindSidebarVideoEvents();
+                        triggerActiveVideoCheck(150);
 
                         // Re-trigger live search filter if query exists
                         if ($mediaSearch.length && $mediaSearch.val().trim() !== '') {
