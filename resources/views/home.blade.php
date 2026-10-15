@@ -255,6 +255,51 @@
             line-height: 1;
             font-size: 16px;
         }
+
+        body > .menu {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 4px 0 8px 0 !important;
+            padding: 6px 12px !important;
+            box-sizing: border-box !important;
+        }
+
+        .main {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 8px 12px 30px 12px !important;
+            box-sizing: border-box !important;
+        }
+
+        .talent-grid {
+            grid-template-columns: 1fr !important;
+            max-width: 440px !important;
+            margin: 0 auto !important;
+            gap: 16px !important;
+            padding: 4px 0 !important;
+            width: 100% !important;
+        }
+
+        .container.talent-card-anim {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 auto !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .sidebar-toggle-btn {
+            padding: 10px 5px 10px 8px !important;
+            font-size: 10px !important;
+            letter-spacing: 0.5px !important;
+        }
+
+        .category-arrow-btn {
+            width: 28px !important;
+            height: 28px !important;
+            font-size: 0.8rem !important;
+        }
     }
 
     /* Floating indicator button styles */
@@ -354,10 +399,14 @@
             transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             display: block !important;
             padding: 0 !important;
+            visibility: hidden;
+            pointer-events: none;
         }
 
         .col-3.open {
             right: 0 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
         }
 
         .media-preview-sidebar {
@@ -1542,15 +1591,19 @@
             });
         });
 
-        sidebarVideos.forEach(v => sidebarObserver.observe(v));
-        sidebarIframes.forEach(iframe => {
-            // Append JS API support parameters dynamically to YouTube source URLs if not already present
-            if (iframe.src.includes('youtube.com') && !iframe.src.includes('enablejsapi=1')) {
-                const glue = iframe.src.includes('?') ? '&' : '?';
-                iframe.src += glue + 'enablejsapi=1';
-            }
-            sidebarObserver.observe(iframe);
-        });
+        if (typeof sidebarVideos !== 'undefined' && typeof sidebarObserver !== 'undefined') {
+            sidebarVideos.forEach(v => sidebarObserver.observe(v));
+        }
+        if (typeof sidebarIframes !== 'undefined' && typeof sidebarObserver !== 'undefined') {
+            sidebarIframes.forEach(iframe => {
+                // Append JS API support parameters dynamically to YouTube source URLs if not already present
+                if (iframe.src.includes('youtube.com') && !iframe.src.includes('enablejsapi=1')) {
+                    const glue = iframe.src.includes('?') ? '&' : '?';
+                    iframe.src += glue + 'enablejsapi=1';
+                }
+                sidebarObserver.observe(iframe);
+            });
+        }
     });
 
     const i18nCard = {

@@ -1187,11 +1187,7 @@
     <audio id="chapconnect-notification-audio" src="{{ $notifSoundUrl }}" preload="auto"></audio>
 
     <script>
-        const isNotificationSoundEnabled = {
-            {
-                $soundEnabled ? 'true' : 'false'
-            }
-        };
+        const isNotificationSoundEnabled = {{ $soundEnabled ? 'true' : 'false' }};
         let audioContext = null;
         let audioUnlocked = false;
 
@@ -1541,16 +1537,8 @@
 
                     var textToType = @json($welcomeText);
                     var charIndex = 0;
-                    var typingSpeed = {
-                        {
-                            max(15, (int) $welcomeSpeed)
-                        }
-                    };
-                    var welcomeDelay = {
-                        {
-                            max(0, (int) $welcomeDelay)
-                        }
-                    };
+                    var typingSpeed = {{ max(15, (int) $welcomeSpeed) }};
+                    var welcomeDelay = {{ max(0, (int) $welcomeDelay) }};
                     var welcomeSoundUrl = @json($welcomeSoundUrl);
 
                     var audioInstance = audioEl || (welcomeSoundUrl ? new Audio(welcomeSoundUrl) : null);

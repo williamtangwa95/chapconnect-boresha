@@ -23,6 +23,12 @@
     font-family: "Poppins", sans-serif;
 }
 
+html,
+body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
 body {
     min-height: 100vh;
     background: var(--bg-gradient);
@@ -37,17 +43,7 @@ body {
     top: 0;
     width: 100%;
     z-index: 1000;
-    /* background: rgba(15, 52, 96, 0.82) url('nav_bg.jpg') center/cover no-repeat; */
-    background: rgb(0, 102, 254) url(nav_bg.jpg);
-
-    /* Controls the scale of the honeycomb cells */
-    background-size: 50px 86.6px, 50px 86.6px, 50px 86.6px, 50px 86.6px, 50px 86.6px, 50px 86.6px, 50px 86.6px, auto;
-
-
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    /* background-blend-mode: overlay; */
+    background: linear-gradient(135deg, #0052cc 0%, #0066fe 100%);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.15);
@@ -1059,7 +1055,7 @@ transition: background 0.3s;
     aspect-ratio: 1 / 1;
     height: auto;
     object-fit: cover;
-    object-position: top center;
+    object-position: center 20%;
     background: radial-gradient(circle at center, #f0f9ff 0%, #e0f2fe 60%, #bae6fd 100%);
     display: block;
 }
@@ -1111,11 +1107,13 @@ transition: background 0.3s;
 /* Responsive Rules for Small Devices */
 @media (max-width: 640px) {
     .main {
-        padding: 20px 12px;
+        padding: 10px 10px 30px 10px;
     }
 
     .talent-grid {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-template-columns: 1fr !important;
+        max-width: 440px !important;
+        margin: 0 auto !important;
         gap: 16px;
         padding: 10px 0;
     }
@@ -1153,7 +1151,8 @@ transition: background 0.3s;
 
 @media (max-width: 380px) {
     .talent-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr !important;
+        max-width: 100% !important;
     }
 
     .like-container {
